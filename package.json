@@ -1,0 +1,42 @@
+{
+  "name": "react-image-editor",
+  "version": "1.0.0",
+  "description": "图片编辑器（微信截图编辑 PRO 版）",
+  "keywords": [
+    "react-image-editor",
+    "image-editor"
+  ],
+  "main": "lib/index",
+  "module": "es/index",
+  "scripts": {
+    "start": "rc-tools run server",
+    "build": "rc-tools run build",
+    "gh-pages": "rc-tools run gh-pages",
+    "pub": "rc-tools run update-self && rc-tools run pub",
+    "lint": "eslint . --ext .js,jsx,.ts,.tsx",
+    "prepublish": "rc-tools run guard"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YaoKaiLun/react-image-editor.git"
+  },
+  "author": "kailunyao",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/YaoKaiLun/react-image-editor/issues"
+  },
+  "homepage": "https://github.com/YaoKaiLun/react-image-editor#readme",
+  "devDependencies": {
+    "@types/react-dom": "^16.9.5",
+    "@typescript-eslint/eslint-plugin": "^2.17.0",
+    "@typescript-eslint/parser": "^2.17.0",
+    "eslint": "^6.8.0",
+    "eslint-plugin-import": "^2.20.0",
+    "eslint-plugin-react": "^7.18.0",
+    "rc-tools": "^9.5.3"
+  },
+  "dependencies": {
+    "konva": "^4.1.2",
+    "rc-tooltip": "^4.0.0-alpha.3"
+  }
+}
