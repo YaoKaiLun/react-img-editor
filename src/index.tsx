@@ -68,6 +68,6 @@ ReactImageEditor.defaultProps = {
   style: {},
   plugins: [],
   toolbar: {
-    items: ['rect', 'circle', 'mosaic', 'repeal', 'download', 'crop'],
+    items: ['arrow', 'rect', 'circle', 'mosaic', 'repeal', 'download', 'crop'],
   },
 } as Partial<ReactImageEditorProps>

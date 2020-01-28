@@ -1,3 +1,4 @@
+import arrow from './arrow'
 import circle from './circle'
 import crop from './crop'
 import eraser from './eraser'
@@ -7,4 +8,4 @@ import pen from './pen'
 import rect from './rect'
 import repeal from './repeal'
 
-export default [circle, crop, eraser, download, mosaic, pen, rect, repeal]
+export default [arrow, circle, crop, eraser, download, mosaic, pen, rect, repeal]
