@@ -17,7 +17,14 @@ interface ReactImageEditorProps {
 
 export default function ReactImageEditor(props: ReactImageEditorProps) {
   const plugins = [...corePlugins, ...props.plugins!]
-  const defaultPlugin = plugins.length > 0 ? plugins[0] : null
+  let defaultPlugin = null
+  for(let i = 0; i < plugins.length; i++) {
+    if (plugins[i].name === props.toolbar.items[0]) {
+      defaultPlugin = plugins[i]
+      break
+    }
+  }
+
   const [currentPlugin, setCurrentPlugin] = useState<PluginProps | null>(defaultPlugin)
   const [currentPluginParamValue, setCurrentPluginParamValue] = useState<PluginParamValue>({})
 
