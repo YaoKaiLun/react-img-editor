@@ -2,6 +2,7 @@ import Konva from 'konva'
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { PluginProps } from '../type'
+import { transformerStyle } from '../constants'
 
 const initRectWidth = 100
 const initRectHeight = 100
@@ -114,15 +115,7 @@ export default {
     // 允许改变裁剪区域
     const transformer = new Konva.Transformer({
       node: rect,
-      centeredScaling: false,
-      rotateEnabled: false,
-      anchorCornerRadius: 3,
-      anchorStrokeWidth: 1,
-      borderStrokeWidth: 1,
-      anchorStroke: '#007AFF',
-      borderStroke: '#007AFF',
-      anchorFill: '#FFF',
-      anchorSize: 6,
+      ...transformerStyle,
       boundBoxFunc: function(oldBox: any, newBox: any) {
         if (
           newBox.width > imageData.width ||
