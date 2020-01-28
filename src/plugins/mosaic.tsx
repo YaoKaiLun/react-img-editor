@@ -1,5 +1,6 @@
 
-import { PluginProps, PluginParamValue } from '../type'
+import Konva from 'konva'
+import { PluginProps } from '../type'
 
 let isPaint = false
 const defalutParamValue = {
@@ -13,7 +14,7 @@ let tileColumnSize = 0
 let width = 0
 let height = 0
 
-function drawTile(tiles: any, Konva: any, stage: any, layer: any) {
+function drawTile(tiles: any, stage: any, layer: any) {
   tiles = [].concat(tiles)
   tiles.forEach((tile: any) => {
     if (tile.isFilled) {
@@ -84,7 +85,7 @@ export default {
   name: 'mosaic',
   iconfont: 'iconfont icon-mosaic',
   params: ['strokeWidth'],
-  onDrawStart: (e: Event, Konva: any, stage: any, layer: any, paramValue: PluginParamValue, imageData: ImageData) => {
+  onDrawStart: ({imageData}) => {
     isPaint = true
 
     width = imageData.width
@@ -117,12 +118,12 @@ export default {
     }
   },
 
-  onDraw: (e: Event, Konva: any, stage: any, layer: any, paramValue: PluginParamValue) => {
+  onDraw: ({stage, layer, paramValue}) => {
     if (!isPaint) return
 
     const strokeWidth = (paramValue && paramValue.strokeWidth) ? paramValue.strokeWidth : defalutParamValue.strokeWidth
     const pos = stage.getPointerPosition()
-    drawTile(getTilesByPoint(pos.x, pos.y, strokeWidth), Konva, stage, layer)
+    drawTile(getTilesByPoint(pos.x, pos.y, strokeWidth), stage, layer)
   },
 
   onDrawEnd: () => {

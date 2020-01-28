@@ -1,3 +1,4 @@
+import Konva from 'konva'
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { PluginProps } from '../type'
@@ -58,7 +59,7 @@ function adjustToolbarPosition() {
 export default {
   name: 'crop',
   iconfont: 'iconfont icon-cut',
-  onClick: (Konva: any, stage: any, layer: any, imageData: ImageData, imageLayer: any, reload: any) => {
+  onClick: ({stage, imageData, reload}) => {
     virtualLayer = new Konva.Layer()
 
     // 绘制灰色遮罩

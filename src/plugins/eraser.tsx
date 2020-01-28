@@ -1,4 +1,5 @@
-import { PluginProps, PluginParamValue } from '../type'
+import Konva from 'konva'
+import { PluginProps } from '../type'
 
 let lastLine: any = null
 let isPaint = false
@@ -10,7 +11,7 @@ export default {
   name: 'eraser',
   iconfont: 'iconfont icon-eraser',
   params: ['strokeWidth'],
-  onDrawStart: (e: Event, Konva: any, stage: any, layer: any, paramValue: PluginParamValue) => {
+  onDrawStart: ({stage, layer, paramValue}) => {
     isPaint = true
 
     const pos = stage.getPointerPosition()
@@ -23,7 +24,7 @@ export default {
     layer.add(lastLine)
   },
 
-  onDraw: (e: Event, Konva: any, stage: any, layer: any) => {
+  onDraw: ({stage, layer}) => {
     if (!isPaint) return
 
     const pos = stage.getPointerPosition()

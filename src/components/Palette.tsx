@@ -106,27 +106,45 @@ export default function Palette(props: PaletteProps) {
 
     stageRef.current.add(layerRef.current)
 
-    stageRef.current.on('mousedown touchstart', (e: Event) => {
+    stageRef.current.on('mousedown touchstart', () => {
       const { currentPlugin, currentPluginParamValue } = props
 
       if (currentPlugin && currentPlugin.onDrawStart) {
-        currentPlugin.onDrawStart(e, Konva, stageRef.current, layerRef.current, currentPluginParamValue, imageData.current)
+        currentPlugin.onDrawStart({
+          stage: stageRef.current,
+          layer: layerRef.current,
+          paramValue: currentPluginParamValue,
+          imageData: imageData.current,
+          reload,
+        })
       }
     })
 
-    stageRef.current.on('mousemove touchmove', (e: Event) => {
+    stageRef.current.on('mousemove touchmove', () => {
       const { currentPlugin, currentPluginParamValue } = props
 
       if (currentPlugin && currentPlugin.onDraw) {
-        currentPlugin.onDraw(e, Konva, stageRef.current, layerRef.current, currentPluginParamValue, imageData.current)
+        currentPlugin.onDraw({
+          stage: stageRef.current,
+          layer: layerRef.current,
+          paramValue: currentPluginParamValue,
+          imageData: imageData.current,
+          reload,
+        })
       }
     })
 
-    stageRef.current.on('mouseup touchend', (e: Event) => {
+    stageRef.current.on('mouseup touchend', () => {
       const { currentPlugin, currentPluginParamValue } = props
 
       if (currentPlugin && currentPlugin.onDrawEnd) {
-        currentPlugin.onDrawEnd(e, Konva, stageRef.current, layerRef.current, currentPluginParamValue, imageData.current)
+        currentPlugin.onDrawEnd({
+          stage: stageRef.current,
+          layer: layerRef.current,
+          paramValue: currentPluginParamValue,
+          imageData: imageData.current,
+          reload,
+        })
       }
     })
   }
@@ -154,8 +172,15 @@ export default function Palette(props: PaletteProps) {
   }, [props.imageObj, props.currentPlugin, props.currentPluginParamValue])
 
   useEffect(() => {
-    if (props.currentPlugin && props.currentPlugin.onClick) {
-      props.currentPlugin.onClick(Konva, stageRef.current, layerRef.current, imageData.current, imageRef.current, reload)
+    const { currentPlugin, currentPluginParamValue } = props
+    if (currentPlugin && currentPlugin.onClick) {
+      currentPlugin.onClick({
+        stage: stageRef.current,
+        layer: layerRef.current,
+        imageData: imageData.current,
+        reload,
+        paramValue: currentPluginParamValue,
+      })
     }
   }, [props.currentPlugin])
 
