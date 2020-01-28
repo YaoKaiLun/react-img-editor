@@ -13,6 +13,7 @@ let tileRowSize = 0
 let tileColumnSize = 0
 let width = 0
 let height = 0
+let rectGroup: any = null
 
 function drawTile(tiles: any, stage: any, layer: any) {
   tiles = [].concat(tiles)
@@ -55,11 +56,13 @@ function drawTile(tiles: any, stage: any, layer: any) {
       height: h,
       fill: `rgba(${color.r}, ${color.g}, ${color.b}, ${color.a / 255})`,
     })
-    layer.add(rect)
-    layer.draw()
+    rectGroup.add(rect)
 
     tile.isFilled = true
   })
+
+  layer.add(rectGroup)
+  layer.batchDraw()
 }
 
 function getTilesByPoint(x: number, y: number, strokeWidth: number) {
@@ -92,6 +95,8 @@ export default {
     height = imageData.height
     tileRowSize = Math.ceil(height / tileHeight)
     tileColumnSize = Math.ceil(width / tileWidth)
+
+    rectGroup = new Konva.Group()
 
     // 将图片切分成一个个大一点的贴片
     for (let i = 0; i < tileRowSize; i++) {
@@ -126,7 +131,8 @@ export default {
     drawTile(getTilesByPoint(pos.x, pos.y, strokeWidth), stage, layer)
   },
 
-  onDrawEnd: () => {
+  onDrawEnd: ({historyStack}) => {
     isPaint = false
+    historyStack.push(rectGroup)
   },
 }  as PluginProps

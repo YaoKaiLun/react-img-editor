@@ -33,7 +33,8 @@ export default {
     layer.batchDraw()
   },
 
-  onDrawEnd: () => {
+  onDrawEnd: ({historyStack}) => {
     isPaint = false
+    historyStack.push(lastLine)
   },
 }  as PluginProps

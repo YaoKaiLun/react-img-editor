@@ -4,6 +4,7 @@ export interface DrawEventPramas {
   paramValue: PluginParamValue | null;
   imageData: ImageData;
   reload: (imageObj: any, rectWidth: number, rectHeigh: number) => void;
+  historyStack: any[];
 }
 export interface PluginProps {
   name: string;

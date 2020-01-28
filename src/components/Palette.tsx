@@ -29,6 +29,7 @@ export default function Palette(props: PaletteProps) {
   const imageRef = useRef<any>(null)
   const layerRef = useRef<any>(null)
   const imageData = useRef<any>(null)
+  const historyStack = useRef<any[]>([])
 
   function initPalette() {
     stageRef.current = new Konva.Stage({
@@ -66,6 +67,7 @@ export default function Palette(props: PaletteProps) {
   }
 
   function reload(imgObj: any, width: number, height: number) {
+    historyStack.current = []
     stageRef.current = new Konva.Stage({
       container: 'react-image-editor',
       width: width,
@@ -116,6 +118,7 @@ export default function Palette(props: PaletteProps) {
           paramValue: currentPluginParamValue,
           imageData: imageData.current,
           reload,
+          historyStack: historyStack.current,
         })
       }
     })
@@ -130,6 +133,7 @@ export default function Palette(props: PaletteProps) {
           paramValue: currentPluginParamValue,
           imageData: imageData.current,
           reload,
+          historyStack: historyStack.current,
         })
       }
     })
@@ -144,6 +148,7 @@ export default function Palette(props: PaletteProps) {
           paramValue: currentPluginParamValue,
           imageData: imageData.current,
           reload,
+          historyStack: historyStack.current,
         })
       }
     })
@@ -180,6 +185,7 @@ export default function Palette(props: PaletteProps) {
         imageData: imageData.current,
         reload,
         paramValue: currentPluginParamValue,
+        historyStack: historyStack.current,
       })
     }
   }, [props.currentPlugin])

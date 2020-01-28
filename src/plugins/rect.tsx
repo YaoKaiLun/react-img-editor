@@ -2,7 +2,7 @@
 import Konva from 'konva'
 import { PluginProps } from '../type'
 
-let lastReact: any = null
+let lastRect: any = null
 let isPaint = false
 let startPoint = [0, 0]
 const defalutParamValue = {
@@ -19,7 +19,7 @@ export default {
 
     const pos = stage.getPointerPosition()
     startPoint = [pos.x, pos.y]
-    lastReact = new Konva.Rect({
+    lastRect = new Konva.Rect({
       stroke: (paramValue && paramValue.color) ? paramValue.color : defalutParamValue.color,
       strokeWidth: (paramValue && paramValue.strokeWidth) ? paramValue.strokeWidth : defalutParamValue.strokeWidth,
       globalCompositeOperation: 'source-over',
@@ -28,19 +28,20 @@ export default {
       dashEnabled: !!(paramValue && paramValue.lineType && paramValue.lineType === 'dash'),
       dash: [8],
     })
-    layer.add(lastReact)
+    layer.add(lastRect)
   },
 
   onDraw: ({stage, layer}) => {
     if (!isPaint) return
 
     const pos = stage.getPointerPosition()
-    lastReact.width(pos.x - startPoint[0])
-    lastReact.height(pos.y - startPoint[1])
+    lastRect.width(pos.x - startPoint[0])
+    lastRect.height(pos.y - startPoint[1])
     layer.batchDraw()
   },
 
-  onDrawEnd: () => {
+  onDrawEnd: ({historyStack}) => {
     isPaint = false
+    historyStack.push(lastRect)
   },
 }  as PluginProps
