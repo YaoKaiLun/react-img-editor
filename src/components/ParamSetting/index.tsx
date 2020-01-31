@@ -1,4 +1,5 @@
 import ColorSetting from './ColorSetting'
+import FontSizeSetting from './FontSizeSetting'
 import LineTypeSetting from './LineTypeSetting'
 import React from 'react'
 import StrokeWidthSetting from './StrokeWidthSetting'
@@ -24,9 +25,9 @@ export default function ParamSetting(props: ParamSettingProps) {
     props.onChange({ ...props.paramValue, color })
   }
 
-  // function handleFontSizeChange(fontSize: 'small' | 'medium' | 'large') {
-  //   props.onChange({ ...props.paramValue, fontSize })
-  // }
+  function handleFontSizeChange(fontSize: number) {
+    props.onChange({ ...props.paramValue, fontSize })
+  }
 
   function renderParamComponent(paramName: PluginParamName) {
     switch (paramName) {
@@ -52,7 +53,12 @@ export default function ParamSetting(props: ParamSettingProps) {
           />
         )
       case 'fontSize':
-        return null
+        return (
+          <FontSizeSetting
+            value={props.paramValue ? props.paramValue['fontSize'] : undefined}
+            onChange={handleFontSizeChange}
+          />
+        )
       default:
         return null
     }

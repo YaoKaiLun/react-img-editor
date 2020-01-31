@@ -108,6 +108,24 @@ export default function Palette(props: PaletteProps) {
 
     stageRef.current.add(layerRef.current)
 
+    stageRef.current.on('click tap', (e) => {
+      // 修复 stage 上元素双击事件不起作用
+      if (e.target instanceof Konva.Text) return
+
+      const { currentPlugin, currentPluginParamValue } = props
+
+      if (currentPlugin && currentPlugin.onStageClcik) {
+        currentPlugin.onStageClcik({
+          stage: stageRef.current,
+          layer: layerRef.current,
+          paramValue: currentPluginParamValue,
+          imageData: imageData.current,
+          reload,
+          historyStack: historyStack.current,
+        })
+      }
+    })
+
     stageRef.current.on('mousedown touchstart', () => {
       const { currentPlugin, currentPluginParamValue } = props
 
@@ -157,6 +175,7 @@ export default function Palette(props: PaletteProps) {
   function removeEvents() {
     if (!stageRef.current) return
 
+    stageRef.current.off('click tap')
     stageRef.current.off('mousedown touchstart')
     stageRef.current.off('mousemove touchmove')
     stageRef.current.off('mouseup touchend')

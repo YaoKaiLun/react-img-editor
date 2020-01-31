@@ -30,7 +30,7 @@ export default function ReactImageEditor(props: ReactImageEditorProps) {
 
   function handlePluginChange(plugin: PluginProps) {
     setCurrentPlugin(plugin)
-    if (plugin.onClick) {
+    if (plugin.onClick && !plugin.params) {
       setTimeout(() => {
         setCurrentPlugin(null)
       }, 1000)
@@ -68,6 +68,6 @@ ReactImageEditor.defaultProps = {
   style: {},
   plugins: [],
   toolbar: {
-    items: ['arrow', 'rect', 'circle', 'mosaic', 'repeal', 'download', 'crop'],
+    items: ['arrow', 'rect', 'circle', 'mosaic', 'text', 'repeal', 'download', 'crop'],
   },
 } as Partial<ReactImageEditorProps>

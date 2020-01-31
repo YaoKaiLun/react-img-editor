@@ -14,11 +14,12 @@ export interface PluginProps {
   onDrawStart?: (params: DrawEventPramas) => void;
   onDraw?: (params: DrawEventPramas) => void;
   onDrawEnd?: (params: DrawEventPramas) => void;
+  onStageClcik?: (params: DrawEventPramas) => void;
 }
 export type PluginParamName = 'strokeWidth' | 'color' | 'fontSize' | 'lineType'
 export interface PluginParamValue {
   strokeWidth?: number;
   color?: string;
-  fontSize?: 'small' | 'medium' | 'large';
+  fontSize?: number;
   lineType?: 'solid' | 'dash';
 }
