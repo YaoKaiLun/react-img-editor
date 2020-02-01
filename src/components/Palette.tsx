@@ -1,6 +1,6 @@
 import Konva from 'konva'
 import React, { useEffect, useRef } from 'react'
-import { PluginProps, PluginParamValue } from '../type'
+import { PluginProps, PluginParamValue, DrawEventPramas } from '../type'
 import { prefixCls } from '../constants'
 
 interface PaletteProps {
@@ -25,7 +25,6 @@ export default function Palette(props: PaletteProps) {
   const ratio  = Math.min (hRatio, vRatio)
   const canvasWidth = props.imageObj.naturalWidth * ratio
   const canvasHeight = props.imageObj.naturalHeight * ratio
-
   const stageRef = useRef<any>(null)
   const imageRef = useRef<any>(null)
   const layerRef = useRef<any>(null)
@@ -109,66 +108,40 @@ export default function Palette(props: PaletteProps) {
 
     stageRef.current.add(layerRef.current)
 
+    const { currentPlugin, currentPluginParamValue } = props
+    const drawEventPramas: DrawEventPramas = {
+      stage: stageRef.current,
+      layer: layerRef.current,
+      paramValue: currentPluginParamValue,
+      imageData: imageData.current,
+      reload,
+      historyStack: historyStack.current,
+    }
+
     stageRef.current.on('click tap', (e) => {
       // 修复 stage 上元素双击事件不起作用
       if (e.target instanceof Konva.Text) return
 
-      const { currentPlugin, currentPluginParamValue } = props
-
       if (currentPlugin && currentPlugin.onStageClcik) {
-        currentPlugin.onStageClcik({
-          stage: stageRef.current,
-          layer: layerRef.current,
-          paramValue: currentPluginParamValue,
-          imageData: imageData.current,
-          reload,
-          historyStack: historyStack.current,
-        })
+        currentPlugin.onStageClcik(drawEventPramas)
       }
     })
 
     stageRef.current.on('mousedown touchstart', () => {
-      const { currentPlugin, currentPluginParamValue } = props
-
       if (currentPlugin && currentPlugin.onDrawStart) {
-        currentPlugin.onDrawStart({
-          stage: stageRef.current,
-          layer: layerRef.current,
-          paramValue: currentPluginParamValue,
-          imageData: imageData.current,
-          reload,
-          historyStack: historyStack.current,
-        })
+        currentPlugin.onDrawStart(drawEventPramas)
       }
     })
 
     stageRef.current.on('mousemove touchmove', () => {
-      const { currentPlugin, currentPluginParamValue } = props
-
       if (currentPlugin && currentPlugin.onDraw) {
-        currentPlugin.onDraw({
-          stage: stageRef.current,
-          layer: layerRef.current,
-          paramValue: currentPluginParamValue,
-          imageData: imageData.current,
-          reload,
-          historyStack: historyStack.current,
-        })
+        currentPlugin.onDraw(drawEventPramas)
       }
     })
 
     stageRef.current.on('mouseup touchend', () => {
-      const { currentPlugin, currentPluginParamValue } = props
-
       if (currentPlugin && currentPlugin.onDrawEnd) {
-        currentPlugin.onDrawEnd({
-          stage: stageRef.current,
-          layer: layerRef.current,
-          paramValue: currentPluginParamValue,
-          imageData: imageData.current,
-          reload,
-          historyStack: historyStack.current,
-        })
+        currentPlugin.onDrawEnd(drawEventPramas)
       }
     })
   }
