@@ -9,6 +9,7 @@ interface PaletteProps {
   imageObj: HTMLImageElement;
   currentPlugin: PluginProps | null;
   currentPluginParamValue: PluginParamValue | null;
+  getStage?: (stage: any) => void;
 }
 
 const pixelRatio = window.devicePixelRatio
@@ -37,6 +38,7 @@ export default function Palette(props: PaletteProps) {
       width: canvasWidth,
       height: canvasHeight,
     })
+    props.getStage && props.getStage(stageRef.current)
     const $konvaContent = document.querySelector('.konvajs-content')
     const $placeholder = document.createElement('div')
     $placeholder.id = 'react-image-editor-inner-placeholder'
@@ -73,6 +75,7 @@ export default function Palette(props: PaletteProps) {
       width: width,
       height: height,
     })
+    props.getStage && props.getStage(stageRef.current)
     const $konvaContent = document.querySelector('.konvajs-content')
     const $placeholder = document.createElement('div')
     $placeholder.id = 'react-image-editor-inner-placeholder'

@@ -13,6 +13,7 @@ interface ReactImageEditorProps {
     items: string[];
   };
   imageObj: HTMLImageElement;
+  getStage?: (stage: any) => void;
 }
 
 export default function ReactImageEditor(props: ReactImageEditorProps) {
@@ -49,6 +50,7 @@ export default function ReactImageEditor(props: ReactImageEditorProps) {
         imageObj={props.imageObj}
         currentPlugin={currentPlugin}
         currentPluginParamValue={currentPluginParamValue}
+        getStage={props.getStage}
       />
       <Toolbar width={props.width!}
         plugins={plugins!}
