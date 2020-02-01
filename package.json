@@ -1,6 +1,6 @@
 {
   "name": "react-image-editor",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "图片编辑器（微信截图编辑 PRO 版）",
   "keywords": [
     "react-image-editor",
@@ -16,6 +16,7 @@
     "lint": "eslint . --ext .js,jsx,.ts,.tsx",
     "prepublish": "rc-tools run guard"
   },
+  "files": ["es", "lib", "assets/*.css"],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/YaoKaiLun/react-image-editor.git"
