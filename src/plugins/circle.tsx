@@ -22,8 +22,6 @@ export default {
       stroke: (paramValue && paramValue.color) ? paramValue.color : defalutParamValue.color,
       strokeWidth: (paramValue && paramValue.strokeWidth) ? paramValue.strokeWidth : defalutParamValue.strokeWidth,
       globalCompositeOperation: 'source-over',
-      x: pos.x,
-      y: pos.y,
       radius: 0,
       dashEnabled: !!(paramValue && paramValue.lineType && paramValue.lineType === 'dash'),
       dash: [8],
@@ -35,9 +33,10 @@ export default {
     if (!isPaint) return
 
     const pos = stage.getPointerPosition()
-    const radius = Math.sqrt(Math.pow(pos.x - startPoint[0], 2) + Math.pow(pos.y - startPoint[1], 2))
-    lastCircle.width(radius * 2)
-    lastCircle.height(radius * 2)
+    const radius = Math.sqrt(Math.pow(pos.x - startPoint[0], 2) + Math.pow(pos.y - startPoint[1], 2)) / 2
+    lastCircle.x((pos.x + startPoint[0]) / 2)
+    lastCircle.y((pos.y + startPoint[1]) / 2)
+    lastCircle.setAttr('radius', radius)
     layer.batchDraw()
   },
 
