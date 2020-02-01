@@ -7,15 +7,15 @@ const defalutParamValue = {
   strokeWidth: 4,
 }
 const tiles: any = []
-const tileHeight = 10
-const tileWidth = 10
+const tileHeight = 5
+const tileWidth = 5
 let tileRowSize = 0
 let tileColumnSize = 0
 let width = 0
 let height = 0
 let rectGroup: any = null
 
-function drawTile(tiles: any, stage: any, layer: any) {
+function drawTile(tiles: any, layer: any) {
   tiles = [].concat(tiles)
   tiles.forEach((tile: any) => {
     if (tile.isFilled) {
@@ -88,11 +88,12 @@ export default {
   name: 'mosaic',
   iconfont: 'iconfont icon-mosaic',
   params: ['strokeWidth'],
-  onDrawStart: ({imageData}) => {
+  onDrawStart: ({stage, imageData}) => {
     isPaint = true
 
-    width = imageData.width
-    height = imageData.height
+    const pixelRatio = window.devicePixelRatio
+    width = stage.width()
+    height = stage.height()
     tileRowSize = Math.ceil(height / tileHeight)
     tileColumnSize = Math.ceil(width / tileWidth)
 
@@ -110,12 +111,16 @@ export default {
         }
 
         let data: any = []
-        const pixelPosition = width * 4 * tileHeight * tile.row + tile.column * tileWidth * 4
-        // 每个贴片包含的所有像素数据，遍历贴片范围内的每一列
-        for (let i = 0, j = tile.pixelHeight; i < j; i++) {
-          const position = pixelPosition + width * 4 * i
-          // 贴片范围内一行的像素数据，等于 贴片宽度 * 4
-          data = [...data, ...imageData.data.slice(position, position + tile.pixelWidth * 4)]
+        // 转换为像素图形下，起始像素位置
+        const pixelPosition = (width * tileHeight * tile.row * pixelRatio + tile.column * tileWidth) * 4 * pixelRatio
+        // 转换为像素图形下，包含多少行
+        const pixelRowAmount = tile.pixelHeight * pixelRatio
+        // 计算，转换为像素图形使，一个贴片所包含的所有像素数据。先遍历贴片范围内的每一列，每一列中再单独统计行的像素数量
+        for (let i = 0; i < pixelRowAmount; i++) {
+          // 当前列的起始像素位置
+          const position = pixelPosition + width * 4 * i * pixelRatio
+          // 贴片范围内一行的像素数据，等于贴片宽度 * 4
+          data = [...data, ...imageData.data.slice(position, position + tile.pixelWidth * 4 * pixelRatio)]
         }
         tile.data = data
         tiles.push(tile)
@@ -128,7 +133,7 @@ export default {
 
     const strokeWidth = (paramValue && paramValue.strokeWidth) ? paramValue.strokeWidth : defalutParamValue.strokeWidth
     const pos = stage.getPointerPosition()
-    drawTile(getTilesByPoint(pos.x, pos.y, strokeWidth), stage, layer)
+    drawTile(getTilesByPoint(pos.x, pos.y, strokeWidth), layer)
   },
 
   onDrawEnd: ({historyStack}) => {

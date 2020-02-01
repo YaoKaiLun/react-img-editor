@@ -11,7 +11,8 @@ interface PaletteProps {
   currentPluginParamValue: PluginParamValue | null;
 }
 
-Konva.pixelRatio = 1 // TODO: 临时修复 getImageData 的 bug
+const pixelRatio = window.devicePixelRatio
+Konva.pixelRatio = pixelRatio
 
 export default function Palette(props: PaletteProps) {
   const style = {
@@ -63,7 +64,7 @@ export default function Palette(props: PaletteProps) {
     imageLayer.draw()
     imageRef.current = imageLayer
     const ctx = imageLayer.getContext()
-    imageData.current = ctx.getImageData(0, 0, canvasWidth, canvasHeight)
+    imageData.current = ctx.getImageData(0, 0, canvasWidth * pixelRatio, canvasHeight * pixelRatio)
   }
 
   function reload(imgObj: any, width: number, height: number) {
@@ -97,7 +98,7 @@ export default function Palette(props: PaletteProps) {
     imageLayer.draw()
     imageRef.current = imageLayer
     const ctx = imageLayer.getContext()
-    imageData.current = ctx.getImageData(0, 0, width, height)
+    imageData.current = ctx.getImageData(0, 0, width * pixelRatio, height * pixelRatio)
 
     layerRef.current = new Konva.Layer()
     stageRef.current.add(layerRef.current)
