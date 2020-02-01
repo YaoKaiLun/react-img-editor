@@ -56,8 +56,8 @@ export default {
       textNode.hide()
       layer.draw()
 
-      textarea.addEventListener('keyup', function(e) {
-        const rows = e.target.value.split(/[(\r\n)\r\n]+/)
+      textarea.addEventListener('keyup', function(e: any) {
+        const rows: string[] = e.target.value.split(/[(\r\n)\r\n]+/)
 
         if (e.keyCode === 13) {
           textarea.style.height = rows.length * lineHeight + 'px'
@@ -86,7 +86,7 @@ export default {
         textNode.text(textarea.value)
         textNode.width(textarea.clientWidth)
         textNode.height(textarea.clientHeight)
-        textarea.parentNode.removeChild(textarea)
+        textarea.parentNode!.removeChild(textarea)
         textNode.show()
         layer.draw()
       })

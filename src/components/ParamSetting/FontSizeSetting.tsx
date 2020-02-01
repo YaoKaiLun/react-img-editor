@@ -3,7 +3,7 @@ import { prefixCls } from '../../constants'
 
 interface FontSizeSettingProps {
   value?: number;
-  onChange: (number) => void;
+  onChange: (fontSize: number) => void;
 }
 
 export default function FontSizeSetting(props: FontSizeSettingProps) {

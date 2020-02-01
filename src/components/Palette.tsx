@@ -121,7 +121,7 @@ export default function Palette(props: PaletteProps) {
       historyStack: historyStack.current,
     }
 
-    stageRef.current.on('click tap', (e) => {
+    stageRef.current.on('click tap', (e: any) => {
       // 修复 stage 上元素双击事件不起作用
       if (e.target instanceof Konva.Text) return
 

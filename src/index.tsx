@@ -20,7 +20,7 @@ export default function ReactImageEditor(props: ReactImageEditorProps) {
   const plugins = [...corePlugins, ...props.plugins!]
   let defaultPlugin = null
   for(let i = 0; i < plugins.length; i++) {
-    if (plugins[i].name === props.toolbar.items[0]) {
+    if (props.toolbar && plugins[i].name === props.toolbar.items[0]) {
       defaultPlugin = plugins[i]
       break
     }
