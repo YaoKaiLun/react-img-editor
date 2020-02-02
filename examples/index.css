@@ -271,7 +271,7 @@
 .icon-repeal:before {
   content: "\e78a";
 }
-.react-image-editor-palette {
+.react-img-editor-palette {
   position: relative;
   background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAQMAAAAlPW0iAAAAA3NCSVQICAjb4U/gAAAABlBMVEXMzMz////TjRV2AAAACXBIWXMAAArrAAAK6wGCiw1aAAAAHHRFWHRTb2Z0d2FyZQBBZG9iZSBGaXJld29ya3MgQ1M26LyyjAAAABFJREFUCJlj+M/AgBVhF/0PAH6/D/HkDxOGAAAAAElFTkSuQmCC");
   display: -webkit-box;
@@ -279,7 +279,7 @@
   -webkit-box-align: center;
           align-items: center;
 }
-.react-image-editor-toolbar {
+.react-img-editor-toolbar {
   display: -webkit-box;
   display: flex;
   -webkit-box-align: center;
@@ -290,19 +290,19 @@
   height: 56px;
   border: 1px solid #A9A9AC;
 }
-.react-image-editor-toolbar-icon i {
+.react-img-editor-toolbar-icon i {
   font-size: 16px;
   cursor: pointer;
   color: #A9A9AC;
   padding: 5px;
 }
-.react-image-editor-toolbar-icon.activated i {
+.react-img-editor-toolbar-icon.activated i {
   color: #7DB5FD;
 }
-.react-image-editor-tooltip {
+.react-img-editor-tooltip {
   opacity: 1;
 }
-.react-image-editor-tooltip .rc-tooltip-inner {
+.react-img-editor-tooltip .rc-tooltip-inner {
   display: -webkit-box;
   display: flex;
   -webkit-box-align: center;
@@ -315,16 +315,16 @@
   padding-top: 0;
   padding-bottom: 0;
 }
-.react-image-editor-tooltip .rc-tooltip-arrow {
+.react-img-editor-tooltip .rc-tooltip-arrow {
   border-top-color: #FFF;
 }
-.react-image-editor-param-setting {
+.react-img-editor-param-setting {
   display: -webkit-box;
   display: flex;
   -webkit-box-align: center;
           align-items: center;
 }
-.react-image-editor-color-square {
+.react-img-editor-color-square {
   display: inline-block;
   width: 20px;
   height: 20px;
@@ -333,10 +333,10 @@
   box-sizing: border-box;
   cursor: pointer;
 }
-.react-image-editor-color-square-activated {
+.react-img-editor-color-square-activated {
   border: 4px solid darkgray;
 }
-.react-image-editor-line-type {
+.react-img-editor-line-type {
   width: 20px;
   height: 20px;
   color: #BDBDC2;
@@ -344,32 +344,32 @@
   cursor: pointer;
   font-weight: 900;
 }
-.react-image-editor-line-type-activated {
+.react-img-editor-line-type-activated {
   color: #007AFF;
 }
-.react-image-editor-stroke-circle {
+.react-img-editor-stroke-circle {
   display: inline-block;
   border-radius: 50%;
   background: #BDBDC2;
   margin: 0 8px;
   cursor: pointer;
 }
-.react-image-editor-stroke-circle-activated {
+.react-img-editor-stroke-circle-activated {
   background: #007AFF;
 }
-.react-image-editor-stroke-circle-small {
+.react-img-editor-stroke-circle-small {
   width: 4px;
   height: 4px;
 }
-.react-image-editor-stroke-circle-medium {
+.react-img-editor-stroke-circle-medium {
   width: 10px;
   height: 10px;
 }
-.react-image-editor-stroke-circle-large {
+.react-img-editor-stroke-circle-large {
   width: 18px;
   height: 18px;
 }
-.react-image-editor-font-size {
+.react-img-editor-font-size {
   display: inline-block;
   line-height: 18px;
   margin-left: -1px;
@@ -379,15 +379,15 @@
   color: #97979B;
   cursor: pointer;
 }
-.react-image-editor-font-size:first-child:not(:last-child) {
+.react-img-editor-font-size:first-child:not(:last-child) {
   border-top-left-radius: 4px;
   border-bottom-left-radius: 4px;
 }
-.react-image-editor-font-size:last-child:not(:first-child) {
+.react-img-editor-font-size:last-child:not(:first-child) {
   border-top-right-radius: 4px;
   border-bottom-right-radius: 4px;
 }
-.react-image-editor-font-size-activated {
+.react-img-editor-font-size-activated {
   background-color: #007AFF;
   color: #fff;
   border: 1px solid #007AFF;

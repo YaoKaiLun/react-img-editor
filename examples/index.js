@@ -113,38 +113,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _src_index__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../src/index */ "./src/index.tsx");
 /* harmony import */ var _assets_index_less__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../assets/index.less */ "./assets/index.less");
 /* harmony import */ var _assets_index_less__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_assets_index_less__WEBPACK_IMPORTED_MODULE_3__);
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
-
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
-
-function _iterableToArrayLimit(arr, i) { if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) { return; } var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
-
 
 
 
 
 
 function Example() {
-  var _useState = Object(react__WEBPACK_IMPORTED_MODULE_0__["useState"])(true),
-      _useState2 = _slicedToArray(_useState, 2),
-      isLoading = _useState2[0],
-      setIsLoading = _useState2[1];
-
   var stageRef = Object(react__WEBPACK_IMPORTED_MODULE_0__["useRef"])(null);
-  var imageObj = new Image();
-
-  imageObj.onload = function () {
-    setIsLoading(false);
-  };
-
-  imageObj.crossOrigin = 'anonymous';
-  imageObj.src = 'https://cstore-public.seewo.com/faq-service/4e3f2924f1d4432f82e760468bf680f0';
-
-  if (isLoading) {
-    return null;
-  }
 
   function setStage(stage) {
     stageRef.current = stage;
@@ -161,7 +136,7 @@ function Example() {
   }
 
   return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_0___default.a.Fragment, null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_src_index__WEBPACK_IMPORTED_MODULE_2__["default"], {
-    imageObj: imageObj,
+    src: "https://cstore-public.seewo.com/faq-service/4e3f2924f1d4432f82e760468bf680f0",
     plugins: [],
     getStage: setStage
   }), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
@@ -52618,14 +52593,14 @@ function Palette(props) {
     var _a;
 
     stageRef.current = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Stage({
-      container: 'react-image-editor',
+      container: 'react-img-editor',
       width: canvasWidth,
       height: canvasHeight
     });
     props.getStage && props.getStage(stageRef.current);
     var $konvaContent = document.querySelector('.konvajs-content');
     var $placeholder = document.createElement('div');
-    $placeholder.id = 'react-image-editor-inner-placeholder';
+    $placeholder.id = 'react-img-editor-inner-placeholder';
     (_a = $konvaContent) === null || _a === void 0 ? void 0 : _a.appendChild($placeholder);
   }
 
@@ -52656,14 +52631,14 @@ function Palette(props) {
 
     historyStack.current = [];
     stageRef.current = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Stage({
-      container: 'react-image-editor',
+      container: 'react-img-editor',
       width: width,
       height: height
     });
     props.getStage && props.getStage(stageRef.current);
     var $konvaContent = document.querySelector('.konvajs-content');
     var $placeholder = document.createElement('div');
-    $placeholder.id = 'react-image-editor-inner-placeholder';
+    $placeholder.id = 'react-img-editor-inner-placeholder';
     (_a = $konvaContent) === null || _a === void 0 ? void 0 : _a.appendChild($placeholder);
     var img = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Image({
       x: 0,
@@ -53094,7 +53069,7 @@ function Toolbar(props) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "prefixCls", function() { return prefixCls; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "transformerStyle", function() { return transformerStyle; });
-var prefixCls = 'react-image-editor';
+var prefixCls = 'react-img-editor';
 var transformerStyle = {
   centeredScaling: false,
   rotateEnabled: false,
@@ -53124,14 +53099,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_2__);
 /* harmony import */ var _components_Toolbar__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./components/Toolbar */ "./src/components/Toolbar.tsx");
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
-
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
-
-function _iterableToArrayLimit(arr, i) { if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) { return; } var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
-
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
 
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
@@ -53140,11 +53107,32 @@ function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.
 
 function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
 
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
+
+function _iterableToArrayLimit(arr, i) { if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) { return; } var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
 
 
 
 
 function ReactImageEditor(props) {
+  var _useState = Object(react__WEBPACK_IMPORTED_MODULE_2__["useState"])(null),
+      _useState2 = _slicedToArray(_useState, 2),
+      imageObj = _useState2[0],
+      setImageObj = _useState2[1];
+
+  var image = new Image();
+
+  image.onload = function () {
+    setImageObj(image);
+  };
+
+  image.crossOrigin = 'anonymous';
+  image.src = props.src;
   var plugins = [].concat(_toConsumableArray(_plugins__WEBPACK_IMPORTED_MODULE_0__["default"]), _toConsumableArray(props.plugins));
   var defaultPlugin = null;
 
@@ -53155,15 +53143,15 @@ function ReactImageEditor(props) {
     }
   }
 
-  var _useState = Object(react__WEBPACK_IMPORTED_MODULE_2__["useState"])(defaultPlugin),
-      _useState2 = _slicedToArray(_useState, 2),
-      currentPlugin = _useState2[0],
-      setCurrentPlugin = _useState2[1];
-
-  var _useState3 = Object(react__WEBPACK_IMPORTED_MODULE_2__["useState"])({}),
+  var _useState3 = Object(react__WEBPACK_IMPORTED_MODULE_2__["useState"])(defaultPlugin),
       _useState4 = _slicedToArray(_useState3, 2),
-      currentPluginParamValue = _useState4[0],
-      setCurrentPluginParamValue = _useState4[1];
+      currentPlugin = _useState4[0],
+      setCurrentPlugin = _useState4[1];
+
+  var _useState5 = Object(react__WEBPACK_IMPORTED_MODULE_2__["useState"])({}),
+      _useState6 = _slicedToArray(_useState5, 2),
+      currentPluginParamValue = _useState6[0],
+      setCurrentPluginParamValue = _useState6[1];
 
   function handlePluginChange(plugin) {
     setCurrentPlugin(plugin);
@@ -53180,12 +53168,12 @@ function ReactImageEditor(props) {
   }
 
   return react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement("div", {
-    className: "react-image-editor",
+    className: "react-img-editor",
     style: props.style
-  }, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_components_Palette__WEBPACK_IMPORTED_MODULE_1__["default"], {
+  }, imageObj ? react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_2___default.a.Fragment, null, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_components_Palette__WEBPACK_IMPORTED_MODULE_1__["default"], {
     width: props.width,
     height: props.height,
-    imageObj: props.imageObj,
+    imageObj: imageObj,
     currentPlugin: currentPlugin,
     currentPluginParamValue: currentPluginParamValue,
     getStage: props.getStage
@@ -53197,7 +53185,7 @@ function ReactImageEditor(props) {
     currentPluginParamValue: currentPluginParamValue,
     handlePluginChange: handlePluginChange,
     handlePluginParamValueChange: handlePluginParamValueChange
-  }));
+  })) : null);
 }
 ReactImageEditor.defaultProps = {
   width: 700,
@@ -53399,7 +53387,7 @@ var style = {
 };
 
 function adjustToolbarPosition() {
-  var $placeholder = document.getElementById('react-image-editor-inner-placeholder');
+  var $placeholder = document.getElementById('react-img-editor-inner-placeholder');
   $placeholder.style.left = "".concat(rectX, "px");
   $placeholder.style.top = "".concat(rectHeight + rectY + toolbarDistance, "px");
 }
@@ -53485,7 +53473,7 @@ function adjustToolbarPosition() {
       }
     }));
     virtualLayer.add(transformer);
-    var $placeholder = document.getElementById('react-image-editor-inner-placeholder');
+    var $placeholder = document.getElementById('react-img-editor-inner-placeholder');
     $placeholder.style.position = 'absolute';
     $placeholder.style.zIndex = '1';
 
