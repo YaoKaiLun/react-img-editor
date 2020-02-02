@@ -1,6 +1,6 @@
 import corePlugins from './plugins'
 import Palette from './components/Palette'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Toolbar from './components/Toolbar'
 import { PluginProps, PluginParamValue } from './type'
 
@@ -19,12 +19,14 @@ interface ReactImageEditorProps {
 
 export default function ReactImageEditor(props: ReactImageEditorProps) {
   const [imageObj, setImageObj] = useState<HTMLImageElement | null>(null)
-  const image = new Image()
-  image.onload = () => {
-    setImageObj(image)
-  }
-  image.crossOrigin = 'anonymous'
-  image.src = props.src
+  useEffect(() => {
+    const image = new Image()
+    image.onload = () => {
+      setImageObj(image)
+    }
+    image.crossOrigin = 'anonymous'
+    image.src = props.src
+  }, [props.src])
 
   const plugins = [...corePlugins, ...props.plugins!]
   let defaultPlugin = null
