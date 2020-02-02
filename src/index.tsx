@@ -12,11 +12,19 @@ interface ReactImageEditorProps {
   toolbar?: {
     items: string[];
   };
-  imageObj: HTMLImageElement;
+  src: string;
   getStage?: (stage: any) => void;
 }
 
 export default function ReactImageEditor(props: ReactImageEditorProps) {
+  const [imageObj, setImageObj] = useState<HTMLImageElement>(null)
+  const image = new Image()
+  image.onload = () => {
+    setImageObj(image)
+  }
+  image.crossOrigin = 'anonymous'
+  image.src = props.src
+
   const plugins = [...corePlugins, ...props.plugins!]
   let defaultPlugin = null
   for(let i = 0; i < plugins.length; i++) {
@@ -43,23 +51,29 @@ export default function ReactImageEditor(props: ReactImageEditorProps) {
   }
 
   return (
-    <div className="react-image-editor" style={props.style}>
-      <Palette
-        width={props.width!}
-        height={props.height!}
-        imageObj={props.imageObj}
-        currentPlugin={currentPlugin}
-        currentPluginParamValue={currentPluginParamValue}
-        getStage={props.getStage}
-      />
-      <Toolbar width={props.width!}
-        plugins={plugins!}
-        toolbar={props.toolbar!}
-        currentPlugin={currentPlugin}
-        currentPluginParamValue={currentPluginParamValue}
-        handlePluginChange={handlePluginChange}
-        handlePluginParamValueChange={handlePluginParamValueChange}
-      />
+    <div className="react-img-editor" style={props.style}>
+      {
+        imageObj ? (
+          <>
+            <Palette
+              width={props.width!}
+              height={props.height!}
+              imageObj={imageObj}
+              currentPlugin={currentPlugin}
+              currentPluginParamValue={currentPluginParamValue}
+              getStage={props.getStage}
+            />
+            <Toolbar width={props.width!}
+              plugins={plugins!}
+              toolbar={props.toolbar!}
+              currentPlugin={currentPlugin}
+              currentPluginParamValue={currentPluginParamValue}
+              handlePluginChange={handlePluginChange}
+              handlePluginParamValueChange={handlePluginParamValueChange}
+            />
+          </>
+        ) : null
+      }
     </div>
   )
 }
