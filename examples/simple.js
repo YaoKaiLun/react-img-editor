@@ -144,7 +144,11 @@ function Example() {
     plugins: [],
     getStage: setStage,
     defaultPluginName: "circle"
-  }), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
+  }), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+    style: {
+      marginTop: '50px'
+    }
+  }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
     onClick: downloadImage
   }, "download")));
 }
@@ -52591,7 +52595,7 @@ function Palette(props) {
   };
   var hRatio = props.width / props.imageObj.naturalWidth;
   var vRatio = props.height / props.imageObj.naturalHeight;
-  var ratio = Math.min(hRatio, vRatio);
+  var ratio = Math.min(hRatio, vRatio, 1);
   var canvasWidth = props.imageObj.naturalWidth * ratio;
   var canvasHeight = props.imageObj.naturalHeight * ratio;
   var stageRef = Object(react__WEBPACK_IMPORTED_MODULE_1__["useRef"])(null);
@@ -52601,18 +52605,12 @@ function Palette(props) {
   var historyStack = Object(react__WEBPACK_IMPORTED_MODULE_1__["useRef"])([]);
 
   function initPalette() {
-    var _a;
-
     stageRef.current = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Stage({
       container: 'react-img-editor',
       width: canvasWidth,
       height: canvasHeight
     });
     props.getStage && props.getStage(stageRef.current);
-    var $konvaContent = document.querySelector('.konvajs-content');
-    var $placeholder = document.createElement('div');
-    $placeholder.id = 'react-img-editor-inner-placeholder';
-    (_a = $konvaContent) === null || _a === void 0 ? void 0 : _a.appendChild($placeholder);
   }
 
   function drawImage() {
@@ -52638,8 +52636,6 @@ function Palette(props) {
   }
 
   function reload(imgObj, width, height) {
-    var _a;
-
     historyStack.current = [];
     stageRef.current = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Stage({
       container: 'react-img-editor',
@@ -52647,10 +52643,6 @@ function Palette(props) {
       height: height
     });
     props.getStage && props.getStage(stageRef.current);
-    var $konvaContent = document.querySelector('.konvajs-content');
-    var $placeholder = document.createElement('div');
-    $placeholder.id = 'react-img-editor-inner-placeholder';
-    (_a = $konvaContent) === null || _a === void 0 ? void 0 : _a.appendChild($placeholder);
     var img = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Image({
       x: 0,
       y: 0,
@@ -53133,14 +53125,16 @@ function ReactImageEditor(props) {
       imageObj = _useState2[0],
       setImageObj = _useState2[1];
 
-  var image = new Image();
+  Object(react__WEBPACK_IMPORTED_MODULE_2__["useEffect"])(function () {
+    var image = new Image();
 
-  image.onload = function () {
-    setImageObj(image);
-  };
+    image.onload = function () {
+      setImageObj(image);
+    };
 
-  image.crossOrigin = 'anonymous';
-  image.src = props.src;
+    image.crossOrigin = 'anonymous';
+    image.src = props.src;
+  }, [props.src]);
   var plugins = [].concat(_toConsumableArray(_plugins__WEBPACK_IMPORTED_MODULE_0__["default"]), _toConsumableArray(props.plugins));
   var defaultPlugin = null;
 
@@ -53337,14 +53331,8 @@ var defalutParamValue = {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var konva__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! konva */ "./node_modules/konva/lib/index.js");
 /* harmony import */ var konva__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(konva__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var react_dom__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react-dom */ "./node_modules/react-dom/index.js");
-/* harmony import */ var react_dom__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(react_dom__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../constants */ "./src/constants.ts");
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../constants */ "./src/constants.ts");
 function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
-
-
 
 
 
@@ -53352,52 +53340,64 @@ var initRectWidth = 100;
 var initRectHeight = 100;
 var initRectX = 0;
 var initRectY = 0;
-var toolbarDistance = 20;
 var virtualLayer = null;
 var rectWidth = initRectWidth;
 var rectHeight = initRectHeight;
 var rectX = initRectX;
 var rectY = initRectY;
-var style = {
-  wrapper: {
-    background: '#FFF',
-    boxShadow: '0 2px 8px 0 rgba(0, 0, 0, 0.15)',
-    width: '285px',
-    height: '40px',
-    display: 'flex',
-    alignItems: 'center',
-    padding: '0 12px'
-  },
-  cancelBtn: {
-    display: 'inline-block',
-    width: '32px',
-    height: '24px',
-    lineHeight: '24px',
-    background: '#FFF',
-    border: '1px solid #C9C9D0',
-    borderRadius: '2px',
-    textAlign: 'center',
-    margin: '0 8px 0 16px',
-    cursor: 'pointer'
-  },
-  sureBtn: {
-    display: 'inline-block',
-    width: '32px',
-    height: '24px',
-    lineHeight: '24px',
-    background: '#007AFF',
-    border: '1px solid #C9C9D0',
-    borderRadius: '2px',
-    color: '#FFF',
-    textAlign: 'center',
-    cursor: 'pointer'
-  }
-};
 
-function adjustToolbarPosition() {
-  var $placeholder = document.getElementById('react-img-editor-inner-placeholder');
-  $placeholder.style.left = "".concat(rectX, "px");
-  $placeholder.style.top = "".concat(rectHeight + rectY + toolbarDistance, "px");
+function adjustToolbarPosition(stage) {
+  if (!document.getElementById('react-img-editor-crop-toolbar')) return;
+  var container = stage.container().getBoundingClientRect();
+  var $placeholder = document.getElementById('react-img-editor-crop-toolbar');
+  $placeholder.style.left = "".concat(container.left + rectX + 1, "px");
+  $placeholder.style.top = "".concat(container.top + rectHeight + rectY + 20, "px");
+}
+
+function createCropToolbar(sureBtnEvent, cancelBtnEvent) {
+  if (document.getElementById('react-img-editor-crop-toolbar')) return;
+  var fragment = new DocumentFragment(); // 创建截图工具栏
+
+  var $cropToolbar = document.createElement('div');
+  $cropToolbar.setAttribute('id', 'react-img-editor-crop-toolbar');
+  var cropToolbarStyle = 'position: absolute; z-index: 1; box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.15);' + 'background: #FFF; width: 275px; height: 40px; display: flex; align-items: center; padding: 0 12px;' + 'font-size: 14px;';
+  $cropToolbar.setAttribute('style', cropToolbarStyle);
+  fragment.appendChild($cropToolbar); // 创建文本
+
+  var $textNode = document.createTextNode('拖动边框调整图片显示范围');
+  $cropToolbar.appendChild($textNode);
+  var btnStyle = 'display: inline-block; width: 32px; height: 24px; border: 1px solid #C9C9D0;' + 'border-radius: 2px; text-align: center; cursor: pointer; line-height: 24px;'; // 创建取消按钮
+
+  var $cancelBtn = document.createElement('span');
+  $cancelBtn.setAttribute('style', btnStyle + 'background: #FFF; margin: 0 8px 0 10px;');
+  $cancelBtn.onclick = cancelBtnEvent;
+  $cropToolbar.appendChild($cancelBtn); // 创建取消按钮图标
+
+  var $closeIcon = document.createElement('i');
+  $closeIcon.setAttribute('class', 'iconfont icon-close');
+  $closeIcon.setAttribute('style', 'font-size: 12px;');
+  $cancelBtn.appendChild($closeIcon); // 创建确认按钮
+
+  var $sureBtn = document.createElement('span');
+  $sureBtn.setAttribute('style', btnStyle + 'background: #007AFF; color: #FFF;');
+  $sureBtn.onclick = sureBtnEvent;
+  $cropToolbar.appendChild($sureBtn); // 创建确认按钮图标
+
+  var $checkIcon = document.createElement('i');
+  $checkIcon.setAttribute('class', 'iconfont icon-check');
+  $checkIcon.setAttribute('style', 'font-size: 12px;');
+  $sureBtn.appendChild($checkIcon);
+  document.body.appendChild(fragment);
+}
+
+function reset() {
+  var $toolbar = document.getElementById('react-img-editor-crop-toolbar');
+  $toolbar && document.body.removeChild($toolbar);
+  virtualLayer && virtualLayer.remove();
+  rectWidth = initRectWidth;
+  rectHeight = initRectHeight;
+  rectX = initRectX;
+  rectY = initRectY;
 }
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -53450,7 +53450,7 @@ function adjustToolbarPosition() {
 
         rectX = x;
         rectY = y;
-        adjustToolbarPosition();
+        adjustToolbarPosition(stage);
         return {
           x: x,
           y: y
@@ -53461,14 +53461,14 @@ function adjustToolbarPosition() {
 
     var transformer = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Transformer(_extends(_extends({
       node: rect
-    }, _constants__WEBPACK_IMPORTED_MODULE_3__["transformerStyle"]), {
+    }, _constants__WEBPACK_IMPORTED_MODULE_1__["transformerStyle"]), {
       boundBoxFunc: function boundBoxFunc(oldBox, newBox) {
         if (newBox.width > imageData.width || newBox.height > imageData.height || newBox.x < 0 || newBox.y < 0 || newBox.x + newBox.width > imageData.width || newBox.y + newBox.height > imageData.height) {
           rectWidth = imageData.width;
           rectHeight = imageData.height;
           rectX = oldBox.x;
           rectY = oldBox.y;
-          adjustToolbarPosition();
+          adjustToolbarPosition(stage);
           return oldBox;
         }
 
@@ -53476,17 +53476,13 @@ function adjustToolbarPosition() {
         rectHeight = newBox.height;
         rectX = newBox.x;
         rectY = newBox.y;
-        adjustToolbarPosition();
+        adjustToolbarPosition(stage);
         return newBox;
       }
     }));
     virtualLayer.add(transformer);
-    var $placeholder = document.getElementById('react-img-editor-inner-placeholder');
-    $placeholder.style.position = 'absolute';
-    $placeholder.style.zIndex = '1';
-
-    function cropImage() {
-      virtualLayer.destroy();
+    createCropToolbar(function () {
+      virtualLayer.remove(transformer);
       var dataURL = stage.toDataURL({
         x: rectX,
         y: rectY,
@@ -53498,21 +53494,12 @@ function adjustToolbarPosition() {
 
       imageObj.onload = function () {
         reload(imageObj, rectWidth, rectHeight);
+        reset();
       };
 
       imageObj.src = dataURL;
-    }
-
-    var ToolbarWrapper = react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", {
-      style: _extends({}, style.wrapper)
-    }, "\u62D6\u52A8\u8FB9\u6846\u8C03\u6574\u56FE\u7247\u663E\u793A\u8303\u56F4", react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("span", {
-      style: style.cancelBtn
-    }, "\xD7"), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("span", {
-      style: style.sureBtn,
-      onClick: cropImage
-    }, "\u221A"));
-    react_dom__WEBPACK_IMPORTED_MODULE_2___default.a.render(ToolbarWrapper, $placeholder);
-    adjustToolbarPosition();
+    }, reset);
+    adjustToolbarPosition(stage);
     stage.add(virtualLayer);
   }
 });
