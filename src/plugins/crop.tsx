@@ -21,7 +21,7 @@ function adjustToolbarPosition(stage: any) {
   $placeholder.style.top = `${container.top + rectHeight + rectY + 20}px`
 }
 
-function createCropToolbar(sureBtnEvent, cancelBtnEvent) {
+function createCropToolbar(sureBtnEvent: () => void, cancelBtnEvent: () => void) {
   if (document.getElementById('react-img-editor-crop-toolbar')) return
 
   const fragment = new DocumentFragment()
@@ -168,7 +168,7 @@ export default {
     })
     virtualLayer.add(transformer)
 
-    createCropToolbar(function sureBtnEvent() {
+    createCropToolbar(function () {
       virtualLayer.remove(transformer)
       const dataURL = stage.toDataURL({
         x: rectX,
