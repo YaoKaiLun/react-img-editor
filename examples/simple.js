@@ -97,10 +97,10 @@
 
 /***/ }),
 
-/***/ "./examples/index.tsx":
-/*!****************************!*\
-  !*** ./examples/index.tsx ***!
-  \****************************/
+/***/ "./examples/simple.tsx":
+/*!*****************************!*\
+  !*** ./examples/simple.tsx ***!
+  \*****************************/
 /*! no exports provided */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -133,12 +133,17 @@ function Example() {
     link.download = 'download.png';
     link.href = dataURL;
     link.click();
-  }
+  } // image1: https://cstore-public.seewo.com/faq-service/4e3f2924f1d4432f82e760468bf680f0
+  // image2: https://cvte-dev-public.seewo.com/faq-service-test/4db524ec93324794b983bf7cd78b2ae1
+
 
   return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_0___default.a.Fragment, null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_src_index__WEBPACK_IMPORTED_MODULE_2__["default"], {
-    src: "https://cstore-public.seewo.com/faq-service/4e3f2924f1d4432f82e760468bf680f0",
+    src: "https://cvte-dev-public.seewo.com/faq-service-test/4db524ec93324794b983bf7cd78b2ae1",
+    width: 736,
+    height: 414,
     plugins: [],
-    getStage: setStage
+    getStage: setStage,
+    defaultPluginName: "circle"
   }), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
     onClick: downloadImage
   }, "download")));
@@ -18287,7 +18292,9 @@ function (_Component) {
       var _this$props5 = this.props,
           getRootDomNode = _this$props5.getRootDomNode,
           visible = _this$props5.visible,
-          stretch = _this$props5.stretch;
+          stretch = _this$props5.stretch; // If there is a pending state update, cancel it, a new one will be set if necessary
+
+      this.cancelFrameState();
 
       if (visible && status !== 'stable') {
         switch (status) {
@@ -18379,7 +18386,11 @@ function (_Component) {
         // Init render should always be stable
         newState.status = 'stable';
       } else if (visible !== prevVisible) {
-        newState.status = visible || supportMotion(mergedMotion) ? null : 'stable';
+        if (visible || supportMotion(mergedMotion) && ['motion', 'AfterMotion', 'stable'].includes(status)) {
+          newState.status = null;
+        } else {
+          newState.status = 'stable';
+        }
 
         if (visible) {
           newState.alignClassName = null;
@@ -53018,7 +53029,7 @@ function Toolbar(props) {
     }
 
     return react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(rc_tooltip__WEBPACK_IMPORTED_MODULE_2__["default"], {
-      placement: "top",
+      placement: "bottom",
       trigger: "click",
       overlay: react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(_ParamSetting__WEBPACK_IMPORTED_MODULE_0__["default"], {
         paramNames: paramNames,
@@ -53026,10 +53037,7 @@ function Toolbar(props) {
         onChange: props.handlePluginParamValueChange
       }),
       visible: isActivated,
-      overlayClassName: "".concat(_constants__WEBPACK_IMPORTED_MODULE_3__["prefixCls"], "-tooltip"),
-      align: {
-        offset: [0, -15]
-      }
+      overlayClassName: "".concat(_constants__WEBPACK_IMPORTED_MODULE_3__["prefixCls"], "-tooltip")
     }, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("span", {
       key: plugin.name,
       className: "".concat(_constants__WEBPACK_IMPORTED_MODULE_3__["prefixCls"], "-toolbar-icon ").concat(isActivated ? 'activated' : ''),
@@ -53137,7 +53145,7 @@ function ReactImageEditor(props) {
   var defaultPlugin = null;
 
   for (var i = 0; i < plugins.length; i++) {
-    if (props.toolbar && plugins[i].name === props.toolbar.items[0]) {
+    if (props.defaultPluginName && props.toolbar && plugins[i].name === props.defaultPluginName) {
       defaultPlugin = plugins[i];
       break;
     }
@@ -53193,7 +53201,7 @@ ReactImageEditor.defaultProps = {
   style: {},
   plugins: [],
   toolbar: {
-    items: ['arrow', 'rect', 'circle', 'mosaic', 'text', 'repeal', 'download', 'crop']
+    items: ['pen', 'eraser', 'arrow', 'rect', 'circle', 'mosaic', 'text', 'repeal', 'download', 'crop']
   }
 };
 
@@ -54053,16 +54061,16 @@ var isFocus = false;
 /***/ }),
 
 /***/ 0:
-/*!**********************************!*\
-  !*** multi ./examples/index.tsx ***!
-  \**********************************/
+/*!***********************************!*\
+  !*** multi ./examples/simple.tsx ***!
+  \***********************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(/*! ./examples/index.tsx */"./examples/index.tsx");
+module.exports = __webpack_require__(/*! ./examples/simple.tsx */"./examples/simple.tsx");
 
 
 /***/ })
 
 /******/ });
-//# sourceMappingURL=index.js.map
+//# sourceMappingURL=simple.js.map

@@ -278,6 +278,8 @@
   display: flex;
   -webkit-box-align: center;
           align-items: center;
+  -webkit-box-pack: center;
+          justify-content: center;
 }
 .react-img-editor-toolbar {
   display: -webkit-box;
@@ -288,7 +290,7 @@
           justify-content: center;
   background-color: #FFF;
   height: 56px;
-  border: 1px solid #A9A9AC;
+  border: 1px solid rgba(0, 0, 0, 0.1);
 }
 .react-img-editor-toolbar-icon i {
   font-size: 16px;
@@ -301,6 +303,9 @@
 }
 .react-img-editor-tooltip {
   opacity: 1;
+}
+.react-img-editor-tooltip .rc-tooltip-arrow {
+  border-bottom-color: rgba(0, 0, 0, 0.1);
 }
 .react-img-editor-tooltip .rc-tooltip-inner {
   display: -webkit-box;
@@ -394,4 +399,4 @@
 }
 
 
-/*# sourceMappingURL=index.css.map*/
+/*# sourceMappingURL=simple.css.map*/
