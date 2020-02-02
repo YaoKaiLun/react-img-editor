@@ -31,7 +31,7 @@ function Example() {
         getStage={setStage}
         defaultPluginName="circle"
       />
-      <div>
+      <div style={{ marginTop: '50px' }}>
         <button onClick={downloadImage}>download</button>
       </div>
     </>
