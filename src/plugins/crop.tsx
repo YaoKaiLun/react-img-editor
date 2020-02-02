@@ -52,7 +52,7 @@ const style = {
 }
 
 function adjustToolbarPosition() {
-  const $placeholder = document.getElementById('react-image-editor-inner-placeholder')!
+  const $placeholder = document.getElementById('react-img-editor-inner-placeholder')!
   $placeholder.style.left = `${rectX}px`
   $placeholder.style.top = `${rectHeight + rectY + toolbarDistance}px`
 }
@@ -143,7 +143,7 @@ export default {
     })
     virtualLayer.add(transformer)
 
-    const $placeholder = document.getElementById('react-image-editor-inner-placeholder')!
+    const $placeholder = document.getElementById('react-img-editor-inner-placeholder')!
     $placeholder.style.position = 'absolute'
     $placeholder.style.zIndex = '1'
 

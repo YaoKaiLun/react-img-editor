@@ -1,4 +1,4 @@
-export const prefixCls = 'react-image-editor'
+export const prefixCls = 'react-img-editor'
 export const transformerStyle = {
   centeredScaling: false,
   rotateEnabled: false,

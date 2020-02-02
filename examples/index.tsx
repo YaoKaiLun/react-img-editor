@@ -1,6 +1,6 @@
 import React, { useRef } from 'react'
 import ReactDOM from 'react-dom'
-import ReactImageEditor from '../src/index'
+import ReactImgEditor from '../src/index'
 import '../assets/index.less'
 
 function Example() {
@@ -20,7 +20,7 @@ function Example() {
 
   return (
     <>
-      <ReactImageEditor
+      <ReactImgEditor
         src="https://cstore-public.seewo.com/faq-service/4e3f2924f1d4432f82e760468bf680f0"
         plugins={[]}
         getStage={setStage}

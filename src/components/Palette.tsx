@@ -34,14 +34,14 @@ export default function Palette(props: PaletteProps) {
 
   function initPalette() {
     stageRef.current = new Konva.Stage({
-      container: 'react-image-editor',
+      container: 'react-img-editor',
       width: canvasWidth,
       height: canvasHeight,
     })
     props.getStage && props.getStage(stageRef.current)
     const $konvaContent = document.querySelector('.konvajs-content')
     const $placeholder = document.createElement('div')
-    $placeholder.id = 'react-image-editor-inner-placeholder'
+    $placeholder.id = 'react-img-editor-inner-placeholder'
     $konvaContent?.appendChild($placeholder)
   }
 
@@ -71,14 +71,14 @@ export default function Palette(props: PaletteProps) {
   function reload(imgObj: any, width: number, height: number) {
     historyStack.current = []
     stageRef.current = new Konva.Stage({
-      container: 'react-image-editor',
+      container: 'react-img-editor',
       width: width,
       height: height,
     })
     props.getStage && props.getStage(stageRef.current)
     const $konvaContent = document.querySelector('.konvajs-content')
     const $placeholder = document.createElement('div')
-    $placeholder.id = 'react-image-editor-inner-placeholder'
+    $placeholder.id = 'react-img-editor-inner-placeholder'
     $konvaContent?.appendChild($placeholder)
 
     const img = new Konva.Image({

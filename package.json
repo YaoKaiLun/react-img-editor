@@ -1,9 +1,9 @@
 {
   "name": "react-img-editor",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "图片编辑器（微信截图编辑 PRO 版）",
   "keywords": [
-    "react-image-editor",
+    "react-img-editor",
     "image-editor"
   ],
   "main": "lib/index",
@@ -16,17 +16,21 @@
     "lint": "eslint . --ext .js,jsx,.ts,.tsx",
     "prepublish": "rc-tools run guard"
   },
-  "files": ["es", "lib", "assets/*.css"],
+  "files": [
+    "es",
+    "lib",
+    "assets/*.css"
+  ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/YaoKaiLun/react-image-editor.git"
+    "url": "git+https://github.com/YaoKaiLun/react-img-editor.git"
   },
   "author": "kailunyao",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/YaoKaiLun/react-image-editor/issues"
+    "url": "https://github.com/YaoKaiLun/react-img-editor/issues"
   },
-  "homepage": "https://github.com/YaoKaiLun/react-image-editor#readme",
+  "homepage": "https://github.com/YaoKaiLun/react-img-editor#readme",
   "devDependencies": {
     "@types/react-dom": "^16.9.5",
     "@typescript-eslint/eslint-plugin": "^2.17.0",
