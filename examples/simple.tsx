@@ -18,12 +18,18 @@ function Example() {
     link.click()
   }
 
+  // image1: https://cstore-public.seewo.com/faq-service/4e3f2924f1d4432f82e760468bf680f0
+  // image2: https://cvte-dev-public.seewo.com/faq-service-test/4db524ec93324794b983bf7cd78b2ae1
+
   return (
     <>
       <ReactImgEditor
-        src="https://cstore-public.seewo.com/faq-service/4e3f2924f1d4432f82e760468bf680f0"
+        src="https://cvte-dev-public.seewo.com/faq-service-test/4db524ec93324794b983bf7cd78b2ae1"
+        width={736}
+        height={414}
         plugins={[]}
         getStage={setStage}
+        defaultPluginName="circle"
       />
       <div>
         <button onClick={downloadImage}>download</button>
