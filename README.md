@@ -1,6 +1,8 @@
 # react-img-editor
 图片编辑器（微信截图编辑 PRO 版）
 
+![示例](./assets/demo.png)
+
 ## 安装
 
 ```
