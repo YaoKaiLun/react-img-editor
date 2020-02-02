@@ -1,6 +1,4 @@
 import Konva from 'konva'
-import React from 'react'
-import ReactDOM from 'react-dom'
 import { PluginProps } from '../type'
 import { transformerStyle } from '../constants'
 
@@ -8,53 +6,79 @@ const initRectWidth = 100
 const initRectHeight = 100
 const initRectX = 0
 const initRectY = 0
-const toolbarDistance = 20
 let virtualLayer: any = null
 let rectWidth = initRectWidth
 let rectHeight = initRectHeight
 let rectX = initRectX
 let rectY = initRectY
 
-const style = {
-  wrapper: {
-    background: '#FFF',
-    boxShadow: '0 2px 8px 0 rgba(0, 0, 0, 0.15)',
-    width: '285px',
-    height: '40px',
-    display: 'flex',
-    alignItems: 'center',
-    padding: '0 12px',
-  },
-  cancelBtn: {
-    display: 'inline-block',
-    width: '32px',
-    height: '24px',
-    lineHeight: '24px',
-    background: '#FFF',
-    border: '1px solid #C9C9D0',
-    borderRadius: '2px',
-    textAlign: 'center' as const,
-    margin: '0 8px 0 16px',
-    cursor: 'pointer',
-  },
-  sureBtn: {
-    display: 'inline-block',
-    width: '32px',
-    height: '24px',
-    lineHeight: '24px',
-    background: '#007AFF',
-    border: '1px solid #C9C9D0',
-    borderRadius: '2px',
-    color: '#FFF',
-    textAlign: 'center' as const,
-    cursor: 'pointer',
-  },
+function adjustToolbarPosition(stage: any) {
+  if (!document.getElementById('react-img-editor-crop-toolbar')) return
+
+  const container = stage.container().getBoundingClientRect()
+  const $placeholder = document.getElementById('react-img-editor-crop-toolbar')!
+  $placeholder.style.left = `${container.left + rectX + 1}px`
+  $placeholder.style.top = `${container.top + rectHeight + rectY + 20}px`
 }
 
-function adjustToolbarPosition() {
-  const $placeholder = document.getElementById('react-img-editor-inner-placeholder')!
-  $placeholder.style.left = `${rectX}px`
-  $placeholder.style.top = `${rectHeight + rectY + toolbarDistance}px`
+function createCropToolbar(sureBtnEvent, cancelBtnEvent) {
+  if (document.getElementById('react-img-editor-crop-toolbar')) return
+
+  const fragment = new DocumentFragment()
+
+  // 创建截图工具栏
+  const $cropToolbar = document.createElement('div')
+  $cropToolbar.setAttribute('id', 'react-img-editor-crop-toolbar')
+  const cropToolbarStyle = 'position: absolute; z-index: 1; box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.15);' +
+    'background: #FFF; width: 275px; height: 40px; display: flex; align-items: center; padding: 0 12px;' +
+    'font-size: 14px;'
+  $cropToolbar.setAttribute('style', cropToolbarStyle)
+  fragment.appendChild($cropToolbar)
+
+  // 创建文本
+  const $textNode = document.createTextNode('拖动边框调整图片显示范围')
+  $cropToolbar.appendChild($textNode)
+
+  const btnStyle = 'display: inline-block; width: 32px; height: 24px; border: 1px solid #C9C9D0;' +
+    'border-radius: 2px; text-align: center; cursor: pointer; line-height: 24px;'
+
+  // 创建取消按钮
+  const $cancelBtn = document.createElement('span')
+  $cancelBtn.setAttribute('style', btnStyle + 'background: #FFF; margin: 0 8px 0 10px;')
+  $cancelBtn.onclick = cancelBtnEvent
+  $cropToolbar.appendChild($cancelBtn)
+
+  // 创建取消按钮图标
+  const $closeIcon = document.createElement('i')
+  $closeIcon.setAttribute('class', 'iconfont icon-close')
+  $closeIcon.setAttribute('style', 'font-size: 12px;')
+  $cancelBtn.appendChild($closeIcon)
+
+  // 创建确认按钮
+  const $sureBtn = document.createElement('span')
+  $sureBtn.setAttribute('style', btnStyle + 'background: #007AFF; color: #FFF;')
+  $sureBtn.onclick = sureBtnEvent
+  $cropToolbar.appendChild($sureBtn)
+
+  // 创建确认按钮图标
+  const $checkIcon = document.createElement('i')
+  $checkIcon.setAttribute('class', 'iconfont icon-check')
+  $checkIcon.setAttribute('style', 'font-size: 12px;')
+  $sureBtn.appendChild($checkIcon)
+
+  document.body.appendChild(fragment)
+}
+
+function reset() {
+  const $toolbar = document.getElementById('react-img-editor-crop-toolbar')
+  $toolbar && document.body.removeChild($toolbar)
+
+  virtualLayer && virtualLayer.remove()
+
+  rectWidth = initRectWidth
+  rectHeight = initRectHeight
+  rectX = initRectX
+  rectY = initRectY
 }
 
 export default {
@@ -106,7 +130,8 @@ export default {
 
         rectX = x
         rectY = y
-        adjustToolbarPosition()
+
+        adjustToolbarPosition(stage)
         return { x, y }
       },
     })
@@ -129,7 +154,7 @@ export default {
           rectHeight = imageData.height
           rectX = oldBox.x
           rectY = oldBox.y
-          adjustToolbarPosition()
+          adjustToolbarPosition(stage)
           return oldBox
         }
 
@@ -137,19 +162,14 @@ export default {
         rectHeight = newBox.height
         rectX = newBox.x
         rectY = newBox.y
-        adjustToolbarPosition()
+        adjustToolbarPosition(stage)
         return newBox
       },
     })
     virtualLayer.add(transformer)
 
-    const $placeholder = document.getElementById('react-img-editor-inner-placeholder')!
-    $placeholder.style.position = 'absolute'
-    $placeholder.style.zIndex = '1'
-
-    function cropImage() {
-      virtualLayer.destroy()
-
+    createCropToolbar(function sureBtnEvent() {
+      virtualLayer.remove(transformer)
       const dataURL = stage.toDataURL({
         x: rectX,
         y: rectY,
@@ -160,21 +180,12 @@ export default {
       const imageObj = new Image()
       imageObj.onload = function() {
         reload(imageObj, rectWidth, rectHeight)
+        reset()
       }
       imageObj.src = dataURL
-    }
+    }, reset)
 
-    const ToolbarWrapper = (
-      <div style={{ ...style.wrapper }}>
-        拖动边框调整图片显示范围
-        <span style={style.cancelBtn}>×</span>
-        <span style={style.sureBtn} onClick={cropImage}>√</span>
-      </div>
-    )
-
-    ReactDOM.render(ToolbarWrapper, $placeholder)
-
-    adjustToolbarPosition()
+    adjustToolbarPosition(stage)
 
     stage.add(virtualLayer)
   },

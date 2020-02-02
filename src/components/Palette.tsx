@@ -39,10 +39,6 @@ export default function Palette(props: PaletteProps) {
       height: canvasHeight,
     })
     props.getStage && props.getStage(stageRef.current)
-    const $konvaContent = document.querySelector('.konvajs-content')
-    const $placeholder = document.createElement('div')
-    $placeholder.id = 'react-img-editor-inner-placeholder'
-    $konvaContent?.appendChild($placeholder)
   }
 
   function drawImage() {
@@ -76,10 +72,6 @@ export default function Palette(props: PaletteProps) {
       height: height,
     })
     props.getStage && props.getStage(stageRef.current)
-    const $konvaContent = document.querySelector('.konvajs-content')
-    const $placeholder = document.createElement('div')
-    $placeholder.id = 'react-img-editor-inner-placeholder'
-    $konvaContent?.appendChild($placeholder)
 
     const img = new Konva.Image({
       x: 0,
