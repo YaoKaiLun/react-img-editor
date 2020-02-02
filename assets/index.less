@@ -8,6 +8,7 @@
     background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAQMAAAAlPW0iAAAAA3NCSVQICAjb4U/gAAAABlBMVEXMzMz////TjRV2AAAACXBIWXMAAArrAAAK6wGCiw1aAAAAHHRFWHRTb2Z0d2FyZQBBZG9iZSBGaXJld29ya3MgQ1M26LyyjAAAABFJREFUCJlj+M/AgBVhF/0PAH6/D/HkDxOGAAAAAElFTkSuQmCC");
     display: flex;
     align-items: center;
+    justify-content: center;
   }
 
   &-toolbar {
@@ -16,7 +17,7 @@
     justify-content: center;
     background-color: #FFF;
     height: 56px;
-    border: 1px solid #A9A9AC;
+    border: 1px solid rgba(0, 0, 0, .1);
   }
 
   &-toolbar-icon {
@@ -34,6 +35,10 @@
 
   &-tooltip {
     opacity: 1;
+
+    .rc-tooltip-arrow {
+      border-bottom-color: rgba(0, 0, 0, .1);
+    }
 
     .rc-tooltip-inner {
       display: flex;

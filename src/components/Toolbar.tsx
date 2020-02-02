@@ -41,7 +41,7 @@ export default function Toolbar(props: ToolbarProps) {
 
     return (
       <Tooltip
-        placement="top"
+        placement="bottom"
         trigger="click"
         overlay={(
           <ParamSetting
@@ -52,7 +52,6 @@ export default function Toolbar(props: ToolbarProps) {
         )}
         visible={isActivated}
         overlayClassName={`${prefixCls}-tooltip`}
-        align={{offset: [0, -15]}}
       >
         <span
           key={plugin.name}
