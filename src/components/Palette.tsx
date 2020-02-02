@@ -23,7 +23,7 @@ export default function Palette(props: PaletteProps) {
 
   const hRatio = props.width / props.imageObj.naturalWidth
   const vRatio = props.height / props.imageObj.naturalHeight
-  const ratio  = Math.min (hRatio, vRatio)
+  const ratio  = Math.min (hRatio, vRatio, 1)
   const canvasWidth = props.imageObj.naturalWidth * ratio
   const canvasHeight = props.imageObj.naturalHeight * ratio
   const stageRef = useRef<any>(null)
