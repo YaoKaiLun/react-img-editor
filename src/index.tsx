@@ -17,7 +17,7 @@ interface ReactImageEditorProps {
 }
 
 export default function ReactImageEditor(props: ReactImageEditorProps) {
-  const [imageObj, setImageObj] = useState<HTMLImageElement>(null)
+  const [imageObj, setImageObj] = useState<HTMLImageElement | null>(null)
   const image = new Image()
   image.onload = () => {
     setImageObj(image)
