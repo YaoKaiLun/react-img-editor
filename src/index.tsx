@@ -14,6 +14,7 @@ interface ReactImageEditorProps {
   };
   src: string;
   getStage?: (stage: any) => void;
+  defaultPluginName?: string;
 }
 
 export default function ReactImageEditor(props: ReactImageEditorProps) {
@@ -28,7 +29,7 @@ export default function ReactImageEditor(props: ReactImageEditorProps) {
   const plugins = [...corePlugins, ...props.plugins!]
   let defaultPlugin = null
   for(let i = 0; i < plugins.length; i++) {
-    if (props.toolbar && plugins[i].name === props.toolbar.items[0]) {
+    if (props.defaultPluginName && props.toolbar && plugins[i].name === props.defaultPluginName) {
       defaultPlugin = plugins[i]
       break
     }
@@ -84,6 +85,6 @@ ReactImageEditor.defaultProps = {
   style: {},
   plugins: [],
   toolbar: {
-    items: ['arrow', 'rect', 'circle', 'mosaic', 'text', 'repeal', 'download', 'crop'],
+    items: ['pen', 'eraser', 'arrow', 'rect', 'circle', 'mosaic', 'text', 'repeal', 'download', 'crop'],
   },
 } as Partial<ReactImageEditorProps>
