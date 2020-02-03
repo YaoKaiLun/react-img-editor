@@ -29,7 +29,7 @@ function createCropToolbar(sureBtnEvent: () => void, cancelBtnEvent: () => void)
   // 创建截图工具栏
   const $cropToolbar = document.createElement('div')
   $cropToolbar.setAttribute('id', 'react-img-editor-crop-toolbar')
-  const cropToolbarStyle = 'position: absolute; z-index: 1; box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.15);' +
+  const cropToolbarStyle = 'position: absolute; z-index: 1000; box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.15);' +
     'background: #FFF; width: 275px; height: 40px; display: flex; align-items: center; padding: 0 12px;' +
     'font-size: 14px;'
   $cropToolbar.setAttribute('style', cropToolbarStyle)

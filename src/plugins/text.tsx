@@ -52,6 +52,7 @@ export default {
       textarea.style.overflow = 'hidden'
       textarea.style.background = 'none'
       textarea.style.resize = 'none'
+      textarea.style.zIndex = '1000'
       textarea.focus()
       textNode.hide()
       layer.draw()
