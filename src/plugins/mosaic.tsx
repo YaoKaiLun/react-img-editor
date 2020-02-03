@@ -88,10 +88,8 @@ export default {
   name: 'mosaic',
   iconfont: 'iconfont icon-mosaic',
   params: ['strokeWidth'],
-  onDrawStart: ({stage, imageData}) => {
+  onDrawStart: ({stage, imageData, pixelRatio}) => {
     isPaint = true
-
-    const pixelRatio = window.devicePixelRatio
     width = stage.width()
     height = stage.height()
     tileRowSize = Math.ceil(height / tileHeight)

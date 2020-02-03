@@ -12,9 +12,6 @@ interface PaletteProps {
   getStage?: (stage: any) => void;
 }
 
-const pixelRatio = window.devicePixelRatio
-Konva.pixelRatio = pixelRatio
-
 export default function Palette(props: PaletteProps) {
   const style = {
     width: props.width,
@@ -23,14 +20,16 @@ export default function Palette(props: PaletteProps) {
 
   const hRatio = props.width / props.imageObj.naturalWidth
   const vRatio = props.height / props.imageObj.naturalHeight
-  const ratio  = Math.min (hRatio, vRatio, 1)
-  const canvasWidth = props.imageObj.naturalWidth * ratio
-  const canvasHeight = props.imageObj.naturalHeight * ratio
+  const scaleRatio  = Math.min (hRatio, vRatio, 1)
+  const canvasWidth = props.imageObj.naturalWidth * scaleRatio
+  const canvasHeight = props.imageObj.naturalHeight * scaleRatio
   const stageRef = useRef<any>(null)
   const imageRef = useRef<any>(null)
   const layerRef = useRef<any>(null)
   const imageData = useRef<any>(null)
   const historyStack = useRef<any[]>([])
+  const pixelRatio = window.devicePixelRatio
+  Konva.pixelRatio = pixelRatio
 
   function initPalette() {
     stageRef.current = new Konva.Stage({
@@ -50,12 +49,7 @@ export default function Palette(props: PaletteProps) {
       height: canvasHeight,
     })
 
-    const imageLayer = new Konva.Layer({
-      x: 0,
-      y: 0,
-      width: canvasWidth,
-      height: canvasHeight,
-    })
+    const imageLayer = new Konva.Layer()
     stageRef.current.add(imageLayer)
     imageLayer.add(img)
     imageLayer.draw()
@@ -111,6 +105,7 @@ export default function Palette(props: PaletteProps) {
       imageData: imageData.current,
       reload,
       historyStack: historyStack.current,
+      pixelRatio,
     }
 
     stageRef.current.on('click tap', (e: any) => {
@@ -174,6 +169,7 @@ export default function Palette(props: PaletteProps) {
         reload,
         paramValue: currentPluginParamValue,
         historyStack: historyStack.current,
+        pixelRatio,
       })
     }
   }, [props.currentPlugin])
