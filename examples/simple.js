@@ -127,10 +127,11 @@ function Example() {
 
   function downloadImage() {
     var dataURL = stageRef.current.toDataURL({
-      pixelRatio: window.devicePixelRatio
+      pixelRatio: stageRef.current._pixelRatio,
+      mimeType: 'image/jpeg'
     });
     var link = document.createElement('a');
-    link.download = 'download.png';
+    link.download = '';
     link.href = dataURL;
     link.click();
   }
@@ -52613,6 +52614,7 @@ function Palette(props) {
       width: canvasWidth,
       height: canvasHeight
     });
+    stageRef.current._pixelRatio = pixelRatio;
     props.getStage && props.getStage(stageRef.current);
   }
 
@@ -52648,6 +52650,7 @@ function Palette(props) {
       width: width,
       height: height
     });
+    stageRef.current._pixelRatio = pixelRatio;
     props.getStage && props.getStage(stageRef.current);
     var img = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Image({
       x: 0,
