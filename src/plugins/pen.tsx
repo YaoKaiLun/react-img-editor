@@ -5,13 +5,15 @@ let lastLine: any = null
 let isPaint = false
 const defalutParamValue = {
   strokeWidth: 2,
-  color: '#df4b26',
+  lineType: 'solid',
+  color: '#F5222D',
 }
 
 export default {
   name: 'pen',
   iconfont: 'iconfont icon-pen',
   params: ['strokeWidth', 'lineType', 'color'],
+  defalutParamValue,
   onDrawStart: ({stage, layer, paramValue}) => {
     isPaint = true
 

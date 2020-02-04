@@ -4,7 +4,7 @@ import { PluginProps } from '../type'
 
 let isPaint = false
 const defalutParamValue = {
-  strokeWidth: 4,
+  strokeWidth: 2,
 }
 const tiles: any = []
 const tileHeight = 5
@@ -88,6 +88,7 @@ export default {
   name: 'mosaic',
   iconfont: 'iconfont icon-mosaic',
   params: ['strokeWidth'],
+  defalutParamValue,
   onDrawStart: ({stage, imageData}) => {
     isPaint = true
     width = stage.width()

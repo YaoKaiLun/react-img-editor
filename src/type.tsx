@@ -11,6 +11,7 @@ export interface PluginProps {
   name: string;
   iconfont: string;
   params?: PluginParamName[];
+  defalutParamValue?: PluginParamValue;
   onClick?: (params: DrawEventPramas) => void;
   onDrawStart?: (params: DrawEventPramas) => void;
   onDraw?: (params: DrawEventPramas) => void;

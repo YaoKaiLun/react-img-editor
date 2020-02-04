@@ -19,6 +19,7 @@ interface ReactImageEditorProps {
 
 export default function ReactImageEditor(props: ReactImageEditorProps) {
   const [imageObj, setImageObj] = useState<HTMLImageElement | null>(null)
+
   useEffect(() => {
     const image = new Image()
     image.onload = () => {
@@ -30,18 +31,25 @@ export default function ReactImageEditor(props: ReactImageEditorProps) {
 
   const plugins = [...corePlugins, ...props.plugins!]
   let defaultPlugin = null
+  let defalutParamValue = {}
   for(let i = 0; i < plugins.length; i++) {
     if (props.defaultPluginName && props.toolbar && plugins[i].name === props.defaultPluginName) {
       defaultPlugin = plugins[i]
+
+      if (defaultPlugin.defalutParamValue) {
+        defalutParamValue = defaultPlugin.defalutParamValue
+      }
+
       break
     }
   }
 
   const [currentPlugin, setCurrentPlugin] = useState<PluginProps | null>(defaultPlugin)
-  const [currentPluginParamValue, setCurrentPluginParamValue] = useState<PluginParamValue>({})
+  const [currentPluginParamValue, setCurrentPluginParamValue] = useState<PluginParamValue>(defalutParamValue)
 
   function handlePluginChange(plugin: PluginProps) {
     setCurrentPlugin(plugin)
+    plugin.defalutParamValue && setCurrentPluginParamValue(plugin.defalutParamValue)
     if (plugin.onClick && !plugin.params) {
       setTimeout(() => {
         setCurrentPlugin(null)

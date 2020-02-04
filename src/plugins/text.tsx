@@ -3,7 +3,7 @@ import { PluginProps } from '../type'
 
 const defalutParamValue = {
   fontSize: 12,
-  color: '#df4b26',
+  color: '#F5222D',
 }
 
 let isFocus = false
@@ -12,6 +12,7 @@ export default {
   name: 'text',
   iconfont: 'iconfont icon-text',
   params: ['fontSize', 'color'],
+  defalutParamValue,
   onStageClcik: ({stage, layer, paramValue}) => {
     if (isFocus) return
 

@@ -11,6 +11,7 @@ export default {
   name: 'eraser',
   iconfont: 'iconfont icon-eraser',
   params: ['strokeWidth'],
+  defalutParamValue,
   onDrawStart: ({stage, layer, paramValue}) => {
     isPaint = true
 

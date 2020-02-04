@@ -6,13 +6,15 @@ let isPaint = false
 let startPoints = [0, 0]
 const defalutParamValue = {
   strokeWidth: 2,
-  color: '#df4b26',
+  lineType: 'solid',
+  color: '#F5222D',
 }
 
 export default {
   name: 'arrow',
   iconfont: 'iconfont icon-arrow',
   params: ['strokeWidth', 'lineType', 'color'],
+  defalutParamValue,
   onDrawStart: ({stage, layer, paramValue}) => {
     isPaint = true
 
