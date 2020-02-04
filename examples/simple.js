@@ -52637,6 +52637,7 @@ function Palette(props) {
     });
     var imageLayer = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Layer();
     stageRef.current.add(imageLayer);
+    imageLayer.setZIndex(1);
     imageLayer.add(img);
     imageLayer.draw();
     imageRef.current = imageLayer;
@@ -52672,6 +52673,7 @@ function Palette(props) {
   function bindEvents() {
     if (!stageRef.current) return;
     stageRef.current.add(layerRef.current);
+    layerRef.current.setZIndex(1);
     var currentPlugin = props.currentPlugin,
         currentPluginParamValue = props.currentPluginParamValue;
     var drawEventPramas = {
@@ -52771,7 +52773,12 @@ __webpack_require__.r(__webpack_exports__);
 
 var colors = ['#F5222D', '#FFEB00', '#007CFF', '#52C51A ', '#19191A'];
 function ColorSetting(props) {
-  return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_0___default.a.Fragment, null, colors.map(function (color) {
+  return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("span", {
+    style: {
+      margin: '0 8px',
+      fontSize: 0
+    }
+  }, colors.map(function (color) {
     return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("span", {
       key: color,
       className: "".concat(_constants__WEBPACK_IMPORTED_MODULE_1__["prefixCls"], "-color-square ").concat(props.value === color ? _constants__WEBPACK_IMPORTED_MODULE_1__["prefixCls"] + '-color-square-activated' : ''),
@@ -52803,7 +52810,11 @@ __webpack_require__.r(__webpack_exports__);
 
 
 function FontSizeSetting(props) {
-  return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("span", null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
+  return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("span", {
+    style: {
+      margin: '0 8px'
+    }
+  }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
     className: "".concat(_constants__WEBPACK_IMPORTED_MODULE_1__["prefixCls"], "-font-size ").concat(props.value === 12 ? _constants__WEBPACK_IMPORTED_MODULE_1__["prefixCls"] + '-font-size-activated' : ''),
     onClick: function onClick() {
       return props.onChange(12);
@@ -53142,10 +53153,16 @@ function ReactImageEditor(props) {
   }, [props.src]);
   var plugins = [].concat(_toConsumableArray(_plugins__WEBPACK_IMPORTED_MODULE_0__["default"]), _toConsumableArray(props.plugins));
   var defaultPlugin = null;
+  var defalutParamValue = {};
 
   for (var i = 0; i < plugins.length; i++) {
     if (props.defaultPluginName && props.toolbar && plugins[i].name === props.defaultPluginName) {
       defaultPlugin = plugins[i];
+
+      if (defaultPlugin.defalutParamValue) {
+        defalutParamValue = defaultPlugin.defalutParamValue;
+      }
+
       break;
     }
   }
@@ -53155,13 +53172,14 @@ function ReactImageEditor(props) {
       currentPlugin = _useState4[0],
       setCurrentPlugin = _useState4[1];
 
-  var _useState5 = Object(react__WEBPACK_IMPORTED_MODULE_2__["useState"])({}),
+  var _useState5 = Object(react__WEBPACK_IMPORTED_MODULE_2__["useState"])(defalutParamValue),
       _useState6 = _slicedToArray(_useState5, 2),
       currentPluginParamValue = _useState6[0],
       setCurrentPluginParamValue = _useState6[1];
 
   function handlePluginChange(plugin) {
     setCurrentPlugin(plugin);
+    plugin.defalutParamValue && setCurrentPluginParamValue(plugin.defalutParamValue);
 
     if (plugin.onClick && !plugin.params) {
       setTimeout(function () {
@@ -53223,12 +53241,14 @@ var isPaint = false;
 var startPoints = [0, 0];
 var defalutParamValue = {
   strokeWidth: 2,
-  color: '#df4b26'
+  lineType: 'solid',
+  color: '#F5222D'
 };
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: 'arrow',
   iconfont: 'iconfont icon-arrow',
   params: ['strokeWidth', 'lineType', 'color'],
+  defalutParamValue: defalutParamValue,
   onDrawStart: function onDrawStart(_ref) {
     var stage = _ref.stage,
         layer = _ref.layer,
@@ -53282,12 +53302,14 @@ var isPaint = false;
 var startPoint = [0, 0];
 var defalutParamValue = {
   strokeWidth: 2,
-  color: '#df4b26'
+  lineType: 'solid',
+  color: '#F5222D'
 };
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: 'circle',
   iconfont: 'iconfont icon-circle',
   params: ['strokeWidth', 'lineType', 'color'],
+  defalutParamValue: defalutParamValue,
   onDrawStart: function onDrawStart(_ref) {
     var stage = _ref.stage,
         layer = _ref.layer,
@@ -53413,26 +53435,28 @@ function reset() {
         imageData = _ref.imageData,
         reload = _ref.reload,
         pixelRatio = _ref.pixelRatio;
-    virtualLayer = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Layer(); // 绘制灰色遮罩
+    if (document.getElementById('react-img-editor-crop-toolbar')) return;
+    virtualLayer = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Layer();
+    stage.add(virtualLayer);
+    virtualLayer.setZIndex(2); // 绘制透明黑色遮罩
 
-    var rect1 = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Rect({
+    var maskRect = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Rect({
+      globalCompositeOperation: 'source-over',
       x: rectX,
       y: rectY,
       width: imageData.width,
       height: imageData.height,
       fill: 'rgba(0, 0, 0, .6)'
     });
-    virtualLayer.add(rect1); // 绘制初始裁剪区域
+    virtualLayer.add(maskRect); // 绘制初始裁剪区域
 
     var rect = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Rect({
       x: 0,
       y: 0,
       width: initRectWidth,
       height: initRectHeight,
-      fill: 'red',
+      fill: '#FFF',
       draggable: true,
-      shadowBlur: 1000,
-      shadowColor: 'green',
       globalCompositeOperation: 'destination-out',
       dragBoundFunc: function dragBoundFunc(pos) {
         var x = pos.x;
@@ -53488,6 +53512,7 @@ function reset() {
     }));
     virtualLayer.add(transformer);
     createCropToolbar(function () {
+      // 提前清除拉伸框
       virtualLayer.remove(transformer);
       var dataURL = stage.toDataURL({
         x: rectX,
@@ -53507,7 +53532,7 @@ function reset() {
       imageObj.src = dataURL;
     }, reset);
     adjustToolbarPosition(stage);
-    stage.add(virtualLayer);
+    virtualLayer.draw();
   }
 });
 
@@ -53561,6 +53586,7 @@ var defalutParamValue = {
   name: 'eraser',
   iconfont: 'iconfont icon-eraser',
   params: ['strokeWidth'],
+  defalutParamValue: defalutParamValue,
   onDrawStart: function onDrawStart(_ref) {
     var stage = _ref.stage,
         layer = _ref.layer,
@@ -53648,7 +53674,7 @@ function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 var isPaint = false;
 var defalutParamValue = {
-  strokeWidth: 4
+  strokeWidth: 2
 };
 var tiles = [];
 var tileHeight = 5;
@@ -53707,7 +53733,7 @@ function drawTile(tiles, layer) {
     tile.isFilled = true;
   });
   layer.add(rectGroup);
-  layer.batchDraw();
+  layer.draw();
 }
 
 function getTilesByPoint(x, y, strokeWidth) {
@@ -53735,6 +53761,7 @@ function getTilesByPoint(x, y, strokeWidth) {
   name: 'mosaic',
   iconfont: 'iconfont icon-mosaic',
   params: ['strokeWidth'],
+  defalutParamValue: defalutParamValue,
   onDrawStart: function onDrawStart(_ref) {
     var stage = _ref.stage,
         imageData = _ref.imageData;
@@ -53806,12 +53833,14 @@ var lastLine = null;
 var isPaint = false;
 var defalutParamValue = {
   strokeWidth: 2,
-  color: '#df4b26'
+  lineType: 'solid',
+  color: '#F5222D'
 };
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: 'pen',
   iconfont: 'iconfont icon-pen',
   params: ['strokeWidth', 'lineType', 'color'],
+  defalutParamValue: defalutParamValue,
   onDrawStart: function onDrawStart(_ref) {
     var stage = _ref.stage,
         layer = _ref.layer,
@@ -53863,12 +53892,14 @@ var isPaint = false;
 var startPoint = [0, 0];
 var defalutParamValue = {
   strokeWidth: 2,
-  color: '#df4b26'
+  lineType: 'solid',
+  color: '#F5222D'
 };
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: 'rect',
   iconfont: 'iconfont icon-square',
   params: ['strokeWidth', 'lineType', 'color'],
+  defalutParamValue: defalutParamValue,
   onDrawStart: function onDrawStart(_ref) {
     var stage = _ref.stage,
         layer = _ref.layer,
@@ -53968,13 +53999,14 @@ function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 var defalutParamValue = {
   fontSize: 12,
-  color: '#df4b26'
+  color: '#F5222D'
 };
 var isFocus = false;
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: 'text',
   iconfont: 'iconfont icon-text',
   params: ['fontSize', 'color'],
+  defalutParamValue: defalutParamValue,
   onStageClcik: function onStageClcik(_ref) {
     var stage = _ref.stage,
         layer = _ref.layer,
