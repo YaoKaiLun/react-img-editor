@@ -8,7 +8,7 @@ interface FontSizeSettingProps {
 
 export default function FontSizeSetting(props: FontSizeSettingProps) {
   return (
-    <span>
+    <span style={{ margin: '0 8px' }}>
       <button
         className={`${prefixCls}-font-size ${props.value === 12 ? prefixCls + '-font-size-activated' : ''}`}
         onClick={() => props.onChange(12)}

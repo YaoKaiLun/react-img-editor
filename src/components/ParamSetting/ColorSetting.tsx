@@ -10,7 +10,7 @@ const colors = ['#F5222D', '#FFEB00', '#007CFF', '#52C51A ', '#19191A']
 
 export default function ColorSetting(props: ColorSettingProps) {
   return (
-    <>
+    <span style={{ margin: '0 8px', fontSize: 0 }}>
       {
         colors.map(color => {
           return (
@@ -23,6 +23,6 @@ export default function ColorSetting(props: ColorSettingProps) {
           )
         })
       }
-    </>
+    </span>
   )
 }
