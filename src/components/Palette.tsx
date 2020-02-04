@@ -18,17 +18,19 @@ export default function Palette(props: PaletteProps) {
     height: props.height,
   }
 
-  const hRatio = props.width / props.imageObj.naturalWidth
-  const vRatio = props.height / props.imageObj.naturalHeight
-  const scaleRatio  = Math.min (hRatio, vRatio, 1)
-  const canvasWidth = props.imageObj.naturalWidth * scaleRatio
-  const canvasHeight = props.imageObj.naturalHeight * scaleRatio
+  const imageNatureWidth = props.imageObj.naturalWidth
+  const imageNatureHeight = props.imageObj.naturalHeight
+  const wRatio = props.width / imageNatureWidth
+  const hRatio = props.height / imageNatureHeight
+  const scaleRatio  = Math.min (wRatio, hRatio, 1)
+  const canvasWidth = imageNatureWidth * scaleRatio
+  const canvasHeight = imageNatureHeight * scaleRatio
   const stageRef = useRef<any>(null)
   const imageRef = useRef<any>(null)
   const layerRef = useRef<any>(null)
   const imageData = useRef<any>(null)
   const historyStack = useRef<any[]>([])
-  const pixelRatio = window.devicePixelRatio
+  const pixelRatio = 1 / scaleRatio
   Konva.pixelRatio = pixelRatio
 
   function initPalette() {
@@ -38,6 +40,15 @@ export default function Palette(props: PaletteProps) {
       height: canvasHeight,
     })
     props.getStage && props.getStage(stageRef.current)
+  }
+
+  function generateImageData(imgObj: any, width: number, height: number) {
+    const canvas = document.createElement('canvas')
+    canvas.width = width
+    canvas.height = height
+    const ctx = canvas.getContext('2d')
+    ctx.drawImage(imgObj, 0, 0, width, height)
+    return ctx.getImageData(0, 0, width, height)
   }
 
   function drawImage() {
@@ -54,8 +65,8 @@ export default function Palette(props: PaletteProps) {
     imageLayer.add(img)
     imageLayer.draw()
     imageRef.current = imageLayer
-    const ctx = imageLayer.getContext()
-    imageData.current = ctx.getImageData(0, 0, canvasWidth * pixelRatio, canvasHeight * pixelRatio)
+
+    imageData.current = generateImageData(props.imageObj, canvasWidth, canvasHeight)
   }
 
   function reload(imgObj: any, width: number, height: number) {
@@ -75,18 +86,12 @@ export default function Palette(props: PaletteProps) {
       height: height,
     })
 
-    const imageLayer = new Konva.Layer({
-      x: 0,
-      y: 0,
-      width: width,
-      height: height,
-    })
+    const imageLayer = new Konva.Layer()
     stageRef.current.add(imageLayer)
     imageLayer.add(img)
     imageLayer.draw()
     imageRef.current = imageLayer
-    const ctx = imageLayer.getContext()
-    imageData.current = ctx.getImageData(0, 0, width * pixelRatio, height * pixelRatio)
+    imageData.current = generateImageData(imgObj, width, height)
 
     layerRef.current = new Konva.Layer()
     stageRef.current.add(layerRef.current)

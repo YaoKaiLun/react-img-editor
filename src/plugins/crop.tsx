@@ -84,7 +84,7 @@ function reset() {
 export default {
   name: 'crop',
   iconfont: 'iconfont icon-cut',
-  onClick: ({stage, imageData, reload}) => {
+  onClick: ({stage, imageData, reload, pixelRatio}) => {
     virtualLayer = new Konva.Layer()
 
     // 绘制灰色遮罩
@@ -175,7 +175,8 @@ export default {
         y: rectY,
         width: rectWidth,
         height: rectHeight,
-        pixelRatio: 2,
+        pixelRatio,
+        mimeType: 'image/jpeg',
       })
       const imageObj = new Image()
       imageObj.onload = function() {

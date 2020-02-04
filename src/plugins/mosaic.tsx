@@ -88,7 +88,7 @@ export default {
   name: 'mosaic',
   iconfont: 'iconfont icon-mosaic',
   params: ['strokeWidth'],
-  onDrawStart: ({stage, imageData, pixelRatio}) => {
+  onDrawStart: ({stage, imageData}) => {
     isPaint = true
     width = stage.width()
     height = stage.height()
@@ -110,15 +110,15 @@ export default {
 
         let data: any = []
         // 转换为像素图形下，起始像素位置
-        const pixelPosition = (width * tileHeight * tile.row * pixelRatio + tile.column * tileWidth) * 4 * pixelRatio
+        const pixelPosition = (width * tileHeight * tile.row + tile.column * tileWidth) * 4
         // 转换为像素图形下，包含多少行
-        const pixelRowAmount = tile.pixelHeight * pixelRatio
+        const pixelRowAmount = tile.pixelHeight
         // 计算，转换为像素图形使，一个贴片所包含的所有像素数据。先遍历贴片范围内的每一列，每一列中再单独统计行的像素数量
         for (let i = 0; i < pixelRowAmount; i++) {
           // 当前列的起始像素位置
-          const position = pixelPosition + width * 4 * i * pixelRatio
+          const position = pixelPosition + width * 4 * i
           // 贴片范围内一行的像素数据，等于贴片宽度 * 4
-          data = [...data, ...imageData.data.slice(position, position + tile.pixelWidth * 4 * pixelRatio)]
+          data = [...data, ...imageData.data.slice(position, position + tile.pixelWidth * 4)]
         }
         tile.data = data
         tiles.push(tile)
