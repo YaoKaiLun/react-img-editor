@@ -62,7 +62,7 @@ function drawTile(tiles: any, layer: any) {
   })
 
   layer.add(rectGroup)
-  layer.batchDraw()
+  layer.draw()
 }
 
 function getTilesByPoint(x: number, y: number, strokeWidth: number) {

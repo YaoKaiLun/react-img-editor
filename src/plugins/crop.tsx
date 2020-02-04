@@ -88,16 +88,19 @@ export default {
     if (document.getElementById('react-img-editor-crop-toolbar')) return
 
     virtualLayer = new Konva.Layer()
+    stage.add(virtualLayer)
+    virtualLayer.setZIndex(2)
 
-    // 绘制灰色遮罩
-    const rect1 = new Konva.Rect({
+    // 绘制透明黑色遮罩
+    const maskRect = new Konva.Rect({
+      globalCompositeOperation: 'source-over',
       x: rectX,
       y: rectY,
       width: imageData.width,
       height: imageData.height,
       fill: 'rgba(0, 0, 0, .6)',
     })
-    virtualLayer.add(rect1)
+    virtualLayer.add(maskRect)
 
     // 绘制初始裁剪区域
     const rect = new Konva.Rect({
@@ -105,10 +108,8 @@ export default {
       y: 0,
       width: initRectWidth,
       height: initRectHeight,
-      fill: 'red',
+      fill: '#FFF',
       draggable: true,
-      shadowBlur: 1000,
-      shadowColor: 'green',
       globalCompositeOperation: 'destination-out',
       dragBoundFunc: function(pos: any) {
         let x = pos.x
@@ -171,6 +172,7 @@ export default {
     virtualLayer.add(transformer)
 
     createCropToolbar(function () {
+      // 提前清除拉伸框
       virtualLayer.remove(transformer)
       const dataURL = stage.toDataURL({
         x: rectX,
@@ -189,7 +191,6 @@ export default {
     }, reset)
 
     adjustToolbarPosition(stage)
-
-    stage.add(virtualLayer)
+    virtualLayer.draw()
   },
 }  as PluginProps

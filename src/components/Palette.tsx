@@ -63,6 +63,7 @@ export default function Palette(props: PaletteProps) {
 
     const imageLayer = new Konva.Layer()
     stageRef.current.add(imageLayer)
+    imageLayer.setZIndex(1)
     imageLayer.add(img)
     imageLayer.draw()
     imageRef.current = imageLayer
@@ -103,6 +104,7 @@ export default function Palette(props: PaletteProps) {
     if (!stageRef.current) return
 
     stageRef.current.add(layerRef.current)
+    layerRef.current.setZIndex(1)
 
     const { currentPlugin, currentPluginParamValue } = props
     const drawEventPramas: DrawEventPramas = {
