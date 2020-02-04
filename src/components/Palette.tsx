@@ -47,8 +47,8 @@ export default function Palette(props: PaletteProps) {
     canvas.width = width
     canvas.height = height
     const ctx = canvas.getContext('2d')
-    ctx.drawImage(imgObj, 0, 0, width, height)
-    return ctx.getImageData(0, 0, width, height)
+    ctx!.drawImage(imgObj, 0, 0, width, height)
+    return ctx!.getImageData(0, 0, width, height)
   }
 
   function drawImage() {
