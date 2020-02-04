@@ -85,6 +85,8 @@ export default {
   name: 'crop',
   iconfont: 'iconfont icon-cut',
   onClick: ({stage, imageData, reload, pixelRatio}) => {
+    if (document.getElementById('react-img-editor-crop-toolbar')) return
+
     virtualLayer = new Konva.Layer()
 
     // 绘制灰色遮罩
