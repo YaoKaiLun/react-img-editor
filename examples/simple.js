@@ -133,12 +133,13 @@ function Example() {
     link.download = 'download.png';
     link.href = dataURL;
     link.click();
-  } // image1: https://cstore-public.seewo.com/faq-service/4e3f2924f1d4432f82e760468bf680f0
-  // image2: https://cvte-dev-public.seewo.com/faq-service-test/4db524ec93324794b983bf7cd78b2ae1
+  }
 
+  var image1 = 'https://cstore-public.seewo.com/faq-service/4e3f2924f1d4432f82e760468bf680f0'; // const image2 = 'https://cvte-dev-public.seewo.com/faq-service-test/4db524ec93324794b983bf7cd78b2ae1'
+  // const image3 = 'https://cvte-dev-public.seewo.com/faq-service-test/bfdcc5337dfb43ce823a4c9743aba99c'
 
   return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_0___default.a.Fragment, null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_src_index__WEBPACK_IMPORTED_MODULE_2__["default"], {
-    src: "https://cvte-dev-public.seewo.com/faq-service-test/4db524ec93324794b983bf7cd78b2ae1",
+    src: image1,
     width: 736,
     height: 414,
     plugins: [],
@@ -52586,23 +52587,25 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-var pixelRatio = window.devicePixelRatio;
-konva__WEBPACK_IMPORTED_MODULE_0___default.a.pixelRatio = pixelRatio;
 function Palette(props) {
   var style = {
     width: props.width,
     height: props.height
   };
-  var hRatio = props.width / props.imageObj.naturalWidth;
-  var vRatio = props.height / props.imageObj.naturalHeight;
-  var ratio = Math.min(hRatio, vRatio, 1);
-  var canvasWidth = props.imageObj.naturalWidth * ratio;
-  var canvasHeight = props.imageObj.naturalHeight * ratio;
+  var imageNatureWidth = props.imageObj.naturalWidth;
+  var imageNatureHeight = props.imageObj.naturalHeight;
+  var wRatio = props.width / imageNatureWidth;
+  var hRatio = props.height / imageNatureHeight;
+  var scaleRatio = Math.min(wRatio, hRatio, 1);
+  var canvasWidth = imageNatureWidth * scaleRatio;
+  var canvasHeight = imageNatureHeight * scaleRatio;
   var stageRef = Object(react__WEBPACK_IMPORTED_MODULE_1__["useRef"])(null);
   var imageRef = Object(react__WEBPACK_IMPORTED_MODULE_1__["useRef"])(null);
   var layerRef = Object(react__WEBPACK_IMPORTED_MODULE_1__["useRef"])(null);
   var imageData = Object(react__WEBPACK_IMPORTED_MODULE_1__["useRef"])(null);
   var historyStack = Object(react__WEBPACK_IMPORTED_MODULE_1__["useRef"])([]);
+  var pixelRatio = 1 / scaleRatio;
+  konva__WEBPACK_IMPORTED_MODULE_0___default.a.pixelRatio = pixelRatio;
 
   function initPalette() {
     stageRef.current = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Stage({
@@ -52613,6 +52616,15 @@ function Palette(props) {
     props.getStage && props.getStage(stageRef.current);
   }
 
+  function generateImageData(imgObj, width, height) {
+    var canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    var ctx = canvas.getContext('2d');
+    ctx.drawImage(imgObj, 0, 0, width, height);
+    return ctx.getImageData(0, 0, width, height);
+  }
+
   function drawImage() {
     var img = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Image({
       x: 0,
@@ -52621,18 +52633,12 @@ function Palette(props) {
       width: canvasWidth,
       height: canvasHeight
     });
-    var imageLayer = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Layer({
-      x: 0,
-      y: 0,
-      width: canvasWidth,
-      height: canvasHeight
-    });
+    var imageLayer = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Layer();
     stageRef.current.add(imageLayer);
     imageLayer.add(img);
     imageLayer.draw();
     imageRef.current = imageLayer;
-    var ctx = imageLayer.getContext();
-    imageData.current = ctx.getImageData(0, 0, canvasWidth * pixelRatio, canvasHeight * pixelRatio);
+    imageData.current = generateImageData(props.imageObj, canvasWidth, canvasHeight);
   }
 
   function reload(imgObj, width, height) {
@@ -52650,18 +52656,12 @@ function Palette(props) {
       width: width,
       height: height
     });
-    var imageLayer = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Layer({
-      x: 0,
-      y: 0,
-      width: width,
-      height: height
-    });
+    var imageLayer = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Layer();
     stageRef.current.add(imageLayer);
     imageLayer.add(img);
     imageLayer.draw();
     imageRef.current = imageLayer;
-    var ctx = imageLayer.getContext();
-    imageData.current = ctx.getImageData(0, 0, width * pixelRatio, height * pixelRatio);
+    imageData.current = generateImageData(imgObj, width, height);
     layerRef.current = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Layer();
     stageRef.current.add(layerRef.current);
   }
@@ -52677,7 +52677,8 @@ function Palette(props) {
       paramValue: currentPluginParamValue,
       imageData: imageData.current,
       reload: reload,
-      historyStack: historyStack.current
+      historyStack: historyStack.current,
+      pixelRatio: pixelRatio
     };
     stageRef.current.on('click tap', function (e) {
       // 修复 stage 上元素双击事件不起作用
@@ -52735,7 +52736,8 @@ function Palette(props) {
         imageData: imageData.current,
         reload: reload,
         paramValue: currentPluginParamValue,
-        historyStack: historyStack.current
+        historyStack: historyStack.current,
+        pixelRatio: pixelRatio
       });
     }
   }, [props.currentPlugin]);
@@ -53406,7 +53408,8 @@ function reset() {
   onClick: function onClick(_ref) {
     var stage = _ref.stage,
         imageData = _ref.imageData,
-        reload = _ref.reload;
+        reload = _ref.reload,
+        pixelRatio = _ref.pixelRatio;
     virtualLayer = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Layer(); // 绘制灰色遮罩
 
     var rect1 = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Rect({
@@ -53488,7 +53491,8 @@ function reset() {
         y: rectY,
         width: rectWidth,
         height: rectHeight,
-        pixelRatio: 2
+        pixelRatio: pixelRatio,
+        mimeType: 'image/jpeg'
       });
       var imageObj = new Image();
 
@@ -53519,13 +53523,14 @@ __webpack_require__.r(__webpack_exports__);
   name: 'download',
   iconfont: 'iconfont icon-download',
   onClick: function onClick(_ref) {
-    var stage = _ref.stage;
-    var dataURL = stage.toDataURL({
-      pixelRatio: window.devicePixelRatio
-    });
+    var stage = _ref.stage,
+        pixelRatio = _ref.pixelRatio;
     var link = document.createElement('a');
-    link.download = 'stage.png';
-    link.href = dataURL;
+    link.download = '';
+    link.href = stage.toDataURL({
+      pixelRatio: pixelRatio,
+      mimeType: 'image/jpeg'
+    });
     link.click();
   }
 });
@@ -53731,7 +53736,6 @@ function getTilesByPoint(x, y, strokeWidth) {
     var stage = _ref.stage,
         imageData = _ref.imageData;
     isPaint = true;
-    var pixelRatio = window.devicePixelRatio;
     width = stage.width();
     height = stage.height();
     tileRowSize = Math.ceil(height / tileHeight);
@@ -53749,15 +53753,15 @@ function getTilesByPoint(x, y, strokeWidth) {
         };
         var data = []; // 转换为像素图形下，起始像素位置
 
-        var pixelPosition = (width * tileHeight * tile.row * pixelRatio + tile.column * tileWidth) * 4 * pixelRatio; // 转换为像素图形下，包含多少行
+        var pixelPosition = (width * tileHeight * tile.row + tile.column * tileWidth) * 4; // 转换为像素图形下，包含多少行
 
-        var pixelRowAmount = tile.pixelHeight * pixelRatio; // 计算，转换为像素图形使，一个贴片所包含的所有像素数据。先遍历贴片范围内的每一列，每一列中再单独统计行的像素数量
+        var pixelRowAmount = tile.pixelHeight; // 计算，转换为像素图形使，一个贴片所包含的所有像素数据。先遍历贴片范围内的每一列，每一列中再单独统计行的像素数量
 
         for (var _i = 0; _i < pixelRowAmount; _i++) {
           // 当前列的起始像素位置
-          var position = pixelPosition + width * 4 * _i * pixelRatio; // 贴片范围内一行的像素数据，等于贴片宽度 * 4
+          var position = pixelPosition + width * 4 * _i; // 贴片范围内一行的像素数据，等于贴片宽度 * 4
 
-          data = [].concat(_toConsumableArray(data), _toConsumableArray(imageData.data.slice(position, position + tile.pixelWidth * 4 * pixelRatio)));
+          data = [].concat(_toConsumableArray(data), _toConsumableArray(imageData.data.slice(position, position + tile.pixelWidth * 4)));
         }
 
         tile.data = data;

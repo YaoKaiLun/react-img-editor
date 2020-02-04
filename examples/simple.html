@@ -2,7 +2,7 @@
 <html>
 
 <head>
-  <title>simple.js - example - react-img-editor@0.0.5</title>
+  <title>simple.js - example - react-img-editor@0.0.6</title>
   <meta name="viewport"
         content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
   <meta charset="utf-8"/>
@@ -263,7 +263,7 @@ Monokai Sublime style. Derived from Monokai by noformnocontent http://nn.mit-lic
 <body>
   <div class="container">
     <div class="header">
-      <h1>react-img-editor@0.0.5</h1>
+      <h1>react-img-editor@0.0.6</h1>
 
       <p>图片编辑器（微信截图编辑 PRO 版）</p>
     </div>
@@ -289,13 +289,14 @@ function Example() {
     link.click()
   }
 
-  // image1: https://cstore-public.seewo.com/faq-service/4e3f2924f1d4432f82e760468bf680f0
-  // image2: https://cvte-dev-public.seewo.com/faq-service-test/4db524ec93324794b983bf7cd78b2ae1
+  const image1 = <span class="hljs-string">'https://cstore-public.seewo.com/faq-service/4e3f2924f1d4432f82e760468bf680f0'</span>
+  // const image2 = <span class="hljs-string">'https://cvte-dev-public.seewo.com/faq-service-test/4db524ec93324794b983bf7cd78b2ae1'</span>
+  // const image3 = <span class="hljs-string">'https://cvte-dev-public.seewo.com/faq-service-test/bfdcc5337dfb43ce823a4c9743aba99c'</span>
 
   return (
     &lt;&gt;
       &lt;ReactImgEditor
-        src=<span class="hljs-string">"https://cvte-dev-public.seewo.com/faq-service-test/4db524ec93324794b983bf7cd78b2ae1"</span>
+        src={image1}
         width={736}
         height={414}
         plugins={[]}
