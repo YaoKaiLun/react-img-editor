@@ -39,6 +39,7 @@ export default function Palette(props: PaletteProps) {
       width: canvasWidth,
       height: canvasHeight,
     })
+    stageRef.current._pixelRatio = pixelRatio
     props.getStage && props.getStage(stageRef.current)
   }
 
@@ -76,6 +77,7 @@ export default function Palette(props: PaletteProps) {
       width: width,
       height: height,
     })
+    stageRef.current._pixelRatio = pixelRatio
     props.getStage && props.getStage(stageRef.current)
 
     const img = new Konva.Image({

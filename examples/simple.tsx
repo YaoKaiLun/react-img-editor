@@ -11,9 +11,12 @@ function Example() {
   }
 
   function downloadImage() {
-    const dataURL = stageRef.current.toDataURL({ pixelRatio: window.devicePixelRatio })
+    const dataURL = stageRef.current.toDataURL({
+      pixelRatio: stageRef.current._pixelRatio,
+      mimeType: 'image/jpeg',
+    })
     const link = document.createElement('a')
-    link.download = 'download.png'
+    link.download = ''
     link.href = dataURL
     link.click()
   }
