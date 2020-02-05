@@ -3,29 +3,54 @@ import { PluginProps } from '../type'
 import { transformerStyle } from '../constants'
 
 let isPaint = false
-let startPoint = [0, 0]
 let virtualLayer: any = null
-let rectX = 0
-let rectY = 0
-let rectWidth = 0
-let rectHeight = 0
 let rect = null
+let transformer = null
 const toolbarWidth = 275
 const toolbarHeight = 40
 
+// 一直为正数
+function getRectWidth() {
+  return rect ? rect.getClientRect({skipTransform: false}).width : 0
+}
+// 一直为正数
+function getRectHeight() {
+  return rect ? rect.getClientRect({skipTransform: false}).height : 0
+}
+
+function getRectX() {
+  return rect ? rect.getClientRect({skipTransform: false}).x : 0
+}
+
+function getRectY() {
+  return rect ? rect.getClientRect({skipTransform: false}).y : 0
+}
+
 function adjustToolbarPosition(stage: any) {
+  // 需要考虑宽和高为负数的情况
   const $toolbar = document.getElementById('react-img-editor-crop-toolbar')
   if (!$toolbar) return
 
   const container = stage.container().getBoundingClientRect()
+  let left: number
+  let top: number
 
-  let left = container.left + rectX + 1
-  const top = container.top + rectHeight + rectY + 20
-
-  // 处理最右边工具栏溢出
-  if (rectX + toolbarWidth > stage.width()) {
-    left = container.left + (stage.width() - toolbarWidth) + 1
+  if (getRectWidth() >= 0) {
+    left = container.left + getRectX()
+  } else {
+    left = container.left + getRectX() - toolbarWidth
   }
+
+  if (getRectHeight() >= 0) {
+    top = container.top + getRectHeight() + getRectY() + 20
+  } else {
+    top = container.top + getRectY() + 20
+  }
+
+  if (left < container.left) left = container.left
+  if (left > container.left + stage.width() - toolbarWidth) left = container.left + stage.width() - toolbarWidth
+  if (top < container.top) top = container.top
+  if (top > container.top + stage.height()) top = container.top + stage.height()
 
   $toolbar.style.left = `${left}px`
   $toolbar.style.top = `${top}px`
@@ -96,10 +121,7 @@ export default {
     if (document.getElementById('react-img-editor-crop-toolbar')) return
     isPaint = true
 
-    const pos = stage.getPointerPosition()
-    startPoint = [pos.x, pos.y]
-    rectX = pos.x
-    rectY = pos.y
+    const startPos = stage.getPointerPosition()
 
     virtualLayer = new Konva.Layer()
     stage.add(virtualLayer)
@@ -118,8 +140,8 @@ export default {
     virtualLayer.add(maskRect)
 
     rect = new Konva.Rect({
-      x: pos.x,
-      y: pos.y,
+      x: startPos.x,
+      y: startPos.y,
       fill: '#FFF',
       draggable: true,
       globalCompositeOperation: 'destination-out',
@@ -133,26 +155,32 @@ export default {
     if (document.getElementById('react-img-editor-crop-toolbar')) return
 
     const endPos = stage.getPointerPosition()
-    rectWidth = endPos.x - startPoint[0]
-    rectHeight = endPos.y - startPoint[1]
 
     // 绘制初始裁剪区域
-    rect.width(endPos.x - startPoint[0])
-    rect.height(endPos.y - startPoint[1])
+    rect.width(endPos.x - getRectX())
+    rect.height(endPos.y - getRectY())
     rect.dragBoundFunc((pos: any) => {
       let x = pos.x
       let y = pos.y
 
-      if (pos.x <= 0) x = 0
-      if (pos.x >= stage.width() - rectWidth) x = stage.width() - rectWidth
-      if (pos.y <= 0) y = 0
-      if (pos.y >= stage.height() - rectHeight) y = stage.height() - rectHeight
+      if (transformer.width() >= 0) {
+        if (pos.x <= 0) x = 0
+        if (pos.x >= stage.width() - transformer.width()) x = stage.width() - transformer.width()
+      } else {
+        if (pos.x >= stage.width()) x = stage.width()
+        if (pos.x <= - transformer.width()) x = - transformer.width()
+      }
 
-      rectX = x
-      rectY = y
+      if (transformer.height() >= 0) {
+        if (pos.y <= 0) y = 0
+        if (pos.y >= stage.height() - transformer.height()) y = stage.height() - transformer.height()
+      } else {
+        if (pos.y >= stage.height()) y = stage.height()
+        if (pos.y <= - transformer.height()) y = - transformer.height()
+      }
 
       adjustToolbarPosition(stage)
-      return { x, y }
+      return {x, y}
     })
 
     virtualLayer.draw()
@@ -166,42 +194,58 @@ export default {
     isPaint = false
 
     // 允许改变裁剪区域
-    const transformer = new Konva.Transformer({
+    transformer = new Konva.Transformer({
       node: rect,
       ...transformerStyle,
       boundBoxFunc: function(oldBox: any, newBox: any) {
-        // 禁止反向拖拽
-        if (newBox.width < 0 || newBox.height < 0) return oldBox
-
         let x = newBox.x
         let y = newBox.y
         let width = newBox.width
         let height = newBox.height
 
-        if (newBox.x <= 0) {
-          x = 0
-          width = newBox.width + newBox.x
+        if (newBox.width >= 0) {
+          if (newBox.x <= 0) {
+            x = 0
+            width = newBox.width + newBox.x
+          }
+
+          if (newBox.x >= stage.width() - newBox.width) {
+            width = stage.width() - oldBox.x
+          }
+        } else {
+          if (newBox.x >= stage.width()) {
+            x = stage.width()
+            width = newBox.width + (newBox.x - stage.width())
+          }
+
+          if (newBox.x <= - newBox.width) {
+            width = - oldBox.x
+          }
         }
 
-        if (newBox.x >= stage.width() - newBox.width) {
-          width = stage.width() - oldBox.x
+        if (newBox.height >= 0) {
+          if (newBox.y <= 0) {
+            y = 0
+            height = newBox.height + newBox.y
+          }
+
+          if (newBox.y >= stage.height() - newBox.height) {
+            height = stage.height() - oldBox.y
+          }
+        } else {
+          if (newBox.y >= stage.height()) {
+            y = stage.height()
+            height = newBox.height + (newBox.y - stage.height())
+          }
+
+          if (newBox.y <= - newBox.height) {
+            height = - oldBox.y
+          }
         }
 
-        if (newBox.y <= 0) {
-          y = 0
-          height = newBox.height + newBox.y
-        }
 
-        if (newBox.y >= stage.height() - newBox.height) {
-          height = stage.height() - oldBox.y
-        }
-
-        rectWidth = width
-        rectHeight = height
-        rectX = x
-        rectY = y
         adjustToolbarPosition(stage)
-        return { x, y, width, height } as any
+        return {x, y, width, height} as any
       },
     })
     virtualLayer.add(transformer)
@@ -209,21 +253,21 @@ export default {
 
     createCropToolbar(function () {
       // 裁剪区域太小不允许裁剪
-      if (rectWidth < 2 || rectHeight < 2) return
+      if (getRectWidth() < 2 || getRectHeight() < 2) return
 
       // 提前清除拉伸框
       virtualLayer.remove(transformer)
       const dataURL = stage.toDataURL({
-        x: rectX,
-        y: rectY,
-        width: rectWidth,
-        height: rectHeight,
+        x: getRectX(),
+        y: getRectY(),
+        width: getRectWidth(),
+        height: getRectHeight(),
         pixelRatio,
         mimeType: 'image/jpeg',
       })
       const imageObj = new Image()
       imageObj.onload = function() {
-        reload(imageObj, rectWidth, rectHeight)
+        reload(imageObj, getRectWidth(), getRectHeight())
         reset()
       }
       imageObj.src = dataURL
