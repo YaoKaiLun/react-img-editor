@@ -170,6 +170,9 @@ export default {
       node: rect,
       ...transformerStyle,
       boundBoxFunc: function(oldBox: any, newBox: any) {
+        // 禁止反向拖拽
+        if (newBox.width < 0 || newBox.height < 0) return oldBox
+
         let x = newBox.x
         let y = newBox.y
         let width = newBox.width
@@ -205,6 +208,9 @@ export default {
     virtualLayer.draw()
 
     createCropToolbar(function () {
+      // 裁剪区域太小不允许裁剪
+      if (rectWidth < 2 || rectHeight < 2) return
+
       // 提前清除拉伸框
       virtualLayer.remove(transformer)
       const dataURL = stage.toDataURL({
