@@ -108,6 +108,10 @@ function reset() {
   const $toolbar = document.getElementById('react-img-editor-crop-toolbar')
   $toolbar && document.body.removeChild($toolbar)
   virtualLayer && virtualLayer.remove()
+  if (rect) {
+    rect.off('mouseenter')
+    rect.off('mouseleave')
+  }
 }
 
 export default {
@@ -146,6 +150,13 @@ export default {
       draggable: true,
       globalCompositeOperation: 'destination-out',
     })
+    rect.on('mouseenter', function() {
+      stage.container().style.cursor = 'move'
+    })
+    rect.on('mouseleave', function() {
+      stage.container().style.cursor = 'default'
+    })
+
     virtualLayer.add(rect)
 
     virtualLayer.draw()
@@ -271,7 +282,11 @@ export default {
         reset()
       }
       imageObj.src = dataURL
-    }, reset)
+      stage.container().style.cursor = 'crosshair'
+    }, () => {
+      reset()
+      stage.container().style.cursor = 'crosshair'
+    })
     adjustToolbarPosition(stage)
   },
   onLeave: ({stage}) => {
