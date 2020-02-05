@@ -52584,9 +52584,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var konva__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(konva__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _react_hooks__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../react-hooks */ "./src/react-hooks.ts");
-/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../constants */ "./src/constants.ts");
-
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../constants */ "./src/constants.ts");
 
 
 
@@ -52607,9 +52605,9 @@ function Palette(props) {
   var layerRef = Object(react__WEBPACK_IMPORTED_MODULE_1__["useRef"])(null);
   var imageData = Object(react__WEBPACK_IMPORTED_MODULE_1__["useRef"])(null);
   var historyStack = Object(react__WEBPACK_IMPORTED_MODULE_1__["useRef"])([]);
-  var prevCurrentPlugin = Object(_react_hooks__WEBPACK_IMPORTED_MODULE_2__["usePrevious"])(props.currentPlugin);
   var pixelRatio = 1 / scaleRatio;
   konva__WEBPACK_IMPORTED_MODULE_0___default.a.pixelRatio = pixelRatio;
+  var currentPluginRef = Object(react__WEBPACK_IMPORTED_MODULE_1__["useRef"])(props.currentPlugin);
 
   function initPalette() {
     stageRef.current = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Stage({
@@ -52733,8 +52731,9 @@ function Palette(props) {
     layerRef.current = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Layer();
     stageRef.current.add(layerRef.current);
     return function () {
-      // unMount 时清除插件数据
-      props.currentPlugin && props.currentPlugin.onLeave && props.currentPlugin.onLeave(getDrawEventPramas());
+      var currentPlugin = currentPluginRef.current; // unMount 时清除插件数据
+
+      currentPlugin && currentPlugin.onLeave && currentPlugin.onLeave(getDrawEventPramas());
     };
   }, []);
   Object(react__WEBPACK_IMPORTED_MODULE_1__["useEffect"])(function () {
@@ -52744,20 +52743,23 @@ function Palette(props) {
     };
   }, [props.imageObj, props.currentPlugin, props.currentPluginParamValue]);
   Object(react__WEBPACK_IMPORTED_MODULE_1__["useEffect"])(function () {
+    var prevCurrentPlugin = currentPluginRef.current;
+
     if (props.currentPlugin && prevCurrentPlugin && props.currentPlugin.name !== prevCurrentPlugin.name && props.currentPlugin.params) {
       prevCurrentPlugin.onLeave && prevCurrentPlugin.onLeave(getDrawEventPramas());
     }
-  }, [props.currentPlugin]);
-  Object(react__WEBPACK_IMPORTED_MODULE_1__["useEffect"])(function () {
+
     if (props.currentPlugin && props.currentPlugin.onClick) {
       props.currentPlugin.onClick(getDrawEventPramas());
     }
+
+    currentPluginRef.current = props.currentPlugin;
   }, [props.currentPlugin]);
   return react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", {
-    className: "".concat(_constants__WEBPACK_IMPORTED_MODULE_3__["prefixCls"], "-palette"),
+    className: "".concat(_constants__WEBPACK_IMPORTED_MODULE_2__["prefixCls"], "-palette"),
     style: style
   }, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", {
-    id: _constants__WEBPACK_IMPORTED_MODULE_3__["prefixCls"]
+    id: _constants__WEBPACK_IMPORTED_MODULE_2__["prefixCls"]
   }));
 }
 
@@ -53034,7 +53036,7 @@ function Toolbar(props) {
       return react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("span", {
         key: plugin.name,
         className: "".concat(_constants__WEBPACK_IMPORTED_MODULE_3__["prefixCls"], "-toolbar-icon ").concat(isActivated ? 'activated' : ''),
-        title: plugin.name
+        title: plugin.title
       }, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("i", {
         className: plugin.iconfont,
         onClick: function onClick() {
@@ -53056,7 +53058,7 @@ function Toolbar(props) {
     }, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("span", {
       key: plugin.name,
       className: "".concat(_constants__WEBPACK_IMPORTED_MODULE_3__["prefixCls"], "-toolbar-icon ").concat(isActivated ? 'activated' : ''),
-      title: plugin.name
+      title: plugin.title
     }, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("i", {
       className: plugin.iconfont,
       onClick: function onClick() {
@@ -53254,6 +53256,7 @@ var defalutParamValue = {
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: 'arrow',
   iconfont: 'iconfont icon-arrow',
+  title: '插入箭头',
   params: ['strokeWidth', 'lineType', 'color'],
   defalutParamValue: defalutParamValue,
   onDrawStart: function onDrawStart(_ref) {
@@ -53315,6 +53318,7 @@ var defalutParamValue = {
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: 'circle',
   iconfont: 'iconfont icon-circle',
+  title: '插入圆圈',
   params: ['strokeWidth', 'lineType', 'color'],
   defalutParamValue: defalutParamValue,
   onDrawStart: function onDrawStart(_ref) {
@@ -53480,6 +53484,7 @@ function reset() {
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: 'crop',
   iconfont: 'iconfont icon-cut',
+  title: '图片裁剪',
   params: [],
   onClick: function onClick(_ref) {
     var stage = _ref.stage;
@@ -53676,6 +53681,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: 'download',
   iconfont: 'iconfont icon-download',
+  title: '下载图片',
   onClick: function onClick(_ref) {
     var stage = _ref.stage,
         pixelRatio = _ref.pixelRatio;
@@ -53711,6 +53717,7 @@ var defalutParamValue = {
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: 'eraser',
   iconfont: 'iconfont icon-eraser',
+  title: '擦除',
   params: ['strokeWidth'],
   defalutParamValue: defalutParamValue,
   onDrawStart: function onDrawStart(_ref) {
@@ -53886,6 +53893,7 @@ function getTilesByPoint(x, y, strokeWidth) {
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: 'mosaic',
   iconfont: 'iconfont icon-mosaic',
+  title: '马赛克',
   params: ['strokeWidth'],
   defalutParamValue: defalutParamValue,
   onDrawStart: function onDrawStart(_ref) {
@@ -53965,6 +53973,7 @@ var defalutParamValue = {
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: 'pen',
   iconfont: 'iconfont icon-pen',
+  title: '画笔',
   params: ['strokeWidth', 'lineType', 'color'],
   defalutParamValue: defalutParamValue,
   onDrawStart: function onDrawStart(_ref) {
@@ -54024,6 +54033,7 @@ var defalutParamValue = {
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: 'rect',
   iconfont: 'iconfont icon-square',
+  title: '插入矩形',
   params: ['strokeWidth', 'lineType', 'color'],
   defalutParamValue: defalutParamValue,
   onDrawStart: function onDrawStart(_ref) {
@@ -54076,6 +54086,7 @@ var timer = null;
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: 'repeal',
   iconfont: 'iconfont icon-repeal',
+  title: '撤销',
   onClick: function onClick(_ref) {
     var layer = _ref.layer,
         historyStack = _ref.historyStack;
@@ -54131,6 +54142,7 @@ var isFocus = false;
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: 'text',
   iconfont: 'iconfont icon-text',
+  title: '插入文字',
   params: ['fontSize', 'color'],
   defalutParamValue: defalutParamValue,
   onStageClcik: function onStageClcik(_ref) {
@@ -54210,29 +54222,6 @@ var isFocus = false;
     });
   }
 });
-
-/***/ }),
-
-/***/ "./src/react-hooks.ts":
-/*!****************************!*\
-  !*** ./src/react-hooks.ts ***!
-  \****************************/
-/*! exports provided: usePrevious */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "usePrevious", function() { return usePrevious; });
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
-
-var usePrevious = function usePrevious(state) {
-  var ref = Object(react__WEBPACK_IMPORTED_MODULE_0__["useRef"])();
-  Object(react__WEBPACK_IMPORTED_MODULE_0__["useEffect"])(function () {
-    ref.current = state;
-  });
-  return ref.current;
-};
 
 /***/ }),
 
