@@ -1,5 +1,6 @@
 import Konva from 'konva'
 import React, { useEffect, useRef } from 'react'
+import { usePrevious } from '../react-hooks'
 import { PluginProps, PluginParamValue, DrawEventPramas } from '../type'
 import { prefixCls } from '../constants'
 
@@ -25,12 +26,12 @@ export default function Palette(props: PaletteProps) {
   const scaleRatio  = Math.min (wRatio, hRatio, 1)
   const canvasWidth = imageNatureWidth * scaleRatio
   const canvasHeight = imageNatureHeight * scaleRatio
-  const prevPluginRef = useRef<PluginProps>()
   const stageRef = useRef<any>(null)
   const imageRef = useRef<any>(null)
   const layerRef = useRef<any>(null)
   const imageData = useRef<any>(null)
   const historyStack = useRef<any[]>([])
+  const prevCurrentPlugin = usePrevious(props.currentPlugin)
   const pixelRatio = 1 / scaleRatio
   Konva.pixelRatio = pixelRatio
 
@@ -94,7 +95,6 @@ export default function Palette(props: PaletteProps) {
     layerRef.current.setZIndex(1)
 
     const { currentPlugin } = props
-
 
     stageRef.current.on('click tap', (e: any) => {
       // 修复 stage 上元素双击事件不起作用
@@ -184,11 +184,10 @@ export default function Palette(props: PaletteProps) {
   }, [props.imageObj, props.currentPlugin, props.currentPluginParamValue])
 
   useEffect(() => {
-    if (props.currentPlugin !== prevPluginRef.current && prevPluginRef.current && props.currentPlugin
-      && props.currentPlugin.params) {
-      prevPluginRef.current.onLeave && prevPluginRef.current.onLeave(getDrawEventPramas())
+    if (props.currentPlugin && prevCurrentPlugin &&
+      props.currentPlugin.name !== prevCurrentPlugin.name && props.currentPlugin.params) {
+      prevCurrentPlugin.onLeave && prevCurrentPlugin.onLeave(getDrawEventPramas())
     }
-    prevPluginRef.current = props.currentPlugin
   }, [props.currentPlugin])
 
   useEffect(() => {

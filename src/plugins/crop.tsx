@@ -4,8 +4,8 @@ import { transformerStyle } from '../constants'
 
 let isPaint = false
 let virtualLayer: any = null
-let rect = null
-let transformer = null
+let rect: any = null
+let transformer: any = null
 const toolbarWidth = 275
 const toolbarHeight = 40
 
