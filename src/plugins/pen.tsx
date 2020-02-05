@@ -12,6 +12,7 @@ const defalutParamValue = {
 export default {
   name: 'pen',
   iconfont: 'iconfont icon-pen',
+  title: '画笔',
   params: ['strokeWidth', 'lineType', 'color'],
   defalutParamValue,
   onDrawStart: ({stage, layer, paramValue}) => {

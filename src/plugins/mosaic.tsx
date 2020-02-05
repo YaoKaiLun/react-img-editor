@@ -87,6 +87,7 @@ function getTilesByPoint(x: number, y: number, strokeWidth: number) {
 export default {
   name: 'mosaic',
   iconfont: 'iconfont icon-mosaic',
+  title: '马赛克',
   params: ['strokeWidth'],
   defalutParamValue,
   onDrawStart: ({stage, imageData}) => {

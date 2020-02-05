@@ -32,7 +32,7 @@ export default function Toolbar(props: ToolbarProps) {
         <span
           key={plugin.name}
           className={`${prefixCls}-toolbar-icon ${isActivated ? 'activated' : ''}`}
-          title={plugin.name}
+          title={plugin.title}
         >
           <i className={plugin.iconfont} onClick={() => props.handlePluginChange(plugin)} />
         </span>
@@ -56,7 +56,7 @@ export default function Toolbar(props: ToolbarProps) {
         <span
           key={plugin.name}
           className={`${prefixCls}-toolbar-icon ${isActivated ? 'activated' : ''}`}
-          title={plugin.name}
+          title={plugin.title}
         >
           <i className={plugin.iconfont} onClick={() => props.handlePluginChange(plugin)} />
         </span>

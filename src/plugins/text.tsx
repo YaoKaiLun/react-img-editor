@@ -11,6 +11,7 @@ let isFocus = false
 export default {
   name: 'text',
   iconfont: 'iconfont icon-text',
+  title: '插入文字',
   params: ['fontSize', 'color'],
   defalutParamValue,
   onStageClcik: ({stage, layer, paramValue}) => {

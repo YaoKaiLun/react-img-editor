@@ -10,6 +10,7 @@ export interface DrawEventPramas {
 export interface PluginProps {
   name: string;
   iconfont: string;
+  title: string;
   params?: PluginParamName[];
   defalutParamValue?: PluginParamValue;
   onClick?: (params: DrawEventPramas) => void;

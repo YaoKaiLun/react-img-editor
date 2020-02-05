@@ -117,6 +117,7 @@ function reset() {
 export default {
   name: 'crop',
   iconfont: 'iconfont icon-cut',
+  title: '图片裁剪',
   params: [],
   onClick: ({stage}) => {
     stage.container().style.cursor = 'crosshair'

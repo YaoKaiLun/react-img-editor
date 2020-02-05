@@ -10,6 +10,7 @@ const defalutParamValue = {
 export default {
   name: 'eraser',
   iconfont: 'iconfont icon-eraser',
+  title: '擦除',
   params: ['strokeWidth'],
   defalutParamValue,
   onDrawStart: ({stage, layer, paramValue}) => {

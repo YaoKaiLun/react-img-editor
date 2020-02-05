@@ -6,6 +6,7 @@ let timer: any = null
 export default {
   name: 'repeal',
   iconfont: 'iconfont icon-repeal',
+  title: '撤销',
   onClick: ({layer, historyStack}) => {
     repealCount++
 

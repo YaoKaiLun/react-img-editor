@@ -13,6 +13,7 @@ const defalutParamValue = {
 export default {
   name: 'arrow',
   iconfont: 'iconfont icon-arrow',
+  title: '插入箭头',
   params: ['strokeWidth', 'lineType', 'color'],
   defalutParamValue,
   onDrawStart: ({stage, layer, paramValue}) => {

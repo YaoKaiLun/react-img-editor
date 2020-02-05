@@ -14,6 +14,7 @@ const defalutParamValue = {
 export default {
   name: 'rect',
   iconfont: 'iconfont icon-square',
+  title: '插入矩形',
   params: ['strokeWidth', 'lineType', 'color'],
   defalutParamValue,
   onDrawStart: ({stage, layer, paramValue}) => {

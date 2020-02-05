@@ -13,6 +13,7 @@ const defalutParamValue = {
 export default {
   name: 'circle',
   iconfont: 'iconfont icon-circle',
+  title: '插入圆圈',
   params: ['strokeWidth', 'lineType', 'color'],
   defalutParamValue,
   onDrawStart: ({stage, layer, paramValue}) => {
