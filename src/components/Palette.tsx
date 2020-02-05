@@ -1,6 +1,5 @@
 import Konva from 'konva'
 import React, { useEffect, useRef } from 'react'
-import { usePrevious } from '../react-hooks'
 import { PluginProps, PluginParamValue, DrawEventPramas } from '../type'
 import { prefixCls } from '../constants'
 
@@ -31,9 +30,9 @@ export default function Palette(props: PaletteProps) {
   const layerRef = useRef<any>(null)
   const imageData = useRef<any>(null)
   const historyStack = useRef<any[]>([])
-  const prevCurrentPlugin = usePrevious(props.currentPlugin)
   const pixelRatio = 1 / scaleRatio
   Konva.pixelRatio = pixelRatio
+  const currentPluginRef = useRef(props.currentPlugin)
 
   function initPalette() {
     stageRef.current = new Konva.Stage({
@@ -171,8 +170,9 @@ export default function Palette(props: PaletteProps) {
     stageRef.current.add(layerRef.current)
 
     return () => {
+      const currentPlugin = currentPluginRef.current
       // unMount 时清除插件数据
-      props.currentPlugin && props.currentPlugin.onLeave && props.currentPlugin.onLeave(getDrawEventPramas())
+      currentPlugin && currentPlugin.onLeave && currentPlugin.onLeave(getDrawEventPramas())
     }
   }, [])
 
@@ -184,16 +184,17 @@ export default function Palette(props: PaletteProps) {
   }, [props.imageObj, props.currentPlugin, props.currentPluginParamValue])
 
   useEffect(() => {
+    const prevCurrentPlugin = currentPluginRef.current
     if (props.currentPlugin && prevCurrentPlugin &&
       props.currentPlugin.name !== prevCurrentPlugin.name && props.currentPlugin.params) {
       prevCurrentPlugin.onLeave && prevCurrentPlugin.onLeave(getDrawEventPramas())
     }
-  }, [props.currentPlugin])
 
-  useEffect(() => {
     if (props.currentPlugin && props.currentPlugin.onClick) {
       props.currentPlugin.onClick(getDrawEventPramas())
     }
+
+    currentPluginRef.current = props.currentPlugin
   }, [props.currentPlugin])
 
   return (
