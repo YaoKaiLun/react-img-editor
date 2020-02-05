@@ -25,6 +25,7 @@ export default function Palette(props: PaletteProps) {
   const scaleRatio  = Math.min (wRatio, hRatio, 1)
   const canvasWidth = imageNatureWidth * scaleRatio
   const canvasHeight = imageNatureHeight * scaleRatio
+  const prevPluginRef = useRef<PluginProps>()
   const stageRef = useRef<any>(null)
   const imageRef = useRef<any>(null)
   const layerRef = useRef<any>(null)
@@ -71,7 +72,69 @@ export default function Palette(props: PaletteProps) {
     imageData.current = generateImageData(props.imageObj, canvasWidth, canvasHeight)
   }
 
+  function getDrawEventPramas() {
+    const drawEventPramas: DrawEventPramas = {
+      stage: stageRef.current,
+      layer: layerRef.current,
+      paramValue: props.currentPluginParamValue,
+      imageData: imageData.current,
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define
+      reload,
+      historyStack: historyStack.current,
+      pixelRatio,
+    }
+
+    return drawEventPramas
+  }
+
+  function bindEvents() {
+    if (!stageRef.current) return
+
+    stageRef.current.add(layerRef.current)
+    layerRef.current.setZIndex(1)
+
+    const { currentPlugin } = props
+
+
+    stageRef.current.on('click tap', (e: any) => {
+      // 修复 stage 上元素双击事件不起作用
+      if (e.target instanceof Konva.Text) return
+
+      if (currentPlugin && currentPlugin.onStageClcik) {
+        currentPlugin.onStageClcik(getDrawEventPramas())
+      }
+    })
+
+    stageRef.current.on('mousedown touchstart', () => {
+      if (currentPlugin && currentPlugin.onDrawStart) {
+        currentPlugin.onDrawStart(getDrawEventPramas())
+      }
+    })
+
+    stageRef.current.on('mousemove touchmove', () => {
+      if (currentPlugin && currentPlugin.onDraw) {
+        currentPlugin.onDraw(getDrawEventPramas())
+      }
+    })
+
+    stageRef.current.on('mouseup touchend', () => {
+      if (currentPlugin && currentPlugin.onDrawEnd) {
+        currentPlugin.onDrawEnd(getDrawEventPramas())
+      }
+    })
+  }
+
+  function removeEvents() {
+    if (!stageRef.current) return
+
+    stageRef.current.off('click tap')
+    stageRef.current.off('mousedown touchstart')
+    stageRef.current.off('mousemove touchmove')
+    stageRef.current.off('mouseup touchend')
+  }
+
   function reload(imgObj: any, width: number, height: number) {
+    removeEvents()
     historyStack.current = []
     stageRef.current = new Konva.Stage({
       container: 'react-img-editor',
@@ -98,60 +161,7 @@ export default function Palette(props: PaletteProps) {
 
     layerRef.current = new Konva.Layer()
     stageRef.current.add(layerRef.current)
-  }
-
-  function bindEvents() {
-    if (!stageRef.current) return
-
-    stageRef.current.add(layerRef.current)
-    layerRef.current.setZIndex(1)
-
-    const { currentPlugin, currentPluginParamValue } = props
-    const drawEventPramas: DrawEventPramas = {
-      stage: stageRef.current,
-      layer: layerRef.current,
-      paramValue: currentPluginParamValue,
-      imageData: imageData.current,
-      reload,
-      historyStack: historyStack.current,
-      pixelRatio,
-    }
-
-    stageRef.current.on('click tap', (e: any) => {
-      // 修复 stage 上元素双击事件不起作用
-      if (e.target instanceof Konva.Text) return
-
-      if (currentPlugin && currentPlugin.onStageClcik) {
-        currentPlugin.onStageClcik(drawEventPramas)
-      }
-    })
-
-    stageRef.current.on('mousedown touchstart', () => {
-      if (currentPlugin && currentPlugin.onDrawStart) {
-        currentPlugin.onDrawStart(drawEventPramas)
-      }
-    })
-
-    stageRef.current.on('mousemove touchmove', () => {
-      if (currentPlugin && currentPlugin.onDraw) {
-        currentPlugin.onDraw(drawEventPramas)
-      }
-    })
-
-    stageRef.current.on('mouseup touchend', () => {
-      if (currentPlugin && currentPlugin.onDrawEnd) {
-        currentPlugin.onDrawEnd(drawEventPramas)
-      }
-    })
-  }
-
-  function removeEvents() {
-    if (!stageRef.current) return
-
-    stageRef.current.off('click tap')
-    stageRef.current.off('mousedown touchstart')
-    stageRef.current.off('mousemove touchmove')
-    stageRef.current.off('mouseup touchend')
+    bindEvents()
   }
 
   useEffect(() => {
@@ -159,6 +169,11 @@ export default function Palette(props: PaletteProps) {
     drawImage()
     layerRef.current = new Konva.Layer()
     stageRef.current.add(layerRef.current)
+
+    return () => {
+      // unMount 时清除插件数据
+      props.currentPlugin && props.currentPlugin.onLeave && props.currentPlugin.onLeave(getDrawEventPramas())
+    }
   }, [])
 
   useEffect(() => {
@@ -169,17 +184,16 @@ export default function Palette(props: PaletteProps) {
   }, [props.imageObj, props.currentPlugin, props.currentPluginParamValue])
 
   useEffect(() => {
-    const { currentPlugin, currentPluginParamValue } = props
-    if (currentPlugin && currentPlugin.onClick) {
-      currentPlugin.onClick({
-        stage: stageRef.current,
-        layer: layerRef.current,
-        imageData: imageData.current,
-        reload,
-        paramValue: currentPluginParamValue,
-        historyStack: historyStack.current,
-        pixelRatio,
-      })
+    if (props.currentPlugin !== prevPluginRef.current && prevPluginRef.current && props.currentPlugin
+      && props.currentPlugin.params) {
+      prevPluginRef.current.onLeave && prevPluginRef.current.onLeave(getDrawEventPramas())
+    }
+    prevPluginRef.current = props.currentPlugin
+  }, [props.currentPlugin])
+
+  useEffect(() => {
+    if (props.currentPlugin && props.currentPlugin.onClick) {
+      props.currentPlugin.onClick(getDrawEventPramas())
     }
   }, [props.currentPlugin])
 

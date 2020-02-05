@@ -2,23 +2,33 @@ import Konva from 'konva'
 import { PluginProps } from '../type'
 import { transformerStyle } from '../constants'
 
-const initRectWidth = 100
-const initRectHeight = 100
-const initRectX = 0
-const initRectY = 0
+let isPaint = false
+let startPoint = [0, 0]
 let virtualLayer: any = null
-let rectWidth = initRectWidth
-let rectHeight = initRectHeight
-let rectX = initRectX
-let rectY = initRectY
+let rectX = 0
+let rectY = 0
+let rectWidth = 0
+let rectHeight = 0
+let rect = null
+const toolbarWidth = 275
+const toolbarHeight = 40
 
 function adjustToolbarPosition(stage: any) {
-  if (!document.getElementById('react-img-editor-crop-toolbar')) return
+  const $toolbar = document.getElementById('react-img-editor-crop-toolbar')
+  if (!$toolbar) return
 
   const container = stage.container().getBoundingClientRect()
-  const $placeholder = document.getElementById('react-img-editor-crop-toolbar')!
-  $placeholder.style.left = `${container.left + rectX + 1}px`
-  $placeholder.style.top = `${container.top + rectHeight + rectY + 20}px`
+
+  let left = container.left + rectX + 1
+  const top = container.top + rectHeight + rectY + 20
+
+  // 处理最右边工具栏溢出
+  if (rectX + toolbarWidth > stage.width()) {
+    left = container.left + (stage.width() - toolbarWidth) + 1
+  }
+
+  $toolbar.style.left = `${left}px`
+  $toolbar.style.top = `${top}px`
 }
 
 function createCropToolbar(sureBtnEvent: () => void, cancelBtnEvent: () => void) {
@@ -30,7 +40,7 @@ function createCropToolbar(sureBtnEvent: () => void, cancelBtnEvent: () => void)
   const $cropToolbar = document.createElement('div')
   $cropToolbar.setAttribute('id', 'react-img-editor-crop-toolbar')
   const cropToolbarStyle = 'position: absolute; z-index: 1000; box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.15);' +
-    'background: #FFF; width: 275px; height: 40px; display: flex; align-items: center; padding: 0 12px;' +
+    `background: #FFF; width: ${toolbarWidth}px; height: ${toolbarHeight}px; display: flex; align-items: center; padding: 0 12px;` +
     'font-size: 14px;'
   $cropToolbar.setAttribute('style', cropToolbarStyle)
   fragment.appendChild($cropToolbar)
@@ -72,20 +82,24 @@ function createCropToolbar(sureBtnEvent: () => void, cancelBtnEvent: () => void)
 function reset() {
   const $toolbar = document.getElementById('react-img-editor-crop-toolbar')
   $toolbar && document.body.removeChild($toolbar)
-
   virtualLayer && virtualLayer.remove()
-
-  rectWidth = initRectWidth
-  rectHeight = initRectHeight
-  rectX = initRectX
-  rectY = initRectY
 }
 
 export default {
   name: 'crop',
   iconfont: 'iconfont icon-cut',
-  onClick: ({stage, imageData, reload, pixelRatio}) => {
+  params: [],
+  onClick: ({stage}) => {
+    stage.container().style.cursor = 'crosshair'
+  },
+  onDrawStart: ({stage}) => {
     if (document.getElementById('react-img-editor-crop-toolbar')) return
+    isPaint = true
+
+    const pos = stage.getPointerPosition()
+    startPoint = [pos.x, pos.y]
+    rectX = pos.x
+    rectY = pos.y
 
     virtualLayer = new Konva.Layer()
     stage.add(virtualLayer)
@@ -94,82 +108,101 @@ export default {
     // 绘制透明黑色遮罩
     const maskRect = new Konva.Rect({
       globalCompositeOperation: 'source-over',
-      x: rectX,
-      y: rectY,
-      width: imageData.width,
-      height: imageData.height,
-      fill: 'rgba(0, 0, 0, .6)',
-    })
-    virtualLayer.add(maskRect)
-
-    // 绘制初始裁剪区域
-    const rect = new Konva.Rect({
       x: 0,
       y: 0,
-      width: initRectWidth,
-      height: initRectHeight,
+      width: stage.width(),
+      height: stage.height(),
+      fill: 'rgba(0, 0, 0, .6)',
+    })
+
+    virtualLayer.add(maskRect)
+
+    rect = new Konva.Rect({
+      x: pos.x,
+      y: pos.y,
       fill: '#FFF',
       draggable: true,
       globalCompositeOperation: 'destination-out',
-      dragBoundFunc: function(pos: any) {
-        let x = pos.x
-        let y = pos.y
-
-        if (pos.x < 0) {
-          x = 0
-        }
-
-        if (pos.x > imageData.width - rectWidth) {
-          x = imageData.width - rectWidth
-        }
-
-        if (pos.y < 0) {
-          y = 0
-        }
-
-        if (pos.y > imageData.height - rectHeight) {
-          y = imageData.height - rectHeight
-        }
-
-        rectX = x
-        rectY = y
-
-        adjustToolbarPosition(stage)
-        return { x, y }
-      },
     })
     virtualLayer.add(rect)
+
+    virtualLayer.draw()
+  },
+  onDraw: ({stage}) => {
+    if (!isPaint) return
+    if (document.getElementById('react-img-editor-crop-toolbar')) return
+
+    const endPos = stage.getPointerPosition()
+    rectWidth = endPos.x - startPoint[0]
+    rectHeight = endPos.y - startPoint[1]
+
+    // 绘制初始裁剪区域
+    rect.width(endPos.x - startPoint[0])
+    rect.height(endPos.y - startPoint[1])
+    rect.dragBoundFunc((pos: any) => {
+      let x = pos.x
+      let y = pos.y
+
+      if (pos.x <= 0) x = 0
+      if (pos.x >= stage.width() - rectWidth) x = stage.width() - rectWidth
+      if (pos.y <= 0) y = 0
+      if (pos.y >= stage.height() - rectHeight) y = stage.height() - rectHeight
+
+      rectX = x
+      rectY = y
+
+      adjustToolbarPosition(stage)
+      return { x, y }
+    })
+
+    virtualLayer.draw()
+  },
+  onDrawEnd: ({stage, pixelRatio, reload}) => {
+    if (!isPaint) {
+      isPaint = false
+      return
+    }
+
+    isPaint = false
 
     // 允许改变裁剪区域
     const transformer = new Konva.Transformer({
       node: rect,
       ...transformerStyle,
       boundBoxFunc: function(oldBox: any, newBox: any) {
-        if (
-          newBox.width > imageData.width ||
-          newBox.height > imageData.height ||
-          newBox.x < 0 ||
-          newBox.y < 0 ||
-          newBox.x + newBox.width > imageData.width ||
-          newBox.y + newBox.height > imageData.height)
-        {
-          rectWidth = imageData.width
-          rectHeight = imageData.height
-          rectX = oldBox.x
-          rectY = oldBox.y
-          adjustToolbarPosition(stage)
-          return oldBox
+        let x = newBox.x
+        let y = newBox.y
+        let width = newBox.width
+        let height = newBox.height
+
+        if (newBox.x <= 0) {
+          x = 0
+          width = newBox.width + newBox.x
         }
 
-        rectWidth = newBox.width
-        rectHeight = newBox.height
-        rectX = newBox.x
-        rectY = newBox.y
+        if (newBox.x >= stage.width() - newBox.width) {
+          width = stage.width() - oldBox.x
+        }
+
+        if (newBox.y <= 0) {
+          y = 0
+          height = newBox.height + newBox.y
+        }
+
+        if (newBox.y >= stage.height() - newBox.height) {
+          height = stage.height() - oldBox.y
+        }
+
+        rectWidth = width
+        rectHeight = height
+        rectX = x
+        rectY = y
         adjustToolbarPosition(stage)
-        return newBox
+        return { x, y, width, height } as any
       },
     })
     virtualLayer.add(transformer)
+    virtualLayer.draw()
 
     createCropToolbar(function () {
       // 提前清除拉伸框
@@ -189,8 +222,10 @@ export default {
       }
       imageObj.src = dataURL
     }, reset)
-
     adjustToolbarPosition(stage)
-    virtualLayer.draw()
+  },
+  onLeave: ({stage}) => {
+    reset()
+    stage.container().style.cursor = 'default'
   },
 }  as PluginProps

@@ -27,7 +27,7 @@ export default function Toolbar(props: ToolbarProps) {
     const isActivated = !!(props.currentPlugin && props.currentPlugin.name === plugin.name)
     const paramNames = props.currentPlugin ? props.currentPlugin.params : []
 
-    if (!paramNames) {
+    if (!paramNames || paramNames.length === 0) {
       return (
         <span
           key={plugin.name}

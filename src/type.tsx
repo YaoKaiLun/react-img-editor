@@ -17,6 +17,7 @@ export interface PluginProps {
   onDraw?: (params: DrawEventPramas) => void;
   onDrawEnd?: (params: DrawEventPramas) => void;
   onStageClcik?: (params: DrawEventPramas) => void;
+  onLeave?: (params: DrawEventPramas) => void;
 }
 export type PluginParamName = 'strokeWidth' | 'color' | 'fontSize' | 'lineType'
 export interface PluginParamValue {
