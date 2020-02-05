@@ -52584,7 +52584,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var konva__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(konva__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../constants */ "./src/constants.ts");
+/* harmony import */ var _react_hooks__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../react-hooks */ "./src/react-hooks.ts");
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../constants */ "./src/constants.ts");
+
 
 
 
@@ -52605,6 +52607,7 @@ function Palette(props) {
   var layerRef = Object(react__WEBPACK_IMPORTED_MODULE_1__["useRef"])(null);
   var imageData = Object(react__WEBPACK_IMPORTED_MODULE_1__["useRef"])(null);
   var historyStack = Object(react__WEBPACK_IMPORTED_MODULE_1__["useRef"])([]);
+  var prevCurrentPlugin = Object(_react_hooks__WEBPACK_IMPORTED_MODULE_2__["usePrevious"])(props.currentPlugin);
   var pixelRatio = 1 / scaleRatio;
   konva__WEBPACK_IMPORTED_MODULE_0___default.a.pixelRatio = pixelRatio;
 
@@ -52644,7 +52647,60 @@ function Palette(props) {
     imageData.current = generateImageData(props.imageObj, canvasWidth, canvasHeight);
   }
 
+  function getDrawEventPramas() {
+    var drawEventPramas = {
+      stage: stageRef.current,
+      layer: layerRef.current,
+      paramValue: props.currentPluginParamValue,
+      imageData: imageData.current,
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define
+      reload: reload,
+      historyStack: historyStack.current,
+      pixelRatio: pixelRatio
+    };
+    return drawEventPramas;
+  }
+
+  function bindEvents() {
+    if (!stageRef.current) return;
+    stageRef.current.add(layerRef.current);
+    layerRef.current.setZIndex(1);
+    var currentPlugin = props.currentPlugin;
+    stageRef.current.on('click tap', function (e) {
+      // 修复 stage 上元素双击事件不起作用
+      if (e.target instanceof konva__WEBPACK_IMPORTED_MODULE_0___default.a.Text) return;
+
+      if (currentPlugin && currentPlugin.onStageClcik) {
+        currentPlugin.onStageClcik(getDrawEventPramas());
+      }
+    });
+    stageRef.current.on('mousedown touchstart', function () {
+      if (currentPlugin && currentPlugin.onDrawStart) {
+        currentPlugin.onDrawStart(getDrawEventPramas());
+      }
+    });
+    stageRef.current.on('mousemove touchmove', function () {
+      if (currentPlugin && currentPlugin.onDraw) {
+        currentPlugin.onDraw(getDrawEventPramas());
+      }
+    });
+    stageRef.current.on('mouseup touchend', function () {
+      if (currentPlugin && currentPlugin.onDrawEnd) {
+        currentPlugin.onDrawEnd(getDrawEventPramas());
+      }
+    });
+  }
+
+  function removeEvents() {
+    if (!stageRef.current) return;
+    stageRef.current.off('click tap');
+    stageRef.current.off('mousedown touchstart');
+    stageRef.current.off('mousemove touchmove');
+    stageRef.current.off('mouseup touchend');
+  }
+
   function reload(imgObj, width, height) {
+    removeEvents();
     historyStack.current = [];
     stageRef.current = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Stage({
       container: 'react-img-editor',
@@ -52668,54 +52724,7 @@ function Palette(props) {
     imageData.current = generateImageData(imgObj, width, height);
     layerRef.current = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Layer();
     stageRef.current.add(layerRef.current);
-  }
-
-  function bindEvents() {
-    if (!stageRef.current) return;
-    stageRef.current.add(layerRef.current);
-    layerRef.current.setZIndex(1);
-    var currentPlugin = props.currentPlugin,
-        currentPluginParamValue = props.currentPluginParamValue;
-    var drawEventPramas = {
-      stage: stageRef.current,
-      layer: layerRef.current,
-      paramValue: currentPluginParamValue,
-      imageData: imageData.current,
-      reload: reload,
-      historyStack: historyStack.current,
-      pixelRatio: pixelRatio
-    };
-    stageRef.current.on('click tap', function (e) {
-      // 修复 stage 上元素双击事件不起作用
-      if (e.target instanceof konva__WEBPACK_IMPORTED_MODULE_0___default.a.Text) return;
-
-      if (currentPlugin && currentPlugin.onStageClcik) {
-        currentPlugin.onStageClcik(drawEventPramas);
-      }
-    });
-    stageRef.current.on('mousedown touchstart', function () {
-      if (currentPlugin && currentPlugin.onDrawStart) {
-        currentPlugin.onDrawStart(drawEventPramas);
-      }
-    });
-    stageRef.current.on('mousemove touchmove', function () {
-      if (currentPlugin && currentPlugin.onDraw) {
-        currentPlugin.onDraw(drawEventPramas);
-      }
-    });
-    stageRef.current.on('mouseup touchend', function () {
-      if (currentPlugin && currentPlugin.onDrawEnd) {
-        currentPlugin.onDrawEnd(drawEventPramas);
-      }
-    });
-  }
-
-  function removeEvents() {
-    if (!stageRef.current) return;
-    stageRef.current.off('click tap');
-    stageRef.current.off('mousedown touchstart');
-    stageRef.current.off('mousemove touchmove');
-    stageRef.current.off('mouseup touchend');
+    bindEvents();
   }
 
   Object(react__WEBPACK_IMPORTED_MODULE_1__["useEffect"])(function () {
@@ -52723,6 +52732,10 @@ function Palette(props) {
     drawImage();
     layerRef.current = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Layer();
     stageRef.current.add(layerRef.current);
+    return function () {
+      // unMount 时清除插件数据
+      props.currentPlugin && props.currentPlugin.onLeave && props.currentPlugin.onLeave(getDrawEventPramas());
+    };
   }, []);
   Object(react__WEBPACK_IMPORTED_MODULE_1__["useEffect"])(function () {
     bindEvents();
@@ -52731,26 +52744,20 @@ function Palette(props) {
     };
   }, [props.imageObj, props.currentPlugin, props.currentPluginParamValue]);
   Object(react__WEBPACK_IMPORTED_MODULE_1__["useEffect"])(function () {
-    var currentPlugin = props.currentPlugin,
-        currentPluginParamValue = props.currentPluginParamValue;
-
-    if (currentPlugin && currentPlugin.onClick) {
-      currentPlugin.onClick({
-        stage: stageRef.current,
-        layer: layerRef.current,
-        imageData: imageData.current,
-        reload: reload,
-        paramValue: currentPluginParamValue,
-        historyStack: historyStack.current,
-        pixelRatio: pixelRatio
-      });
+    if (props.currentPlugin && prevCurrentPlugin && props.currentPlugin.name !== prevCurrentPlugin.name && props.currentPlugin.params) {
+      prevCurrentPlugin.onLeave && prevCurrentPlugin.onLeave(getDrawEventPramas());
+    }
+  }, [props.currentPlugin]);
+  Object(react__WEBPACK_IMPORTED_MODULE_1__["useEffect"])(function () {
+    if (props.currentPlugin && props.currentPlugin.onClick) {
+      props.currentPlugin.onClick(getDrawEventPramas());
     }
   }, [props.currentPlugin]);
   return react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", {
-    className: "".concat(_constants__WEBPACK_IMPORTED_MODULE_2__["prefixCls"], "-palette"),
+    className: "".concat(_constants__WEBPACK_IMPORTED_MODULE_3__["prefixCls"], "-palette"),
     style: style
   }, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", {
-    id: _constants__WEBPACK_IMPORTED_MODULE_2__["prefixCls"]
+    id: _constants__WEBPACK_IMPORTED_MODULE_3__["prefixCls"]
   }));
 }
 
@@ -53023,7 +53030,7 @@ function Toolbar(props) {
     var isActivated = !!(props.currentPlugin && props.currentPlugin.name === plugin.name);
     var paramNames = props.currentPlugin ? props.currentPlugin.params : [];
 
-    if (!paramNames) {
+    if (!paramNames || paramNames.length === 0) {
       return react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("span", {
         key: plugin.name,
         className: "".concat(_constants__WEBPACK_IMPORTED_MODULE_3__["prefixCls"], "-toolbar-icon ").concat(isActivated ? 'activated' : ''),
@@ -53181,7 +53188,7 @@ function ReactImageEditor(props) {
     setCurrentPlugin(plugin);
     plugin.defalutParamValue && setCurrentPluginParamValue(plugin.defalutParamValue);
 
-    if (plugin.onClick && !plugin.params) {
+    if (!plugin.params) {
       setTimeout(function () {
         setCurrentPlugin(null);
       }, 1000);
@@ -53363,22 +53370,64 @@ function _extends() { _extends = Object.assign || function (target) { for (var i
 
 
 
-var initRectWidth = 100;
-var initRectHeight = 100;
-var initRectX = 0;
-var initRectY = 0;
+var isPaint = false;
 var virtualLayer = null;
-var rectWidth = initRectWidth;
-var rectHeight = initRectHeight;
-var rectX = initRectX;
-var rectY = initRectY;
+var rect = null;
+var transformer = null;
+var toolbarWidth = 275;
+var toolbarHeight = 40; // 一直为正数
+
+function getRectWidth() {
+  return rect ? rect.getClientRect({
+    skipTransform: false
+  }).width : 0;
+} // 一直为正数
+
+
+function getRectHeight() {
+  return rect ? rect.getClientRect({
+    skipTransform: false
+  }).height : 0;
+}
+
+function getRectX() {
+  return rect ? rect.getClientRect({
+    skipTransform: false
+  }).x : 0;
+}
+
+function getRectY() {
+  return rect ? rect.getClientRect({
+    skipTransform: false
+  }).y : 0;
+}
 
 function adjustToolbarPosition(stage) {
-  if (!document.getElementById('react-img-editor-crop-toolbar')) return;
+  // 需要考虑宽和高为负数的情况
+  var $toolbar = document.getElementById('react-img-editor-crop-toolbar');
+  if (!$toolbar) return;
   var container = stage.container().getBoundingClientRect();
-  var $placeholder = document.getElementById('react-img-editor-crop-toolbar');
-  $placeholder.style.left = "".concat(container.left + rectX + 1, "px");
-  $placeholder.style.top = "".concat(container.top + rectHeight + rectY + 20, "px");
+  var left;
+  var top;
+
+  if (getRectWidth() >= 0) {
+    left = container.left + getRectX();
+  } else {
+    left = container.left + getRectX() - toolbarWidth;
+  }
+
+  if (getRectHeight() >= 0) {
+    top = container.top + getRectHeight() + getRectY() + 20;
+  } else {
+    top = container.top + getRectY() + 20;
+  }
+
+  if (left < container.left) left = container.left;
+  if (left > container.left + stage.width() - toolbarWidth) left = container.left + stage.width() - toolbarWidth;
+  if (top < container.top) top = container.top;
+  if (top > container.top + stage.height()) top = container.top + stage.height();
+  $toolbar.style.left = "".concat(left, "px");
+  $toolbar.style.top = "".concat(top, "px");
 }
 
 function createCropToolbar(sureBtnEvent, cancelBtnEvent) {
@@ -53387,7 +53436,7 @@ function createCropToolbar(sureBtnEvent, cancelBtnEvent) {
 
   var $cropToolbar = document.createElement('div');
   $cropToolbar.setAttribute('id', 'react-img-editor-crop-toolbar');
-  var cropToolbarStyle = 'position: absolute; z-index: 1000; box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.15);' + 'background: #FFF; width: 275px; height: 40px; display: flex; align-items: center; padding: 0 12px;' + 'font-size: 14px;';
+  var cropToolbarStyle = 'position: absolute; z-index: 1000; box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.15);' + "background: #FFF; width: ".concat(toolbarWidth, "px; height: ").concat(toolbarHeight, "px; display: flex; align-items: center; padding: 0 12px;") + 'font-size: 14px;';
   $cropToolbar.setAttribute('style', cropToolbarStyle);
   fragment.appendChild($cropToolbar); // 创建文本
 
@@ -53421,118 +53470,195 @@ function reset() {
   var $toolbar = document.getElementById('react-img-editor-crop-toolbar');
   $toolbar && document.body.removeChild($toolbar);
   virtualLayer && virtualLayer.remove();
-  rectWidth = initRectWidth;
-  rectHeight = initRectHeight;
-  rectX = initRectX;
-  rectY = initRectY;
+
+  if (rect) {
+    rect.off('mouseenter');
+    rect.off('mouseleave');
+  }
 }
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: 'crop',
   iconfont: 'iconfont icon-cut',
+  params: [],
   onClick: function onClick(_ref) {
-    var stage = _ref.stage,
-        imageData = _ref.imageData,
-        reload = _ref.reload,
-        pixelRatio = _ref.pixelRatio;
+    var stage = _ref.stage;
+    stage.container().style.cursor = 'crosshair';
+  },
+  onDrawStart: function onDrawStart(_ref2) {
+    var stage = _ref2.stage;
     if (document.getElementById('react-img-editor-crop-toolbar')) return;
+    isPaint = true;
+    var startPos = stage.getPointerPosition();
     virtualLayer = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Layer();
     stage.add(virtualLayer);
     virtualLayer.setZIndex(2); // 绘制透明黑色遮罩
 
     var maskRect = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Rect({
       globalCompositeOperation: 'source-over',
-      x: rectX,
-      y: rectY,
-      width: imageData.width,
-      height: imageData.height,
-      fill: 'rgba(0, 0, 0, .6)'
-    });
-    virtualLayer.add(maskRect); // 绘制初始裁剪区域
-
-    var rect = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Rect({
       x: 0,
       y: 0,
-      width: initRectWidth,
-      height: initRectHeight,
+      width: stage.width(),
+      height: stage.height(),
+      fill: 'rgba(0, 0, 0, .6)'
+    });
+    virtualLayer.add(maskRect);
+    rect = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Rect({
+      x: startPos.x,
+      y: startPos.y,
       fill: '#FFF',
       draggable: true,
-      globalCompositeOperation: 'destination-out',
-      dragBoundFunc: function dragBoundFunc(pos) {
-        var x = pos.x;
-        var y = pos.y;
-
-        if (pos.x < 0) {
-          x = 0;
-        }
-
-        if (pos.x > imageData.width - rectWidth) {
-          x = imageData.width - rectWidth;
-        }
-
-        if (pos.y < 0) {
-          y = 0;
-        }
-
-        if (pos.y > imageData.height - rectHeight) {
-          y = imageData.height - rectHeight;
-        }
-
-        rectX = x;
-        rectY = y;
-        adjustToolbarPosition(stage);
-        return {
-          x: x,
-          y: y
-        };
-      }
+      globalCompositeOperation: 'destination-out'
     });
-    virtualLayer.add(rect); // 允许改变裁剪区域
+    rect.on('mouseenter', function () {
+      stage.container().style.cursor = 'move';
+    });
+    rect.on('mouseleave', function () {
+      stage.container().style.cursor = 'default';
+    });
+    virtualLayer.add(rect);
+    virtualLayer.draw();
+  },
+  onDraw: function onDraw(_ref3) {
+    var stage = _ref3.stage;
+    if (!isPaint) return;
+    if (document.getElementById('react-img-editor-crop-toolbar')) return;
+    var endPos = stage.getPointerPosition(); // 绘制初始裁剪区域
 
-    var transformer = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Transformer(_extends(_extends({
+    rect.width(endPos.x - getRectX());
+    rect.height(endPos.y - getRectY());
+    rect.dragBoundFunc(function (pos) {
+      var x = pos.x;
+      var y = pos.y;
+
+      if (transformer.width() >= 0) {
+        if (pos.x <= 0) x = 0;
+        if (pos.x >= stage.width() - transformer.width()) x = stage.width() - transformer.width();
+      } else {
+        if (pos.x >= stage.width()) x = stage.width();
+        if (pos.x <= -transformer.width()) x = -transformer.width();
+      }
+
+      if (transformer.height() >= 0) {
+        if (pos.y <= 0) y = 0;
+        if (pos.y >= stage.height() - transformer.height()) y = stage.height() - transformer.height();
+      } else {
+        if (pos.y >= stage.height()) y = stage.height();
+        if (pos.y <= -transformer.height()) y = -transformer.height();
+      }
+
+      adjustToolbarPosition(stage);
+      return {
+        x: x,
+        y: y
+      };
+    });
+    virtualLayer.draw();
+  },
+  onDrawEnd: function onDrawEnd(_ref4) {
+    var stage = _ref4.stage,
+        pixelRatio = _ref4.pixelRatio,
+        reload = _ref4.reload;
+
+    if (!isPaint) {
+      isPaint = false;
+      return;
+    }
+
+    isPaint = false; // 允许改变裁剪区域
+
+    transformer = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Transformer(_extends(_extends({
       node: rect
     }, _constants__WEBPACK_IMPORTED_MODULE_1__["transformerStyle"]), {
       boundBoxFunc: function boundBoxFunc(oldBox, newBox) {
-        if (newBox.width > imageData.width || newBox.height > imageData.height || newBox.x < 0 || newBox.y < 0 || newBox.x + newBox.width > imageData.width || newBox.y + newBox.height > imageData.height) {
-          rectWidth = imageData.width;
-          rectHeight = imageData.height;
-          rectX = oldBox.x;
-          rectY = oldBox.y;
-          adjustToolbarPosition(stage);
-          return oldBox;
+        var x = newBox.x;
+        var y = newBox.y;
+        var width = newBox.width;
+        var height = newBox.height;
+
+        if (newBox.width >= 0) {
+          if (newBox.x <= 0) {
+            x = 0;
+            width = newBox.width + newBox.x;
+          }
+
+          if (newBox.x >= stage.width() - newBox.width) {
+            width = stage.width() - oldBox.x;
+          }
+        } else {
+          if (newBox.x >= stage.width()) {
+            x = stage.width();
+            width = newBox.width + (newBox.x - stage.width());
+          }
+
+          if (newBox.x <= -newBox.width) {
+            width = -oldBox.x;
+          }
         }
 
-        rectWidth = newBox.width;
-        rectHeight = newBox.height;
-        rectX = newBox.x;
-        rectY = newBox.y;
+        if (newBox.height >= 0) {
+          if (newBox.y <= 0) {
+            y = 0;
+            height = newBox.height + newBox.y;
+          }
+
+          if (newBox.y >= stage.height() - newBox.height) {
+            height = stage.height() - oldBox.y;
+          }
+        } else {
+          if (newBox.y >= stage.height()) {
+            y = stage.height();
+            height = newBox.height + (newBox.y - stage.height());
+          }
+
+          if (newBox.y <= -newBox.height) {
+            height = -oldBox.y;
+          }
+        }
+
         adjustToolbarPosition(stage);
-        return newBox;
+        return {
+          x: x,
+          y: y,
+          width: width,
+          height: height
+        };
       }
     }));
     virtualLayer.add(transformer);
+    virtualLayer.draw();
     createCropToolbar(function () {
-      // 提前清除拉伸框
+      // 裁剪区域太小不允许裁剪
+      if (getRectWidth() < 2 || getRectHeight() < 2) return; // 提前清除拉伸框
+
       virtualLayer.remove(transformer);
       var dataURL = stage.toDataURL({
-        x: rectX,
-        y: rectY,
-        width: rectWidth,
-        height: rectHeight,
+        x: getRectX(),
+        y: getRectY(),
+        width: getRectWidth(),
+        height: getRectHeight(),
         pixelRatio: pixelRatio,
         mimeType: 'image/jpeg'
       });
       var imageObj = new Image();
 
       imageObj.onload = function () {
-        reload(imageObj, rectWidth, rectHeight);
+        reload(imageObj, getRectWidth(), getRectHeight());
         reset();
       };
 
       imageObj.src = dataURL;
-    }, reset);
+      stage.container().style.cursor = 'crosshair';
+    }, function () {
+      reset();
+      stage.container().style.cursor = 'crosshair';
+    });
     adjustToolbarPosition(stage);
-    virtualLayer.draw();
+  },
+  onLeave: function onLeave(_ref5) {
+    var stage = _ref5.stage;
+    reset();
+    stage.container().style.cursor = 'default';
   }
 });
 
@@ -54084,6 +54210,29 @@ var isFocus = false;
     });
   }
 });
+
+/***/ }),
+
+/***/ "./src/react-hooks.ts":
+/*!****************************!*\
+  !*** ./src/react-hooks.ts ***!
+  \****************************/
+/*! exports provided: usePrevious */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "usePrevious", function() { return usePrevious; });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+
+var usePrevious = function usePrevious(state) {
+  var ref = Object(react__WEBPACK_IMPORTED_MODULE_0__["useRef"])();
+  Object(react__WEBPACK_IMPORTED_MODULE_0__["useEffect"])(function () {
+    ref.current = state;
+  });
+  return ref.current;
+};
 
 /***/ }),
 
