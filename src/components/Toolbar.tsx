@@ -3,7 +3,7 @@ import React from 'react'
 import Tooltip from 'rc-tooltip'
 import { PluginProps, PluginParamValue } from '../type'
 import { prefixCls } from '../constants'
-import 'rc-tooltip/assets/bootstrap.css'
+import 'rc-tooltip/assets/bootstrap_white.css'
 
 interface ToolbarProps {
   width: number;
@@ -52,6 +52,7 @@ export default function Toolbar(props: ToolbarProps) {
         )}
         visible={isActivated}
         overlayClassName={`${prefixCls}-tooltip`}
+        arrowContent={<div className="rc-tooltip-arrow-inner"></div>}
       >
         <span
           key={plugin.name}

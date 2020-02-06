@@ -15,9 +15,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #FFF;
-    height: 56px;
-    border: 1px solid rgba(0, 0, 0, .1);
+    height: 42px;
   }
 
   &-toolbar-icon {
@@ -35,9 +33,10 @@
 
   &-tooltip {
     opacity: 1;
+    padding: 0;
 
     .rc-tooltip-arrow {
-      border-bottom-color: rgba(0, 0, 0, .1);
+      border-bottom-color: rgba(0,0,0,0.1);
     }
 
     .rc-tooltip-inner {
@@ -50,10 +49,7 @@
       color: #A9A9AC;
       padding-top: 0;
       padding-bottom: 0;
-    }
-
-    .rc-tooltip-arrow {
-      border-top-color: #FFF;
+      border: 1px solid rgba(0,0,0,0.1);
     }
   }
 
