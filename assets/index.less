@@ -19,15 +19,21 @@
   }
 
   &-toolbar-icon {
+    padding: 5px;
+
     i {
       font-size: 16px;
       cursor: pointer;
       color: #A9A9AC;
-      padding: 5px;
+      padding: 3px;
     }
 
     &.activated i {
       color: #7DB5FD;
+    }
+
+    &:hover i {
+      background-color: #F6F6F9;
     }
   }
 
@@ -66,13 +72,11 @@
     margin: 0 2px;
     box-sizing: border-box;
     cursor: pointer;
-    opacity: .8;
+    border: 1px solid #EFEFF4;
   }
 
   &-color-square-activated {
-    border: 1px solid inherit;
-    box-shadow: 0px 0px 2px 2px rgba(0,0,0,.15);
-    opacity: 1;
+    border: 1px solid #007CFF;
   }
 
   &-line-type {
