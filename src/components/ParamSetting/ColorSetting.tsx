@@ -6,7 +6,7 @@ interface ColorSettingProps {
   onChange: (color: string) => void;
 }
 
-const colors = ['#F5222D', '#FFEB00', '#007CFF', '#52C51A ', '#19191A']
+const colors = ['#F5222D', '#FFEB00', '#00B4FF', '#52C51A ', '#19191A', '#FFFFFF']
 
 export default function ColorSetting(props: ColorSettingProps) {
   return (
