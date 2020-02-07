@@ -126,18 +126,20 @@ function Example() {
   }
 
   function downloadImage() {
-    var dataURL = stageRef.current.toDataURL({
-      pixelRatio: stageRef.current._pixelRatio,
-      mimeType: 'image/jpeg'
+    var canvas = stageRef.current.toCanvas({
+      pixelRatio: stageRef.current._pixelRatio
     });
-    var link = document.createElement('a');
-    link.download = '';
-    link.href = dataURL;
-    link.click();
+    canvas.toBlob(function (blob) {
+      var link = document.createElement('a');
+      link.download = '';
+      link.href = URL.createObjectURL(blob);
+      link.click();
+    }, 'image/jpeg');
   }
 
   var image1 = 'https://cstore-public.seewo.com/faq-service/4e3f2924f1d4432f82e760468bf680f0'; // const image2 = 'https://cvte-dev-public.seewo.com/faq-service-test/4db524ec93324794b983bf7cd78b2ae1'
   // const image3 = 'https://cvte-dev-public.seewo.com/faq-service-test/bfdcc5337dfb43ce823a4c9743aba99c'
+  // const image4 = 'https://cvte-dev-public.seewo.com/faq-service-test/bc87ceeb7b1a473da41e025e656af966'
 
   return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_0___default.a.Fragment, null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_src_index__WEBPACK_IMPORTED_MODULE_2__["default"], {
     src: image1,
@@ -52598,8 +52600,8 @@ function Palette(props) {
   var wRatio = props.width / imageNatureWidth;
   var hRatio = props.height / imageNatureHeight;
   var scaleRatio = Math.min(wRatio, hRatio, 1);
-  var canvasWidth = imageNatureWidth * scaleRatio;
-  var canvasHeight = imageNatureHeight * scaleRatio;
+  var canvasWidth = Math.round(imageNatureWidth * scaleRatio);
+  var canvasHeight = Math.round(imageNatureHeight * scaleRatio);
   var stageRef = Object(react__WEBPACK_IMPORTED_MODULE_1__["useRef"])(null);
   var imageRef = Object(react__WEBPACK_IMPORTED_MODULE_1__["useRef"])(null);
   var layerRef = Object(react__WEBPACK_IMPORTED_MODULE_1__["useRef"])(null);
@@ -53689,13 +53691,15 @@ __webpack_require__.r(__webpack_exports__);
   onClick: function onClick(_ref) {
     var stage = _ref.stage,
         pixelRatio = _ref.pixelRatio;
-    var link = document.createElement('a');
-    link.download = '';
-    link.href = stage.toDataURL({
-      pixelRatio: pixelRatio,
-      mimeType: 'image/jpeg'
+    var canvas = stage.toCanvas({
+      pixelRatio: pixelRatio
     });
-    link.click();
+    canvas.toBlob(function (blob) {
+      var link = document.createElement('a');
+      link.download = '';
+      link.href = URL.createObjectURL(blob);
+      link.click();
+    }, 'image/jpeg');
   }
 });
 
@@ -53903,7 +53907,7 @@ function getTilesByPoint(x, y, strokeWidth) {
   onDrawStart: function onDrawStart(_ref) {
     var stage = _ref.stage,
         imageData = _ref.imageData;
-    isPaint = true;
+    tiles = [];
     width = stage.width();
     height = stage.height();
     tileRowSize = Math.ceil(height / tileHeight);
@@ -53936,6 +53940,8 @@ function getTilesByPoint(x, y, strokeWidth) {
         tiles.push(tile);
       }
     }
+
+    isPaint = true;
   },
   onDraw: function onDraw(_ref2) {
     var stage = _ref2.stage,
