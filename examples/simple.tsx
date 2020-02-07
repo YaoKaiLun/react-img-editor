@@ -33,7 +33,7 @@ function Example() {
         height={414}
         plugins={[]}
         getStage={setStage}
-        defaultPluginName="circle"
+        defaultPluginName="text"
       />
       <div style={{ marginTop: '50px' }}>
         <button onClick={downloadImage}>download</button>
