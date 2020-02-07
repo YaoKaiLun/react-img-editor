@@ -1,5 +1,6 @@
 export interface DrawEventPramas {
   stage: any;
+  imageLayer: any;
   layer: any;
   paramValue: PluginParamValue | null;
   imageData: ImageData;
@@ -17,7 +18,7 @@ export interface PluginProps {
   onDrawStart?: (params: DrawEventPramas) => void;
   onDraw?: (params: DrawEventPramas) => void;
   onDrawEnd?: (params: DrawEventPramas) => void;
-  onStageClcik?: (params: DrawEventPramas) => void;
+  onStageClick?: (params: DrawEventPramas) => void;
   onLeave?: (params: DrawEventPramas) => void;
 }
 export type PluginParamName = 'strokeWidth' | 'color' | 'fontSize' | 'lineType'

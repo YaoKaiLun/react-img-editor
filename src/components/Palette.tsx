@@ -75,6 +75,7 @@ export default function Palette(props: PaletteProps) {
   function getDrawEventPramas() {
     const drawEventPramas: DrawEventPramas = {
       stage: stageRef.current,
+      imageLayer: imageRef.current,
       layer: layerRef.current,
       paramValue: props.currentPluginParamValue,
       imageData: imageData.current,
@@ -99,8 +100,8 @@ export default function Palette(props: PaletteProps) {
       // 修复 stage 上元素双击事件不起作用
       if (e.target instanceof Konva.Text) return
 
-      if (currentPlugin && currentPlugin.onStageClcik) {
-        currentPlugin.onStageClcik(getDrawEventPramas())
+      if (currentPlugin && currentPlugin.onStageClick) {
+        currentPlugin.onStageClick(getDrawEventPramas())
       }
     })
 

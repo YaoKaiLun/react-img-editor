@@ -6,7 +6,74 @@ const defalutParamValue = {
   color: '#F5222D',
 }
 
-let isFocus = false
+function removeTextareaBlurModal() {
+  const textareaBlurModal = document.getElementById('textareaBlurModal')
+  if (textareaBlurModal) {
+    textareaBlurModal.removeEventListener('click', removeTextareaBlurModal)
+    document.body.removeChild(textareaBlurModal)
+  }
+}
+
+// 防止 textarea blur 时触发 stage click 事件
+function addTextareaBlurModal(stage: any) {
+  if (document.getElementById('textareaBlurModal')) return
+
+  const container = stage.container().getBoundingClientRect()
+  const textareaBlurModal = document.createElement('div')
+  textareaBlurModal.id = 'textareaBlurModal'
+  textareaBlurModal.style.position = 'fixed'
+  textareaBlurModal.style.left = container.left + 'px'
+  textareaBlurModal.style.top = container.top + 'px'
+  textareaBlurModal.style.width = container.width + 'px'
+  textareaBlurModal.style.height = container.height + 'px'
+  textareaBlurModal.style.zIndex = '999'
+
+  document.body.appendChild(textareaBlurModal)
+
+  textareaBlurModal.addEventListener('click', removeTextareaBlurModal)
+}
+
+function createTextarea(stage: any, layer: any, transformer: any, textNode: any) {
+  const container = stage.container().getBoundingClientRect()
+  const textarea = document.createElement('textarea')
+  textarea.value = textNode.text()
+  textarea.style.position = 'absolute'
+  textarea.style.left = container.left + textNode.x() + 'px'
+  textarea.style.top = container.top + textNode.y() + 'px'
+  textarea.style.width = textNode.width() - 5 + 'px'
+  textarea.style.height = textNode.height() - 5 + 'px'
+  textarea.style.lineHeight = String(textNode.lineHeight())
+  textarea.style.padding = textNode.padding() + 'px'
+  textarea.style.margin = '0px'
+  textarea.style.fontSize = textNode.fontSize() + 'px'
+  textarea.style.color = textNode.fill()
+  textarea.style.fontFamily = textNode.fontFamily()
+  textarea.style.border = 'none'
+  textarea.style.outline = 'none'
+  textarea.style.overflow = 'hidden'
+  textarea.style.background = 'none'
+  textarea.style.resize = 'none'
+  textarea.style.zIndex = '1000'
+  textarea.style.boxSizing = 'content-box'
+
+  textarea.addEventListener('keyup', function(e: any) {
+    textNode.text(e.target.value)
+    layer.draw()
+    textarea.style.width = textNode.width() + 'px'
+    textarea.style.height = textNode.height() + 'px'
+  })
+
+  textarea.addEventListener('blur', function () {
+    textNode.text(textarea.value)
+    textarea.parentNode!.removeChild(textarea)
+    transformer.hide()
+    textNode.show()
+    layer.draw()
+    removeTextareaBlurModal()
+  })
+
+  return textarea
+}
 
 export default {
   name: 'text',
@@ -17,14 +84,11 @@ export default {
   onClick: ({stage}) => {
     stage.container().style.cursor = 'text'
   },
-  onStageClcik: ({stage, layer, paramValue}) => {
-    if (isFocus) return
-
+  onStageClick: ({stage, layer, paramValue}) => {
     const fontSize = (paramValue && paramValue.fontSize) ? paramValue.fontSize : defalutParamValue.fontSize
     const color = (paramValue && paramValue.color) ? paramValue.color : defalutParamValue.color
     const startPos = stage.getPointerPosition()
     const textNode = new Konva.Text({
-      text: '请输入',
       x: startPos.x,
       y: startPos.y - 10, // fix konvajs incorrect position of text
       fontSize,
@@ -47,64 +111,30 @@ export default {
       rotateEnabled: false,
       borderStroke: color,
     })
-    transformer.hide()
 
     layer.add(textNode)
     layer.add(transformer)
+    textNode.hide()
     layer.draw()
+
+    const textarea = createTextarea(stage, layer, transformer, textNode)
+    document.body.appendChild(textarea)
+    textarea.focus()
+    addTextareaBlurModal(stage)
 
     textNode.on('dblclick dbltap', function(e) {
       e.cancelBubble = true
-      isFocus = true
-      const textarea = document.createElement('textarea')
+      const textarea = createTextarea(stage, layer, transformer, textNode)
       document.body.appendChild(textarea)
-      const container = stage.container().getBoundingClientRect()
-      textarea.value = textNode.text()
-      textarea.style.position = 'absolute'
-      textarea.style.left = container.left + textNode.x() + 'px'
-      textarea.style.top = container.top + textNode.y() + 15 + 'px'
-      textarea.style.width = textNode.width() - 5 + 'px'
-      textarea.style.height = textNode.height() - 5 + 'px'
-      textarea.style.lineHeight = String(textNode.lineHeight())
-      textarea.style.padding = textNode.padding() + 'px'
-      textarea.style.margin = '0px'
-      textarea.style.fontSize = textNode.fontSize() + 'px'
-      textarea.style.color = textNode.fill()
-      textarea.style.fontFamily = textNode.fontFamily()
-      textarea.style.border = 'none'
-      textarea.style.outline = 'none'
-      textarea.style.overflow = 'hidden'
-      textarea.style.background = 'none'
-      textarea.style.resize = 'none'
-      textarea.style.zIndex = '1000'
-      textarea.style.boxSizing = 'content-box'
       textarea.focus()
-
       textNode.hide()
       transformer.show()
       layer.draw()
-
-      textarea.addEventListener('keyup', function(e: any) {
-        textNode.text(e.target.value)
-        layer.draw()
-        textarea.style.width = textNode.width() + 'px'
-        textarea.style.height = textNode.height() + 'px'
-      })
-
-      textarea.addEventListener('blur', function () {
-        setTimeout(() => {
-          isFocus = false
-        }, 100)
-
-        textNode.text(textarea.value)
-        textarea.parentNode!.removeChild(textarea)
-        transformer.hide()
-        textNode.show()
-        layer.draw()
-      })
+      addTextareaBlurModal(stage)
     })
   },
   onLeave: ({stage}) => {
     stage.container().style.cursor = 'default'
+    removeTextareaBlurModal()
   },
 }  as PluginProps
