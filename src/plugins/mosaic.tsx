@@ -6,7 +6,7 @@ let isPaint = false
 const defalutParamValue = {
   strokeWidth: 2,
 }
-const tiles: any = []
+let tiles: any = []
 const tileHeight = 5
 const tileWidth = 5
 let tileRowSize = 0
@@ -91,7 +91,7 @@ export default {
   params: ['strokeWidth'],
   defalutParamValue,
   onDrawStart: ({stage, imageData}) => {
-    isPaint = true
+    tiles = []
     width = stage.width()
     height = stage.height()
     tileRowSize = Math.ceil(height / tileHeight)
@@ -126,6 +126,8 @@ export default {
         tiles.push(tile)
       }
     }
+
+    isPaint = true
   },
 
   onDraw: ({stage, layer, paramValue}) => {
