@@ -23,8 +23,8 @@ export default function Palette(props: PaletteProps) {
   const wRatio = props.width / imageNatureWidth
   const hRatio = props.height / imageNatureHeight
   const scaleRatio  = Math.min (wRatio, hRatio, 1)
-  const canvasWidth = imageNatureWidth * scaleRatio
-  const canvasHeight = imageNatureHeight * scaleRatio
+  const canvasWidth = Math.round(imageNatureWidth * scaleRatio)
+  const canvasHeight = Math.round(imageNatureHeight * scaleRatio)
   const stageRef = useRef<any>(null)
   const imageRef = useRef<any>(null)
   const layerRef = useRef<any>(null)
