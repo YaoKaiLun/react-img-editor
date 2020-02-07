@@ -145,7 +145,7 @@ function Example() {
     height: 414,
     plugins: [],
     getStage: setStage,
-    defaultPluginName: "circle"
+    defaultPluginName: "text"
   }), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
     style: {
       marginTop: '50px'
@@ -17728,10 +17728,10 @@ function getTransitionName(transitionName, transitionType) {
 
 /***/ }),
 
-/***/ "./node_modules/rc-tooltip/assets/bootstrap.css":
-/*!******************************************************!*\
-  !*** ./node_modules/rc-tooltip/assets/bootstrap.css ***!
-  \******************************************************/
+/***/ "./node_modules/rc-tooltip/assets/bootstrap_white.css":
+/*!************************************************************!*\
+  !*** ./node_modules/rc-tooltip/assets/bootstrap_white.css ***!
+  \************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -52648,6 +52648,7 @@ function Palette(props) {
   function getDrawEventPramas() {
     var drawEventPramas = {
       stage: stageRef.current,
+      imageLayer: imageRef.current,
       layer: layerRef.current,
       paramValue: props.currentPluginParamValue,
       imageData: imageData.current,
@@ -52668,8 +52669,8 @@ function Palette(props) {
       // 修复 stage 上元素双击事件不起作用
       if (e.target instanceof konva__WEBPACK_IMPORTED_MODULE_0___default.a.Text) return;
 
-      if (currentPlugin && currentPlugin.onStageClcik) {
-        currentPlugin.onStageClcik(getDrawEventPramas());
+      if (currentPlugin && currentPlugin.onStageClick) {
+        currentPlugin.onStageClick(getDrawEventPramas());
       }
     });
     stageRef.current.on('mousedown touchstart', function () {
@@ -52780,7 +52781,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../constants */ "./src/constants.ts");
 
 
-var colors = ['#F5222D', '#FFEB00', '#007CFF', '#52C51A ', '#19191A'];
+var colors = ['#F5222D', '#FFEB00', '#00B4FF', '#52C51A ', '#19191A', '#FFFFFF'];
 function ColorSetting(props) {
   return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("span", {
     style: {
@@ -53015,8 +53016,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var rc_tooltip__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! rc-tooltip */ "./node_modules/rc-tooltip/es/index.js");
 /* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../constants */ "./src/constants.ts");
-/* harmony import */ var rc_tooltip_assets_bootstrap_css__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! rc-tooltip/assets/bootstrap.css */ "./node_modules/rc-tooltip/assets/bootstrap.css");
-/* harmony import */ var rc_tooltip_assets_bootstrap_css__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(rc_tooltip_assets_bootstrap_css__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var rc_tooltip_assets_bootstrap_white_css__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! rc-tooltip/assets/bootstrap_white.css */ "./node_modules/rc-tooltip/assets/bootstrap_white.css");
+/* harmony import */ var rc_tooltip_assets_bootstrap_white_css__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(rc_tooltip_assets_bootstrap_white_css__WEBPACK_IMPORTED_MODULE_4__);
 
 
 
@@ -53035,9 +53036,9 @@ function Toolbar(props) {
     if (!paramNames || paramNames.length === 0) {
       return react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("span", {
         key: plugin.name,
-        className: "".concat(_constants__WEBPACK_IMPORTED_MODULE_3__["prefixCls"], "-toolbar-icon ").concat(isActivated ? 'activated' : ''),
-        title: plugin.title
+        className: "".concat(_constants__WEBPACK_IMPORTED_MODULE_3__["prefixCls"], "-toolbar-icon ").concat(isActivated ? 'activated' : '')
       }, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("i", {
+        title: plugin.title,
         className: plugin.iconfont,
         onClick: function onClick() {
           return props.handlePluginChange(plugin);
@@ -53054,12 +53055,15 @@ function Toolbar(props) {
         onChange: props.handlePluginParamValueChange
       }),
       visible: isActivated,
-      overlayClassName: "".concat(_constants__WEBPACK_IMPORTED_MODULE_3__["prefixCls"], "-tooltip")
+      overlayClassName: "".concat(_constants__WEBPACK_IMPORTED_MODULE_3__["prefixCls"], "-tooltip"),
+      arrowContent: react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", {
+        className: "rc-tooltip-arrow-inner"
+      })
     }, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("span", {
       key: plugin.name,
-      className: "".concat(_constants__WEBPACK_IMPORTED_MODULE_3__["prefixCls"], "-toolbar-icon ").concat(isActivated ? 'activated' : ''),
-      title: plugin.title
+      className: "".concat(_constants__WEBPACK_IMPORTED_MODULE_3__["prefixCls"], "-toolbar-icon ").concat(isActivated ? 'activated' : '')
     }, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("i", {
+      title: plugin.title,
       className: plugin.iconfont,
       onClick: function onClick() {
         return props.handlePluginChange(plugin);
@@ -53257,7 +53261,7 @@ var defalutParamValue = {
   name: 'arrow',
   iconfont: 'iconfont icon-arrow',
   title: '插入箭头',
-  params: ['strokeWidth', 'lineType', 'color'],
+  params: ['strokeWidth', 'color'],
   defalutParamValue: defalutParamValue,
   onDrawStart: function onDrawStart(_ref) {
     var stage = _ref.stage,
@@ -54125,101 +54129,140 @@ var timer = null;
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var konva__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! konva */ "./node_modules/konva/lib/index.js");
 /* harmony import */ var konva__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(konva__WEBPACK_IMPORTED_MODULE_0__);
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
-
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
-
-function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
-
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
-
 
 var defalutParamValue = {
   fontSize: 12,
   color: '#F5222D'
 };
-var isFocus = false;
+
+function removeTextareaBlurModal() {
+  var textareaBlurModal = document.getElementById('textareaBlurModal');
+
+  if (textareaBlurModal) {
+    textareaBlurModal.removeEventListener('click', removeTextareaBlurModal);
+    document.body.removeChild(textareaBlurModal);
+  }
+} // 防止 textarea blur 时触发 stage click 事件
+
+
+function addTextareaBlurModal(stage) {
+  if (document.getElementById('textareaBlurModal')) return;
+  var container = stage.container().getBoundingClientRect();
+  var textareaBlurModal = document.createElement('div');
+  textareaBlurModal.id = 'textareaBlurModal';
+  textareaBlurModal.style.position = 'fixed';
+  textareaBlurModal.style.left = container.left + 'px';
+  textareaBlurModal.style.top = container.top + 'px';
+  textareaBlurModal.style.width = container.width + 'px';
+  textareaBlurModal.style.height = container.height + 'px';
+  textareaBlurModal.style.zIndex = '999';
+  document.body.appendChild(textareaBlurModal);
+  textareaBlurModal.addEventListener('click', removeTextareaBlurModal);
+}
+
+function createTextarea(stage, layer, transformer, textNode, historyStack) {
+  var container = stage.container().getBoundingClientRect();
+  var textarea = document.createElement('textarea');
+  textarea.value = textNode.text();
+  textarea.style.position = 'absolute';
+  textarea.style.left = container.left + textNode.x() + 'px';
+  textarea.style.top = container.top + textNode.y() + 'px';
+  textarea.style.width = textNode.width() - 5 + 'px';
+  textarea.style.height = textNode.height() - 5 + 'px';
+  textarea.style.lineHeight = String(textNode.lineHeight());
+  textarea.style.padding = textNode.padding() + 'px';
+  textarea.style.margin = '0px';
+  textarea.style.fontSize = textNode.fontSize() + 'px';
+  textarea.style.color = textNode.fill();
+  textarea.style.fontFamily = textNode.fontFamily();
+  textarea.style.border = 'none';
+  textarea.style.outline = 'none';
+  textarea.style.overflow = 'hidden';
+  textarea.style.background = 'none';
+  textarea.style.resize = 'none';
+  textarea.style.zIndex = '1000';
+  textarea.style.boxSizing = 'content-box';
+  textarea.addEventListener('keyup', function (e) {
+    textNode.text(e.target.value);
+    layer.draw();
+    textarea.style.width = textNode.width() + 'px';
+    textarea.style.height = textNode.height() + 'px';
+  });
+  textarea.addEventListener('blur', function () {
+    textNode.text(textarea.value);
+    textarea.parentNode.removeChild(textarea);
+    transformer.hide();
+    textNode.show();
+    layer.draw();
+    removeTextareaBlurModal();
+    historyStack.push(textNode);
+  });
+  return textarea;
+}
+
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: 'text',
   iconfont: 'iconfont icon-text',
   title: '插入文字',
   params: ['fontSize', 'color'],
   defalutParamValue: defalutParamValue,
-  onStageClcik: function onStageClcik(_ref) {
-    var stage = _ref.stage,
-        layer = _ref.layer,
-        paramValue = _ref.paramValue;
-    if (isFocus) return;
+  onClick: function onClick(_ref) {
+    var stage = _ref.stage;
+    stage.container().style.cursor = 'text';
+  },
+  onStageClick: function onStageClick(_ref2) {
+    var stage = _ref2.stage,
+        layer = _ref2.layer,
+        paramValue = _ref2.paramValue,
+        historyStack = _ref2.historyStack;
     var fontSize = paramValue && paramValue.fontSize ? paramValue.fontSize : defalutParamValue.fontSize;
-    var lineHeight = fontSize + 8;
     var color = paramValue && paramValue.color ? paramValue.color : defalutParamValue.color;
-    var pos = stage.getPointerPosition();
+    var startPos = stage.getPointerPosition();
     var textNode = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Text({
-      text: '请输入',
-      x: pos.x,
-      y: pos.y,
+      x: startPos.x,
+      y: startPos.y - 10,
       fontSize: fontSize,
       draggable: true,
-      fill: color
+      fill: color,
+      padding: 3,
+      lineHeight: 1.2
+    });
+    textNode.on('mouseenter', function () {
+      stage.container().style.cursor = 'move';
+    });
+    textNode.on('mouseleave', function () {
+      stage.container().style.cursor = 'text';
+    }); // 由于 konvajs 的文本渲染和浏览器渲染的样式不一致，所以使用 Transformer 的边框来代替 textarea 自身的边框
+
+    var transformer = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Transformer({
+      node: textNode,
+      enabledAnchors: [],
+      rotateEnabled: false,
+      borderStroke: color
     });
     layer.add(textNode);
+    layer.add(transformer);
+    textNode.hide();
     layer.draw();
+    var textarea = createTextarea(stage, layer, transformer, textNode, historyStack);
+    document.body.appendChild(textarea);
+    textarea.focus();
+    addTextareaBlurModal(stage);
     textNode.on('dblclick dbltap', function (e) {
       e.cancelBubble = true;
-      isFocus = true;
-      var textarea = document.createElement('textarea');
+      var textarea = createTextarea(stage, layer, transformer, textNode, historyStack);
       document.body.appendChild(textarea);
-      var container = stage.container().getBoundingClientRect();
-      textarea.value = textNode.text();
-      textarea.style.position = 'absolute';
-      textarea.style.top = container.top + textNode.y() + 'px';
-      textarea.style.left = container.left + textNode.x() + 'px';
-      textarea.style.fontSize = fontSize + 'px';
-      textarea.style.width = textNode.width() + 8 + 'px';
-      textarea.style.lineHeight = lineHeight + 'px';
-      textarea.style.height = textNode.height() + 8 + 'px';
-      textarea.style.border = '2px solid red';
-      textarea.style.outline = 'none';
-      textarea.style.color = color;
-      textarea.style.overflow = 'hidden';
-      textarea.style.background = 'none';
-      textarea.style.resize = 'none';
-      textarea.style.zIndex = '1000';
       textarea.focus();
       textNode.hide();
+      transformer.show();
       layer.draw();
-      textarea.addEventListener('keyup', function (e) {
-        var rows = e.target.value.split(/[(\r\n)\r\n]+/);
-
-        if (e.keyCode === 13) {
-          textarea.style.height = rows.length * lineHeight + 'px';
-        }
-
-        var dom = document.createElement('span');
-        dom.style.display = 'inline-block';
-        dom.style.visibility = 'hidden';
-        dom.style.fontSize = fontSize + 'px';
-        document.body.appendChild(dom);
-        var rowLengths = rows.map(function (row) {
-          dom.innerText = row;
-          return dom.clientWidth;
-        });
-        var width = Math.max.apply(Math, _toConsumableArray(rowLengths));
-        document.body.removeChild(dom);
-        textarea.style.width = width + 8 + 'px';
-      });
-      textarea.addEventListener('blur', function () {
-        setTimeout(function () {
-          isFocus = false;
-        }, 100);
-        textNode.text(textarea.value);
-        textNode.width(textarea.clientWidth);
-        textNode.height(textarea.clientHeight);
-        textarea.parentNode.removeChild(textarea);
-        textNode.show();
-        layer.draw();
-      });
+      addTextareaBlurModal(stage);
     });
+  },
+  onLeave: function onLeave(_ref3) {
+    var stage = _ref3.stage;
+    stage.container().style.cursor = 'default';
+    removeTextareaBlurModal();
   }
 });
 
