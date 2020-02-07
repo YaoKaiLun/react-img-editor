@@ -64,10 +64,16 @@ function createTextarea(stage: any, layer: any, transformer: any, textNode: any,
   })
 
   textarea.addEventListener('blur', function () {
-    textNode.text(textarea.value)
+    if (textarea.value !== '') {
+      textNode.text(textarea.value)
+      transformer.hide()
+      textNode.show()
+    } else {
+      textNode.destroy()
+      transformer.destroy()
+    }
+
     textarea.parentNode!.removeChild(textarea)
-    transformer.hide()
-    textNode.show()
     layer.draw()
     removeTextareaBlurModal()
     historyStack.push(textNode)
