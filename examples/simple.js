@@ -52640,7 +52640,7 @@ function Palette(props) {
     });
     var imageLayer = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Layer();
     stageRef.current.add(imageLayer);
-    imageLayer.setZIndex(1);
+    imageLayer.setZIndex(0);
     imageLayer.add(img);
     imageLayer.draw();
     imageRef.current = imageLayer;
@@ -52967,24 +52967,28 @@ function ParamSetting(props) {
     switch (paramName) {
       case 'strokeWidth':
         return react__WEBPACK_IMPORTED_MODULE_3___default.a.createElement(_StrokeWidthSetting__WEBPACK_IMPORTED_MODULE_4__["default"], {
+          key: "stroke-width-setting",
           value: props.paramValue ? props.paramValue['strokeWidth'] : undefined,
           onChange: handleStrokWidthChange
         });
 
       case 'lineType':
         return react__WEBPACK_IMPORTED_MODULE_3___default.a.createElement(_LineTypeSetting__WEBPACK_IMPORTED_MODULE_2__["default"], {
+          key: "line-type-setting",
           value: props.paramValue ? props.paramValue['lineType'] : undefined,
           onChange: handleLineTypeChange
         });
 
       case 'color':
         return react__WEBPACK_IMPORTED_MODULE_3___default.a.createElement(_ColorSetting__WEBPACK_IMPORTED_MODULE_0__["default"], {
+          key: "color-setting",
           value: props.paramValue ? props.paramValue['color'] : undefined,
           onChange: handleColorChange
         });
 
       case 'fontSize':
         return react__WEBPACK_IMPORTED_MODULE_3___default.a.createElement(_FontSizeSetting__WEBPACK_IMPORTED_MODULE_1__["default"], {
+          key: "font-size-setting",
           value: props.paramValue ? props.paramValue['fontSize'] : undefined,
           onChange: handleFontSizeChange
         });
@@ -53049,6 +53053,7 @@ function Toolbar(props) {
     }
 
     return react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(rc_tooltip__WEBPACK_IMPORTED_MODULE_2__["default"], {
+      key: plugin.name,
       placement: "bottom",
       trigger: "click",
       overlay: react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(_ParamSetting__WEBPACK_IMPORTED_MODULE_0__["default"], {
@@ -53296,6 +53301,9 @@ var defalutParamValue = {
     var historyStack = _ref3.historyStack;
     isPaint = false;
     historyStack.push(lastArrow);
+  },
+  onLeave: function onLeave() {
+    isPaint = false;
   }
 });
 
@@ -53359,6 +53367,9 @@ var defalutParamValue = {
     var historyStack = _ref3.historyStack;
     isPaint = false;
     historyStack.push(lastCircle);
+  },
+  onLeave: function onLeave() {
+    isPaint = false;
   }
 });
 
@@ -53670,6 +53681,7 @@ function reset() {
     var stage = _ref5.stage;
     reset();
     stage.container().style.cursor = 'default';
+    isPaint = false;
   }
 });
 
@@ -53755,6 +53767,9 @@ var defalutParamValue = {
     var historyStack = _ref3.historyStack;
     isPaint = false;
     historyStack.push(lastLine);
+  },
+  onLeave: function onLeave() {
+    isPaint = false;
   }
 });
 
@@ -53956,6 +53971,9 @@ function getTilesByPoint(x, y, strokeWidth) {
     var historyStack = _ref3.historyStack;
     isPaint = false;
     historyStack.push(rectGroup);
+  },
+  onLeave: function onLeave() {
+    isPaint = false;
   }
 });
 
@@ -54015,6 +54033,9 @@ var defalutParamValue = {
     var historyStack = _ref3.historyStack;
     isPaint = false;
     historyStack.push(lastLine);
+  },
+  onLeave: function onLeave() {
+    isPaint = false;
   }
 });
 
@@ -54077,6 +54098,9 @@ var defalutParamValue = {
     var historyStack = _ref3.historyStack;
     isPaint = false;
     historyStack.push(lastRect);
+  },
+  onLeave: function onLeave() {
+    isPaint = false;
   }
 });
 
@@ -54195,10 +54219,16 @@ function createTextarea(stage, layer, transformer, textNode, historyStack) {
     textarea.style.height = textNode.height() + 'px';
   });
   textarea.addEventListener('blur', function () {
-    textNode.text(textarea.value);
+    if (textarea.value !== '') {
+      textNode.text(textarea.value);
+      transformer.hide();
+      textNode.show();
+    } else {
+      textNode.destroy();
+      transformer.destroy();
+    }
+
     textarea.parentNode.removeChild(textarea);
-    transformer.hide();
-    textNode.show();
     layer.draw();
     removeTextareaBlurModal();
     historyStack.push(textNode);
