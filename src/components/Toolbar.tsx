@@ -40,6 +40,7 @@ export default function Toolbar(props: ToolbarProps) {
 
     return (
       <Tooltip
+        key={plugin.name}
         placement="bottom"
         trigger="click"
         overlay={(

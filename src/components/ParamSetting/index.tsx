@@ -34,6 +34,7 @@ export default function ParamSetting(props: ParamSettingProps) {
       case 'strokeWidth':
         return (
           <StrokeWidthSetting
+            key="stroke-width-setting"
             value={props.paramValue ? props.paramValue['strokeWidth'] : undefined}
             onChange={handleStrokWidthChange}
           />
@@ -41,6 +42,7 @@ export default function ParamSetting(props: ParamSettingProps) {
       case 'lineType':
         return (
           <LineTypeSetting
+            key="line-type-setting"
             value={props.paramValue ? props.paramValue['lineType'] : undefined}
             onChange={handleLineTypeChange}
           />
@@ -48,6 +50,7 @@ export default function ParamSetting(props: ParamSettingProps) {
       case 'color':
         return (
           <ColorSetting
+            key="color-setting"
             value={props.paramValue ? props.paramValue['color'] : undefined}
             onChange={handleColorChange}
           />
@@ -55,6 +58,7 @@ export default function ParamSetting(props: ParamSettingProps) {
       case 'fontSize':
         return (
           <FontSizeSetting
+            key="font-size-setting"
             value={props.paramValue ? props.paramValue['fontSize'] : undefined}
             onChange={handleFontSizeChange}
           />

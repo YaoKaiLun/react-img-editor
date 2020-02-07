@@ -64,7 +64,7 @@ export default function Palette(props: PaletteProps) {
 
     const imageLayer = new Konva.Layer()
     stageRef.current.add(imageLayer)
-    imageLayer.setZIndex(1)
+    imageLayer.setZIndex(0)
     imageLayer.add(img)
     imageLayer.draw()
     imageRef.current = imageLayer
