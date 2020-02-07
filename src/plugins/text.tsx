@@ -107,6 +107,7 @@ export default {
 
     // 由于 konvajs 的文本渲染和浏览器渲染的样式不一致，所以使用 Transformer 的边框来代替 textarea 自身的边框
     const transformer = new Konva.Transformer({
+      // @ts-ignore
       node: textNode,
       enabledAnchors: [],
       rotateEnabled: false,
