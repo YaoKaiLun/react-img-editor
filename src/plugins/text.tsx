@@ -33,7 +33,7 @@ function addTextareaBlurModal(stage: any) {
   textareaBlurModal.addEventListener('click', removeTextareaBlurModal)
 }
 
-function createTextarea(stage: any, layer: any, transformer: any, textNode: any) {
+function createTextarea(stage: any, layer: any, transformer: any, textNode: any, historyStack: any) {
   const container = stage.container().getBoundingClientRect()
   const textarea = document.createElement('textarea')
   textarea.value = textNode.text()
@@ -70,6 +70,7 @@ function createTextarea(stage: any, layer: any, transformer: any, textNode: any)
     textNode.show()
     layer.draw()
     removeTextareaBlurModal()
+    historyStack.push(textNode)
   })
 
   return textarea
@@ -84,7 +85,7 @@ export default {
   onClick: ({stage}) => {
     stage.container().style.cursor = 'text'
   },
-  onStageClick: ({stage, layer, paramValue}) => {
+  onStageClick: ({stage, layer, paramValue, historyStack}) => {
     const fontSize = (paramValue && paramValue.fontSize) ? paramValue.fontSize : defalutParamValue.fontSize
     const color = (paramValue && paramValue.color) ? paramValue.color : defalutParamValue.color
     const startPos = stage.getPointerPosition()
@@ -117,14 +118,14 @@ export default {
     textNode.hide()
     layer.draw()
 
-    const textarea = createTextarea(stage, layer, transformer, textNode)
+    const textarea = createTextarea(stage, layer, transformer, textNode, historyStack)
     document.body.appendChild(textarea)
     textarea.focus()
     addTextareaBlurModal(stage)
 
     textNode.on('dblclick dbltap', function(e) {
       e.cancelBubble = true
-      const textarea = createTextarea(stage, layer, transformer, textNode)
+      const textarea = createTextarea(stage, layer, transformer, textNode, historyStack)
       document.body.appendChild(textarea)
       textarea.focus()
       textNode.hide()
