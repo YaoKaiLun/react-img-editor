@@ -46,4 +46,8 @@ export default {
     isPaint = false
     historyStack.push(lastArrow)
   },
+
+  onLeave: () => {
+    isPaint = false
+  },
 }  as PluginProps

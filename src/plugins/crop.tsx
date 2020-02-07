@@ -293,5 +293,6 @@ export default {
   onLeave: ({stage}) => {
     reset()
     stage.container().style.cursor = 'default'
+    isPaint = false
   },
 }  as PluginProps

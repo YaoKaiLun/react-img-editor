@@ -142,4 +142,8 @@ export default {
     isPaint = false
     historyStack.push(rectGroup)
   },
+
+  onLeave: () => {
+    isPaint = false
+  },
 }  as PluginProps

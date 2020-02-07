@@ -47,4 +47,8 @@ export default {
     isPaint = false
     historyStack.push(lastCircle)
   },
+
+  onLeave: () => {
+    isPaint = false
+  },
 }  as PluginProps

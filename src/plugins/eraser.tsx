@@ -39,4 +39,8 @@ export default {
     isPaint = false
     historyStack.push(lastLine)
   },
+
+  onLeave: () => {
+    isPaint = false
+  },
 }  as PluginProps
