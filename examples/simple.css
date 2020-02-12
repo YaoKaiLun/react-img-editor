@@ -373,6 +373,7 @@
   margin: 0 8px;
   cursor: pointer;
   font-weight: 900;
+  line-height: 20px;
 }
 .react-img-editor-line-type-activated {
   color: #007AFF;
