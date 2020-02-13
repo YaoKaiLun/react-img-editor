@@ -16,12 +16,14 @@ export default {
   title: '插入圆圈',
   params: ['strokeWidth', 'lineType', 'color'],
   defalutParamValue,
+  shapeName: 'circle',
   onDrawStart: ({stage, layer, paramValue}) => {
     isPaint = true
 
     const pos = stage.getPointerPosition()
     startPoint = [pos.x, pos.y]
     lastCircle = new Konva.Circle({
+      name: 'circle',
       stroke: (paramValue && paramValue.color) ? paramValue.color : defalutParamValue.color,
       strokeWidth: (paramValue && paramValue.strokeWidth) ? paramValue.strokeWidth : defalutParamValue.strokeWidth,
       globalCompositeOperation: 'source-over',

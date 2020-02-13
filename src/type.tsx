@@ -14,6 +14,7 @@ export interface PluginProps {
   title: string;
   params?: PluginParamName[];
   defalutParamValue?: PluginParamValue;
+  shapeName?: string;
   onClick?: (params: DrawEventPramas) => void;
   onDrawStart?: (params: DrawEventPramas) => void;
   onDraw?: (params: DrawEventPramas) => void;

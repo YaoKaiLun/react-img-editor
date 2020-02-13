@@ -17,12 +17,14 @@ export default {
   title: '插入矩形',
   params: ['strokeWidth', 'lineType', 'color'],
   defalutParamValue,
+  shapeName: 'rect',
   onDrawStart: ({stage, layer, paramValue}) => {
     isPaint = true
 
     const pos = stage.getPointerPosition()
     startPoint = [pos.x, pos.y]
     lastRect = new Konva.Rect({
+      name: 'rect',
       stroke: (paramValue && paramValue.color) ? paramValue.color : defalutParamValue.color,
       strokeWidth: (paramValue && paramValue.strokeWidth) ? paramValue.strokeWidth : defalutParamValue.strokeWidth,
       globalCompositeOperation: 'source-over',
@@ -30,6 +32,7 @@ export default {
       y: pos.y,
       dashEnabled: !!(paramValue && paramValue.lineType && paramValue.lineType === 'dash'),
       dash: [8],
+      draggable: true,
     })
     layer.add(lastRect)
   },

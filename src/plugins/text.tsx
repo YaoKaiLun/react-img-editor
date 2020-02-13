@@ -88,6 +88,7 @@ export default {
   title: '插入文字',
   params: ['fontSize', 'color'],
   defalutParamValue,
+  shapeName: 'text',
   onClick: ({stage}) => {
     stage.container().style.cursor = 'text'
   },
@@ -96,6 +97,7 @@ export default {
     const color = (paramValue && paramValue.color) ? paramValue.color : defalutParamValue.color
     const startPos = stage.getPointerPosition()
     const textNode = new Konva.Text({
+      name: 'text',
       x: startPos.x,
       y: startPos.y - 10, // fix konvajs incorrect position of text
       fontSize,

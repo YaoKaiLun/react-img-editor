@@ -16,6 +16,7 @@ export default {
   title: '插入箭头',
   params: ['strokeWidth', 'color'],
   defalutParamValue,
+  shapeName: 'arrow',
   onDrawStart: ({stage, layer, paramValue}) => {
     isPaint = true
 
@@ -23,6 +24,7 @@ export default {
     startPoints = [pos.x, pos.y]
     const strokeColor = (paramValue && paramValue.color) ? paramValue.color : defalutParamValue.color
     lastArrow = new Konva.Arrow({
+      name: 'arrow',
       stroke: strokeColor,
       strokeWidth: (paramValue && paramValue.strokeWidth) ? paramValue.strokeWidth : defalutParamValue.strokeWidth,
       globalCompositeOperation: 'source-over',

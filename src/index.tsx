@@ -70,9 +70,11 @@ export default function ReactImageEditor(props: ReactImageEditorProps) {
               width={props.width!}
               height={props.height!}
               imageObj={imageObj}
+              plugins={plugins!}
               currentPlugin={currentPlugin}
               currentPluginParamValue={currentPluginParamValue}
               getStage={props.getStage}
+              handlePluginChange={handlePluginChange}
             />
             <Toolbar width={props.width!}
               plugins={plugins!}

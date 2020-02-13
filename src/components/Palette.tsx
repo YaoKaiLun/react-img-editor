@@ -2,14 +2,17 @@ import Konva from 'konva'
 import React, { useEffect, useRef } from 'react'
 import { PluginProps, PluginParamValue, DrawEventPramas } from '../type'
 import { prefixCls } from '../constants'
+import plugins from '../plugins'
 
 interface PaletteProps {
   width: number;
   height: number;
   imageObj: HTMLImageElement;
+  plugins: PluginProps[];
   currentPlugin: PluginProps | null;
   currentPluginParamValue: PluginParamValue | null;
   getStage?: (stage: any) => void;
+  handlePluginChange: (plugin: PluginProps) => void;
 }
 
 export default function Palette(props: PaletteProps) {
@@ -97,6 +100,16 @@ export default function Palette(props: PaletteProps) {
     const { currentPlugin } = props
 
     stageRef.current.on('click tap', (e: any) => {
+      if (e.target.name && e.target.name()) {
+        const name = e.target.name()
+        for (let i = 0; i < props.plugins.length; i++) {
+          if (plugins[i].shapeName && plugins[i].shapeName === name && name !== currentPlugin.shapeName) {
+            props.handlePluginChange(plugins[i])
+            return
+          }
+        }
+      }
+
       // 修复 stage 上元素双击事件不起作用
       if (e.target instanceof Konva.Text) return
 
