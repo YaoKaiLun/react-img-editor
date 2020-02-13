@@ -32,7 +32,9 @@ import 'react-img-editor/assets/index.css'
 | getStage | 获取 KonvaJS 的 [Stage](https://konvajs.org/api/Konva.Stage.html) 对象，可用于下载图片等操作 | (stage: any) => void |
 | defaultPluginName | 默认选中的插件名称 | string? | - |
 
+
 **TODO**
 
+- [ ] 优化撤销操作性能
 - [ ] 支持绘制元素的移动和删除
 - [ ] 支持同一页面多个组件同时存在
