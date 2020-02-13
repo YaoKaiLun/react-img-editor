@@ -7,6 +7,7 @@ export interface DrawEventPramas {
   reload: (imageObj: any, rectWidth: number, rectHeigh: number) => void;
   historyStack: any[];
   pixelRatio: number;
+  event?: any;
 }
 export interface PluginProps {
   name: string;

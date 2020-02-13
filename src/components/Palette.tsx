@@ -75,7 +75,7 @@ export default function Palette(props: PaletteProps) {
     imageData.current = generateImageData(props.imageObj, canvasWidth, canvasHeight)
   }
 
-  function getDrawEventPramas() {
+  function getDrawEventPramas(e: any) {
     const drawEventPramas: DrawEventPramas = {
       stage: stageRef.current,
       imageLayer: imageRef.current,
@@ -86,6 +86,7 @@ export default function Palette(props: PaletteProps) {
       reload,
       historyStack: historyStack.current,
       pixelRatio,
+      event: e,
     }
 
     return drawEventPramas
@@ -103,7 +104,13 @@ export default function Palette(props: PaletteProps) {
       if (e.target.name && e.target.name()) {
         const name = e.target.name()
         for (let i = 0; i < props.plugins.length; i++) {
+          // 点击具体图形，会切到对应的插件去
           if (plugins[i].shapeName && plugins[i].shapeName === name && name !== currentPlugin.shapeName) {
+            (function(event: any) {
+              setTimeout(() => {
+                plugins[i].onClick && plugins[i].onClick(getDrawEventPramas(event))
+              })
+            })(e)
             props.handlePluginChange(plugins[i])
             return
           }
@@ -114,25 +121,25 @@ export default function Palette(props: PaletteProps) {
       if (e.target instanceof Konva.Text) return
 
       if (currentPlugin && currentPlugin.onClick) {
-        currentPlugin.onClick(getDrawEventPramas())
+        currentPlugin.onClick(getDrawEventPramas(e))
       }
     })
 
-    stageRef.current.on('mousedown touchstart', () => {
+    stageRef.current.on('mousedown touchstart', (e: any) => {
       if (currentPlugin && currentPlugin.onDrawStart) {
-        currentPlugin.onDrawStart(getDrawEventPramas())
+        currentPlugin.onDrawStart(getDrawEventPramas(e))
       }
     })
 
-    stageRef.current.on('mousemove touchmove', () => {
+    stageRef.current.on('mousemove touchmove', (e: any) => {
       if (currentPlugin && currentPlugin.onDraw) {
-        currentPlugin.onDraw(getDrawEventPramas())
+        currentPlugin.onDraw(getDrawEventPramas(e))
       }
     })
 
-    stageRef.current.on('mouseup touchend', () => {
+    stageRef.current.on('mouseup touchend', (e: any) => {
       if (currentPlugin && currentPlugin.onDrawEnd) {
-        currentPlugin.onDrawEnd(getDrawEventPramas())
+        currentPlugin.onDrawEnd(getDrawEventPramas(e))
       }
     })
   }
