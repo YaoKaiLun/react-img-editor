@@ -35,6 +35,6 @@ import 'react-img-editor/assets/index.css'
 
 **TODO**
 
-- [ ] 优化撤销操作性能
+- [x] 优化撤销操作性能
 - [ ] 支持绘制元素的移动和删除
 - [ ] 支持同一页面多个组件同时存在

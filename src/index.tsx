@@ -53,7 +53,7 @@ export default function ReactImageEditor(props: ReactImageEditorProps) {
     if (!plugin.params) {
       setTimeout(() => {
         setCurrentPlugin(null)
-      }, 1000)
+      })
     }
   }
 
