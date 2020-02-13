@@ -2,7 +2,7 @@
 
 react-img-editor 是一个图像编辑器 react 组件，支持对图片进行裁剪、涂鸦、文字编辑、马赛克处理等操作，同时支持自定义插件和灵活的样式配置。
 
-![示例](./assets/demo.png)
+![示例](https://s2.ax1x.com/2020/02/13/1qUQzj.png)
 
 ## 安装
 
