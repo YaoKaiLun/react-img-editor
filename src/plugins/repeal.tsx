@@ -4,7 +4,7 @@ export default {
   name: 'repeal',
   iconfont: 'iconfont icon-repeal',
   title: '撤销',
-  onClick: ({layer, historyStack}) => {
+  onEnter: ({layer, historyStack}) => {
     const shape = historyStack.pop()
     if (shape && shape.remove) {
       shape.remove()

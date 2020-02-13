@@ -119,7 +119,7 @@ export default {
   iconfont: 'iconfont icon-cut',
   title: '图片裁剪',
   params: [],
-  onClick: ({stage}) => {
+  onEnter: ({stage}) => {
     stage.container().style.cursor = 'crosshair'
   },
   onDrawStart: ({stage}) => {

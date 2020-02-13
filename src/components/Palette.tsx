@@ -113,8 +113,8 @@ export default function Palette(props: PaletteProps) {
       // 修复 stage 上元素双击事件不起作用
       if (e.target instanceof Konva.Text) return
 
-      if (currentPlugin && currentPlugin.onStageClick) {
-        currentPlugin.onStageClick(getDrawEventPramas())
+      if (currentPlugin && currentPlugin.onClick) {
+        currentPlugin.onClick(getDrawEventPramas())
       }
     })
 
@@ -204,8 +204,8 @@ export default function Palette(props: PaletteProps) {
       prevCurrentPlugin.onLeave && prevCurrentPlugin.onLeave(getDrawEventPramas())
     }
 
-    if (props.currentPlugin && props.currentPlugin.onClick) {
-      props.currentPlugin.onClick(getDrawEventPramas())
+    if (props.currentPlugin && props.currentPlugin.onEnter) {
+      props.currentPlugin.onEnter(getDrawEventPramas())
     }
 
     currentPluginRef.current = props.currentPlugin

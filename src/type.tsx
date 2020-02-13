@@ -15,11 +15,11 @@ export interface PluginProps {
   params?: PluginParamName[];
   defalutParamValue?: PluginParamValue;
   shapeName?: string;
-  onClick?: (params: DrawEventPramas) => void;
+  onEnter?: (params: DrawEventPramas) => void;
   onDrawStart?: (params: DrawEventPramas) => void;
+  onClick?: (params: DrawEventPramas) => void;
   onDraw?: (params: DrawEventPramas) => void;
   onDrawEnd?: (params: DrawEventPramas) => void;
-  onStageClick?: (params: DrawEventPramas) => void;
   onLeave?: (params: DrawEventPramas) => void;
 }
 export type PluginParamName = 'strokeWidth' | 'color' | 'fontSize' | 'lineType'

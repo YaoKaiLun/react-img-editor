@@ -89,10 +89,10 @@ export default {
   params: ['fontSize', 'color'],
   defalutParamValue,
   shapeName: 'text',
-  onClick: ({stage}) => {
+  onEnter: ({stage}) => {
     stage.container().style.cursor = 'text'
   },
-  onStageClick: ({stage, layer, paramValue, historyStack}) => {
+  onClick: ({stage, layer, paramValue, historyStack}) => {
     const fontSize = (paramValue && paramValue.fontSize) ? paramValue.fontSize : defalutParamValue.fontSize
     const color = (paramValue && paramValue.color) ? paramValue.color : defalutParamValue.color
     const startPos = stage.getPointerPosition()
