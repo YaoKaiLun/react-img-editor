@@ -15,24 +15,37 @@ const defalutParamValue = {
   color: '#F5222D',
 }
 
-function enableTransform(layer: any, node: any) {
+function enableTransform(stage: any, layer: any, node: any) {
   if (!transformer) {
     transformer = new Konva.Transformer({ ...transformerStyle, borderStrokeWidth: 0 })
     layer.add(transformer)
     transformer.attachTo(node)
+    node.on('mouseenter', function() {
+      stage.container().style.cursor = 'move'
+    })
+    node.on('mouseleave', function() {
+      stage.container().style.cursor = 'default'
+    })
+    stage.container().style.cursor = 'move'
   }
 
   node && node.draggable(true)
   layer.draw()
 }
 
-function disableTransform(layer: any, node: any) {
+function disableTransform(stage: any, layer: any, node: any) {
   if (transformer) {
     transformer.remove()
     transformer = null
   }
 
-  node && node.draggable(false)
+  if (node) {
+    node.draggable(false)
+    node.off('mouseenter')
+    node.off('mouseleave')
+    stage.container().style.cursor = 'default'
+  }
+
   selectedNode = null
   layer.draw()
 }
@@ -44,16 +57,16 @@ export default {
   params: ['strokeWidth', 'lineType', 'color'],
   defalutParamValue,
   shapeName: 'rect',
-  onClick: ({event, layer}) => {
+  onClick: ({event, stage, layer}) => {
     if (event.target.name && event.target.name() === 'rect') {
       // 之前没有选中节点或者在相同节点之间切换点击
       if (!selectedNode || selectedNode._id !== event.target._id) {
-        selectedNode && disableTransform(layer, selectedNode)
-        enableTransform(layer, event.target)
+        selectedNode && disableTransform(stage, layer, selectedNode)
+        enableTransform(stage, layer, event.target)
         selectedNode = event.target
       }
     } else {
-      disableTransform(layer, selectedNode)
+      disableTransform(stage, layer, selectedNode)
     }
   },
 
@@ -88,19 +101,19 @@ export default {
     layer.batchDraw()
   },
 
-  onDrawEnd: ({layer, historyStack}) => {
+  onDrawEnd: ({stage, layer, historyStack}) => {
     // mouseup event is triggered by move event but click event
     if (started) {
-      disableTransform(layer, selectedNode)
+      disableTransform(stage, layer, selectedNode)
     }
     isPaint = false
     started = false
     historyStack.push(lastRect)
   },
 
-  onLeave: ({layer}) => {
+  onLeave: ({stage, layer}) => {
     isPaint = false
     started = false
-    disableTransform(layer, selectedNode)
+    disableTransform(stage, layer, selectedNode)
   },
 }  as PluginProps
