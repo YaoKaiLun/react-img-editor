@@ -104,7 +104,7 @@ function enableTransform(stage: any, layer: any, node: any) {
   layer.draw()
 }
 
-function disableTransform(stage: any, layer: any, node: any) {
+function disableTransform(stage: any, layer: any, node: any, remove?: boolean) {
   if (transformer) {
     transformer.remove()
     transformer = null
@@ -115,6 +115,10 @@ function disableTransform(stage: any, layer: any, node: any) {
     node.off('mouseenter')
     node.off('mouseleave')
     stage.container().style.cursor = 'text'
+
+    if (remove) {
+      node.remove()
+    }
   }
 
   selectedNode = null
@@ -128,8 +132,18 @@ export default {
   params: ['fontSize', 'color'],
   defalutParamValue,
   shapeName: 'text',
-  onEnter: ({stage}) => {
+  onEnter: ({stage, layer}) => {
     stage.container().style.cursor = 'text'
+
+    const container = stage.container()
+    container.tabIndex = 1 // make it focusable
+    container.focus()
+    container.addEventListener('keyup', function(e: any) {
+      if (e.key === 'Backspace' && selectedNode) {
+        disableTransform(stage, layer, selectedNode, true)
+        layer.draw()
+      }
+    })
   },
   onClick: ({event, stage, layer, paramValue, historyStack}) => {
     if (event.target.name && event.target.name() === 'text') {
