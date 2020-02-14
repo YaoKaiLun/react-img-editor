@@ -193,7 +193,7 @@ export default function Palette(props: PaletteProps) {
     return () => {
       const currentPlugin = currentPluginRef.current
       // unMount 时清除插件数据
-      currentPlugin && currentPlugin.onLeave && currentPlugin.onLeave(getDrawEventPramas())
+      currentPlugin && currentPlugin.onLeave && currentPlugin.onLeave(getDrawEventPramas(null))
     }
   }, [])
 
@@ -208,11 +208,11 @@ export default function Palette(props: PaletteProps) {
     const prevCurrentPlugin = currentPluginRef.current
     if (props.currentPlugin && prevCurrentPlugin &&
       props.currentPlugin.name !== prevCurrentPlugin.name && props.currentPlugin.params) {
-      prevCurrentPlugin.onLeave && prevCurrentPlugin.onLeave(getDrawEventPramas())
+      prevCurrentPlugin.onLeave && prevCurrentPlugin.onLeave(getDrawEventPramas(null))
     }
 
     if (props.currentPlugin && props.currentPlugin.onEnter) {
-      props.currentPlugin.onEnter(getDrawEventPramas())
+      props.currentPlugin.onEnter(getDrawEventPramas(null))
     }
 
     currentPluginRef.current = props.currentPlugin
