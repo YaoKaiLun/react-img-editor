@@ -16,7 +16,7 @@ const defalutParamValue = {
 
 function enableTransform(stage: any, layer: any, node: any) {
   if (!transformer) {
-    transformer = new Konva.Transformer({ ...transformerStyle, borderStrokeWidth: 0, rotateEnabled: true })
+    transformer = new Konva.Transformer({ ...transformerStyle, rotateEnabled: true })
     layer.add(transformer)
     transformer.attachTo(node)
     node.on('mouseenter', function() {

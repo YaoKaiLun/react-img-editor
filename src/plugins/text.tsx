@@ -1,5 +1,9 @@
 import Konva from 'konva'
 import { PluginProps } from '../type'
+import { transformerStyle } from '../constants'
+
+let transformer: any = null
+let selectedNode: any = null
 
 const defalutParamValue = {
   fontSize: 12,
@@ -82,6 +86,41 @@ function createTextarea(stage: any, layer: any, transformer: any, textNode: any,
   return textarea
 }
 
+function enableTransform(stage: any, layer: any, node: any) {
+  if (!transformer) {
+    transformer = new Konva.Transformer({ ...transformerStyle, enabledAnchors: [], padding: 3 })
+    layer.add(transformer)
+    transformer.attachTo(node)
+    node.on('mouseenter', function() {
+      stage.container().style.cursor = 'move'
+    })
+    node.on('mouseleave', function() {
+      stage.container().style.cursor = 'text'
+    })
+    stage.container().style.cursor = 'move'
+  }
+
+  node && node.draggable(true)
+  layer.draw()
+}
+
+function disableTransform(stage: any, layer: any, node: any) {
+  if (transformer) {
+    transformer.remove()
+    transformer = null
+  }
+
+  if (node) {
+    node.draggable(false)
+    node.off('mouseenter')
+    node.off('mouseleave')
+    stage.container().style.cursor = 'text'
+  }
+
+  selectedNode = null
+  layer.draw()
+}
+
 export default {
   name: 'text',
   iconfont: 'iconfont icon-text',
@@ -92,7 +131,20 @@ export default {
   onEnter: ({stage}) => {
     stage.container().style.cursor = 'text'
   },
-  onClick: ({stage, layer, paramValue, historyStack}) => {
+  onClick: ({event, stage, layer, paramValue, historyStack}) => {
+    if (event.target.name && event.target.name() === 'text') {
+      // 之前没有选中节点或者在相同节点之间切换点击
+      if (!selectedNode || selectedNode._id !== event.target._id) {
+        selectedNode && disableTransform(stage, layer, selectedNode)
+        enableTransform(stage, layer, event.target)
+        selectedNode = event.target
+      }
+      return
+    } else if (selectedNode) {
+      disableTransform(stage, layer, selectedNode)
+      return
+    }
+
     const fontSize = (paramValue && paramValue.fontSize) ? paramValue.fontSize : defalutParamValue.fontSize
     const color = (paramValue && paramValue.color) ? paramValue.color : defalutParamValue.color
     const startPos = stage.getPointerPosition()
@@ -101,20 +153,13 @@ export default {
       x: startPos.x,
       y: startPos.y - 10, // fix konvajs incorrect position of text
       fontSize,
-      draggable: true,
       fill: color,
       padding: 3,
       lineHeight: 1.2,
     })
-    textNode.on('mouseenter', function() {
-      stage.container().style.cursor = 'move'
-    })
-    textNode.on('mouseleave', function() {
-      stage.container().style.cursor = 'text'
-    })
 
     // 由于 konvajs 的文本渲染和浏览器渲染的样式不一致，所以使用 Transformer 的边框来代替 textarea 自身的边框
-    const transformer = new Konva.Transformer({
+    const textareaTransformer = new Konva.Transformer({
       node: textNode as any,
       enabledAnchors: [],
       rotateEnabled: false,
@@ -122,28 +167,32 @@ export default {
     })
 
     layer.add(textNode)
-    layer.add(transformer)
+    layer.add(textareaTransformer)
     textNode.hide()
     layer.draw()
 
-    const textarea = createTextarea(stage, layer, transformer, textNode, historyStack)
+    const textarea = createTextarea(stage, layer, textareaTransformer, textNode, historyStack)
     document.body.appendChild(textarea)
     textarea.focus()
     addTextareaBlurModal(stage)
 
     textNode.on('dblclick dbltap', function(e) {
+      // dblclick 前会触发两次 onClick 事件，因此要清楚 onClick 事件里的状态
+      disableTransform(stage, layer, selectedNode)
+
       e.cancelBubble = true
-      const textarea = createTextarea(stage, layer, transformer, textNode, historyStack)
+      const textarea = createTextarea(stage, layer, textareaTransformer, textNode, historyStack)
       document.body.appendChild(textarea)
       textarea.focus()
       textNode.hide()
-      transformer.show()
+      textareaTransformer.show()
       layer.draw()
       addTextareaBlurModal(stage)
     })
   },
-  onLeave: ({stage}) => {
+  onLeave: ({stage, layer}) => {
     stage.container().style.cursor = 'default'
     removeTextareaBlurModal()
+    disableTransform(stage, layer, selectedNode)
   },
 }  as PluginProps

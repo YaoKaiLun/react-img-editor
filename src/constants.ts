@@ -9,4 +9,5 @@ export const transformerStyle = {
   borderStroke: '#007AFF',
   anchorFill: '#FFF',
   anchorSize: 6,
+  rotateAnchorOffset: 20,
 }
