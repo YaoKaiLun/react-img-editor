@@ -7,7 +7,7 @@ let lastRect: any = null
 let transformer: any = null
 let selectedNode: any = null
 let isPaint = false // 防止切换插件时，onDraw 没有释放
-let started = false
+let started = false // start draw 的标志
 let startPoint = [0, 0]
 const defalutParamValue = {
   strokeWidth: 2,
