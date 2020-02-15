@@ -87,6 +87,7 @@ export default function Palette(props: PaletteProps) {
       historyStack: historyStack.current,
       pixelRatio,
       event: e,
+      plugins: props.plugins,
     }
 
     return drawEventPramas
@@ -105,7 +106,9 @@ export default function Palette(props: PaletteProps) {
         const name = e.target.name()
         for (let i = 0; i < props.plugins.length; i++) {
           // 点击具体图形，会切到对应的插件去
-          if (plugins[i].shapeName && plugins[i].shapeName === name && name !== currentPlugin.shapeName) {
+          if (plugins[i].shapeName
+            && plugins[i].shapeName === name
+            && (!currentPlugin || !currentPlugin.shapeName || name !== currentPlugin.shapeName)) {
             (function(event: any) {
               setTimeout(() => {
                 plugins[i].onClick && plugins[i].onClick(getDrawEventPramas(event))

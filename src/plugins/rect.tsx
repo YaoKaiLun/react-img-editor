@@ -1,7 +1,10 @@
-
 import Konva from 'konva'
-import { PluginProps } from '../type'
+import { DrawEventPramas, PluginProps } from '../type'
 import { transformerStyle } from '../constants'
+
+function uuid() {
+  return '_' + Math.random().toString(36).substr(2, 9)
+}
 
 let lastRect: any = null
 let transformer: any = null
@@ -15,7 +18,9 @@ const defalutParamValue = {
   color: '#F5222D',
 }
 
-function enableTransform(stage: any, layer: any, node: any) {
+function enableTransform(drawEventPramas: DrawEventPramas, node: any) {
+  const {stage, layer} = drawEventPramas
+
   if (!transformer) {
     transformer = new Konva.Transformer({ ...transformerStyle, borderStrokeWidth: 0 })
     layer.add(transformer)
@@ -33,7 +38,9 @@ function enableTransform(stage: any, layer: any, node: any) {
   layer.draw()
 }
 
-function disableTransform(stage: any, layer: any, node: any, remove?: boolean) {
+function disableTransform(drawEventPramas: DrawEventPramas, node: any, remove?: boolean) {
+  const {stage, layer, historyStack} = drawEventPramas
+
   if (transformer) {
     transformer.remove()
     transformer = null
@@ -61,27 +68,30 @@ export default {
   params: ['strokeWidth', 'lineType', 'color'],
   defalutParamValue,
   shapeName: 'rect',
-  onEnter: ({stage, layer}) => {
+  onEnter: (drawEventPramas) => {
+    const {stage, layer} = drawEventPramas
     const container = stage.container()
     container.tabIndex = 1 // make it focusable
     container.focus()
     container.addEventListener('keyup', function(e: any) {
       if (e.key === 'Backspace' && selectedNode) {
-        disableTransform(stage, layer, selectedNode, true)
+        disableTransform(drawEventPramas, selectedNode, true)
         layer.draw()
       }
     })
   },
-  onClick: ({event, stage, layer}) => {
+
+  onClick: (drawEventPramas) => {
+    const {event} = drawEventPramas
     if (event.target.name && event.target.name() === 'rect') {
       // 之前没有选中节点或者在相同节点之间切换点击
       if (!selectedNode || selectedNode._id !== event.target._id) {
-        selectedNode && disableTransform(stage, layer, selectedNode)
-        enableTransform(stage, layer, event.target)
+        selectedNode && disableTransform(drawEventPramas, selectedNode)
+        enableTransform(drawEventPramas, event.target)
         selectedNode = event.target
       }
     } else {
-      disableTransform(stage, layer, selectedNode)
+      disableTransform(drawEventPramas, selectedNode)
     }
   },
 
@@ -89,13 +99,14 @@ export default {
     isPaint = true
   },
 
-  onDraw: ({stage, layer, paramValue}) => {
+  onDraw: ({stage, layer, paramValue, historyStack}) => {
     if (!isPaint || transformer) return
 
     if (!started) {
       const pos = stage.getPointerPosition()
       startPoint = [pos.x, pos.y]
       lastRect = new Konva.Rect({
+        id: uuid(),
         name: 'rect',
         stroke: (paramValue && paramValue.color) ? paramValue.color : defalutParamValue.color,
         strokeWidth: (paramValue && paramValue.strokeWidth) ? paramValue.strokeWidth : defalutParamValue.strokeWidth,
@@ -105,6 +116,12 @@ export default {
         dashEnabled: !!(paramValue && paramValue.lineType && paramValue.lineType === 'dash'),
         dash: [8],
         strokeScaleEnabled: false,
+      })
+      lastRect.on('transformend', () => {
+        historyStack.push(lastRect.toObject())
+      })
+      lastRect.on('dragend', () => {
+        historyStack.push(lastRect.toObject())
       })
       layer.add(lastRect)
       started = true
@@ -116,21 +133,32 @@ export default {
     layer.batchDraw()
   },
 
-  onDrawEnd: ({stage, layer, historyStack}) => {
+  onDrawEnd: (drawEventPramas) => {
+    const {historyStack} = drawEventPramas
+
     // mouseup event is triggered by move event but click event
     if (started) {
-      disableTransform(stage, layer, selectedNode)
+      disableTransform(drawEventPramas, selectedNode)
+      if (lastRect) {
+        historyStack.push(lastRect.toObject())
+      }
     }
     isPaint = false
     started = false
-    if (lastRect) {
-      historyStack.push(lastRect)
-    }
   },
 
-  onLeave: ({stage, layer}) => {
+  onLeave: (drawEventPramas) => {
     isPaint = false
     started = false
-    disableTransform(stage, layer, selectedNode)
+    disableTransform(drawEventPramas, selectedNode)
+  },
+
+  onNodeRecreate: ({historyStack}, node) => {
+    node.on('transformend', () => {
+      historyStack.push(node.toObject())
+    })
+    node.on('dragend', () => {
+      historyStack.push(node.toObject())
+    })
   },
 }  as PluginProps

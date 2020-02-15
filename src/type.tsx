@@ -8,6 +8,7 @@ export interface DrawEventPramas {
   historyStack: any[];
   pixelRatio: number;
   event?: any;
+  plugins: PluginProps[];
 }
 export interface PluginProps {
   name: string;
@@ -22,6 +23,7 @@ export interface PluginProps {
   onDraw?: (params: DrawEventPramas) => void;
   onDrawEnd?: (params: DrawEventPramas) => void;
   onLeave?: (params: DrawEventPramas) => void;
+  onNodeRecreate?: (params: DrawEventPramas, node: any) => void;
 }
 export type PluginParamName = 'strokeWidth' | 'color' | 'fontSize' | 'lineType'
 export interface PluginParamValue {
