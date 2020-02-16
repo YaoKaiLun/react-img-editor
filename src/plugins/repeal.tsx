@@ -9,6 +9,7 @@ export default {
     const {layer, historyStack, plugins} = drawEventPramas
     layer.removeChildren()
     historyStack.pop()
+
     historyStack.forEach((node, index) => {
       let flag = false
       for (let i = index + 1; i < historyStack.length; i++) {
@@ -30,6 +31,7 @@ export default {
         })
       }
     })
+
     layer.draw()
   },
 }  as PluginProps

@@ -53,6 +53,9 @@ function disableTransform(drawEventPramas: DrawEventPramas, node: any, remove?: 
     stage.container().style.cursor = 'default'
 
     if (remove) {
+      node.hide()
+      // 使用隐藏节点占位并覆盖堆栈中已有节点
+      historyStack.push(node.toObject())
       node.remove()
     }
   }
@@ -117,11 +120,11 @@ export default {
         dash: [8],
         strokeScaleEnabled: false,
       })
-      lastRect.on('transformend', () => {
-        historyStack.push(lastRect.toObject())
+      lastRect.on('transformend', function() {
+        historyStack.push(this.toObject())
       })
-      lastRect.on('dragend', () => {
-        historyStack.push(lastRect.toObject())
+      lastRect.on('dragend', function() {
+        historyStack.push(this.toObject())
       })
       layer.add(lastRect)
       started = true
@@ -154,11 +157,11 @@ export default {
   },
 
   onNodeRecreate: ({historyStack}, node) => {
-    node.on('transformend', () => {
-      historyStack.push(node.toObject())
+    node.on('transformend', function() {
+      historyStack.push(this.toObject())
     })
-    node.on('dragend', () => {
-      historyStack.push(node.toObject())
+    node.on('dragend', function() {
+      historyStack.push(this.toObject())
     })
   },
 }  as PluginProps
