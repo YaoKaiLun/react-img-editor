@@ -1,6 +1,7 @@
 import Konva from 'konva'
 import Plugin from './Plugin'
 import { DrawEventPramas, PluginParamName, PluginParamValue } from '../type'
+import { uuid } from '../utils'
 
 export default class Eraser extends Plugin {
   name = 'eraser'
@@ -19,6 +20,7 @@ export default class Eraser extends Plugin {
     const pos = stage.getPointerPosition()
     this.isPaint = true
     this.lastLine = new Konva.Line({
+      id: uuid(),
       stroke: '#df4b26',
       strokeWidth: (paramValue && paramValue.strokeWidth) ? paramValue.strokeWidth : this.defalutParamValue.strokeWidth,
       globalCompositeOperation: 'destination-out',
@@ -40,7 +42,7 @@ export default class Eraser extends Plugin {
   onDrawEnd = (drawEventPramas: DrawEventPramas) => {
     const {historyStack} = drawEventPramas
     this.isPaint = false
-    historyStack.push(this.lastLine)
+    historyStack.push(this.lastLine.toObject())
   }
 
   onLeave = () => {

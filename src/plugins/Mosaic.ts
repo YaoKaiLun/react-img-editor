@@ -2,6 +2,7 @@
 import Konva from 'konva'
 import Plugin from './Plugin'
 import { DrawEventPramas, PluginParamValue, PluginParamName } from '../type'
+import { uuid } from '../utils'
 
 const tileHeight = 5
 const tileWidth = 5
@@ -100,7 +101,7 @@ export default class Mosaic extends Plugin {
     this.tileRowSize = Math.ceil(this.height / tileHeight)
     this.tileColumnSize = Math.ceil(this.width / tileWidth)
 
-    this.rectGroup = new Konva.Group()
+    this.rectGroup = new Konva.Group({id: uuid()})
 
     // 将图片切分成一个个大一点的贴片
     for (let i = 0; i < this.tileRowSize; i++) {
@@ -145,7 +146,7 @@ export default class Mosaic extends Plugin {
   onDrawEnd = (drawEventPramas: DrawEventPramas) => {
     const {historyStack} = drawEventPramas
     this.isPaint = false
-    historyStack.push(this.rectGroup)
+    historyStack.push(this.rectGroup.toObject())
   }
 
   onLeave = () => {
