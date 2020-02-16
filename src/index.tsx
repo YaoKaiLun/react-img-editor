@@ -63,8 +63,14 @@ export default function ReactImageEditor(props: ReactImageEditorProps) {
     setCurrentPluginParamValue(value)
   }
 
+  const style = {
+    width: props.width + 'px',
+    height: props.height + 'px',
+    ...props.style,
+  }
+
   return (
-    <div className="react-img-editor" style={props.style}>
+    <div className="react-img-editor" style={style}>
       {
         imageObj ? (
           <>

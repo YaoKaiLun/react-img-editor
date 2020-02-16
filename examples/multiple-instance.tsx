@@ -14,12 +14,14 @@ function MultipleInstance() {
         width={500}
         height={414}
         plugins={[]}
+        defaultPluginName="text"
       />
       <ReactImgEditor
         src={image2}
         width={500}
         height={414}
         plugins={[]}
+        defaultPluginName="rect"
       />
     </div>
   )

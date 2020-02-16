@@ -19,7 +19,7 @@ interface PaletteProps {
 export default function Palette(props: PaletteProps) {
   const style = {
     width: props.width,
-    height: props.height,
+    height: props.height - 42,
   }
 
   const imageNatureWidth = props.imageObj.naturalWidth
