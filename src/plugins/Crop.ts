@@ -42,32 +42,31 @@ export default class Crop extends Plugin {
     const $toolbar = document.getElementById(this.toolbarId)
     if (!$toolbar) return
 
-    const container = stage.container().getBoundingClientRect()
     let left: number
     let top: number
 
     if (this.getRectWidth() >= 0) {
-      left = container.left + this.getRectX()
+      left = this.getRectX()
     } else {
-      left = container.left + this.getRectX() - toolbarWidth
+      left = this.getRectX() - toolbarWidth
     }
 
     if (this.getRectHeight() >= 0) {
-      top = container.top + this.getRectHeight() + this.getRectY() + 20
+      top = this.getRectHeight() + this.getRectY() + 20
     } else {
-      top = container.top + this.getRectY() + 20
+      top = this.getRectY() + 20
     }
 
-    if (left < container.left) left = container.left
-    if (left > container.left + stage.width() - toolbarWidth) left = container.left + stage.width() - toolbarWidth
-    if (top < container.top) top = container.top
-    if (top > container.top + stage.height()) top = container.top + stage.height()
+    if (left < 0) left = 0
+    if (left > stage.width() - toolbarWidth) left = stage.width() - toolbarWidth
+    if (top < 0) top = 0
+    if (top > stage.height()) top = stage.height()
 
     $toolbar.style.left = `${left}px`
     $toolbar.style.top = `${top}px`
   }
 
-  createCropToolbar = (sureBtnEvent: () => void, cancelBtnEvent: () => void) => {
+  createCropToolbar = (stage: any, sureBtnEvent: () => void, cancelBtnEvent: () => void) => {
     if (document.getElementById(this.toolbarId)) return
 
     const fragment = new DocumentFragment()
@@ -112,12 +111,12 @@ export default class Crop extends Plugin {
     $checkIcon.setAttribute('style', 'font-size: 12px;')
     $sureBtn.appendChild($checkIcon)
 
-    document.body.appendChild(fragment)
+    stage.container().appendChild(fragment)
   }
 
-  reset = () => {
+  reset = (stage: any) => {
     const $toolbar = document.getElementById(this.toolbarId)
-    $toolbar && document.body.removeChild($toolbar)
+    $toolbar && stage.container().removeChild($toolbar)
     this.virtualLayer && this.virtualLayer.remove()
     if (this.rect) {
       this.rect.off('mouseenter')
@@ -225,7 +224,7 @@ export default class Crop extends Plugin {
     this.transformer = new Konva.Transformer({
       node: this.rect,
       ...transformerStyle,
-      boundBoxFunc: function(oldBox: any, newBox: any) {
+      boundBoxFunc: (oldBox: any, newBox: any) => {
         let x = newBox.x
         let y = newBox.y
         let width = newBox.width
@@ -279,7 +278,7 @@ export default class Crop extends Plugin {
     this.virtualLayer.add(this.transformer)
     this.virtualLayer.draw()
 
-    this.createCropToolbar(() => {
+    this.createCropToolbar(stage, () => {
       // 裁剪区域太小不允许裁剪
       if (this.getRectWidth() < 2 || this.getRectHeight() < 2) return
 
@@ -296,12 +295,12 @@ export default class Crop extends Plugin {
       const imageObj = new Image()
       imageObj.onload = () => {
         reload(imageObj, this.getRectWidth(), this.getRectHeight())
-        this.reset()
+        this.reset(stage)
       }
       imageObj.src = dataURL
       stage.container().style.cursor = 'crosshair'
     }, () => {
-      this.reset()
+      this.reset(stage)
       stage.container().style.cursor = 'crosshair'
     })
     this.adjustToolbarPosition(stage)
@@ -309,7 +308,7 @@ export default class Crop extends Plugin {
 
   onLeave = (drawEventPramas: DrawEventPramas) => {
     const {stage} = drawEventPramas
-    this.reset()
+    this.reset(stage)
     stage.container().style.cursor = 'default'
     this.isPaint = false
   }

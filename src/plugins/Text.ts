@@ -46,12 +46,11 @@ export default class Text extends Plugin {
   }
 
   createTextarea = (stage: any, layer: any, transformer: any, textNode: any, historyStack: any) => {
-    const container = stage.container().getBoundingClientRect()
     const textarea = document.createElement('textarea')
     textarea.value = textNode.text()
     textarea.style.position = 'absolute'
-    textarea.style.left = container.left + textNode.x() + 'px'
-    textarea.style.top = container.top + textNode.y() + 12 + 'px'
+    textarea.style.left = textNode.x() + 'px'
+    textarea.style.top = textNode.y() + 'px'
     textarea.style.width = textNode.width() + 'px'
     textarea.style.height = textNode.height() + 'px'
     textarea.style.lineHeight = String(textNode.lineHeight())
@@ -98,7 +97,7 @@ export default class Text extends Plugin {
     const {stage, layer} = drawEventPramas
 
     if (!this.transformer) {
-      this.transformer = new Konva.Transformer({ ...transformerStyle, enabledAnchors: [], padding: 3 })
+      this.transformer = new Konva.Transformer({ ...transformerStyle, enabledAnchors: [], padding: 2 })
       layer.add(this.transformer)
       this.transformer.attachTo(node)
       node.on('mouseenter', function() {
@@ -182,7 +181,7 @@ export default class Text extends Plugin {
       fontSize,
       fill: color,
       padding: 3,
-      lineHeight: 1.2,
+      lineHeight: 1.1,
     })
     textNode.on('dragend', function() {
       historyStack.push(this.toObject())
@@ -202,7 +201,7 @@ export default class Text extends Plugin {
     layer.draw()
 
     const textarea = this.createTextarea(stage, layer, textareaTransformer, textNode, historyStack)
-    document.body.appendChild(textarea)
+    stage.container().appendChild(textarea)
     textarea.focus()
     this.addTextareaBlurModal(stage)
 
@@ -212,7 +211,7 @@ export default class Text extends Plugin {
 
       e.cancelBubble = true
       const textarea = this.createTextarea(stage, layer, textareaTransformer, textNode, historyStack)
-      document.body.appendChild(textarea)
+      stage.container().appendChild(textarea)
       textarea.focus()
       textNode.hide()
       textareaTransformer.show()

@@ -225,7 +225,7 @@ export default function Palette(props: PaletteProps) {
 
   return (
     <div className={`${prefixCls}-palette`} style={style}>
-      <div id={containerIdRef.current} />
+      <div id={containerIdRef.current} className={`${prefixCls}-container`} />
     </div>
   )
 }
