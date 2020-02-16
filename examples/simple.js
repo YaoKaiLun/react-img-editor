@@ -52587,6 +52587,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../constants */ "./src/constants.ts");
+/* harmony import */ var _plugins__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../plugins */ "./src/plugins/index.tsx");
+
 
 
 
@@ -52647,7 +52649,7 @@ function Palette(props) {
     imageData.current = generateImageData(props.imageObj, canvasWidth, canvasHeight);
   }
 
-  function getDrawEventPramas() {
+  function getDrawEventPramas(e) {
     var drawEventPramas = {
       stage: stageRef.current,
       imageLayer: imageRef.current,
@@ -52657,7 +52659,9 @@ function Palette(props) {
       // eslint-disable-next-line @typescript-eslint/no-use-before-define
       reload: reload,
       historyStack: historyStack.current,
-      pixelRatio: pixelRatio
+      pixelRatio: pixelRatio,
+      event: e,
+      plugins: props.plugins
     };
     return drawEventPramas;
   }
@@ -52668,26 +52672,51 @@ function Palette(props) {
     layerRef.current.setZIndex(1);
     var currentPlugin = props.currentPlugin;
     stageRef.current.on('click tap', function (e) {
-      // 修复 stage 上元素双击事件不起作用
-      if (e.target instanceof konva__WEBPACK_IMPORTED_MODULE_0___default.a.Text) return;
+      if (e.target.name && e.target.name()) {
+        var name = e.target.name();
 
-      if (currentPlugin && currentPlugin.onStageClick) {
-        currentPlugin.onStageClick(getDrawEventPramas());
+        var _loop = function _loop(i) {
+          // 点击具体图形，会切到对应的插件去
+          if (_plugins__WEBPACK_IMPORTED_MODULE_3__["default"][i].shapeName && _plugins__WEBPACK_IMPORTED_MODULE_3__["default"][i].shapeName === name && (!currentPlugin || !currentPlugin.shapeName || name !== currentPlugin.shapeName)) {
+            (function (event) {
+              setTimeout(function () {
+                _plugins__WEBPACK_IMPORTED_MODULE_3__["default"][i].onClick && _plugins__WEBPACK_IMPORTED_MODULE_3__["default"][i].onClick(getDrawEventPramas(event));
+              });
+            })(e);
+
+            props.handlePluginChange(_plugins__WEBPACK_IMPORTED_MODULE_3__["default"][i]);
+            return {
+              v: void 0
+            };
+          }
+        };
+
+        for (var i = 0; i < props.plugins.length; i++) {
+          var _ret = _loop(i);
+
+          if (typeof _ret === "object") return _ret.v;
+        }
+      } // 修复 stage 上元素双击事件不起作用
+      // if (e.target instanceof Konva.Text) return
+
+
+      if (currentPlugin && currentPlugin.onClick) {
+        currentPlugin.onClick(getDrawEventPramas(e));
       }
     });
-    stageRef.current.on('mousedown touchstart', function () {
+    stageRef.current.on('mousedown touchstart', function (e) {
       if (currentPlugin && currentPlugin.onDrawStart) {
-        currentPlugin.onDrawStart(getDrawEventPramas());
+        currentPlugin.onDrawStart(getDrawEventPramas(e));
       }
     });
-    stageRef.current.on('mousemove touchmove', function () {
+    stageRef.current.on('mousemove touchmove', function (e) {
       if (currentPlugin && currentPlugin.onDraw) {
-        currentPlugin.onDraw(getDrawEventPramas());
+        currentPlugin.onDraw(getDrawEventPramas(e));
       }
     });
-    stageRef.current.on('mouseup touchend', function () {
+    stageRef.current.on('mouseup touchend', function (e) {
       if (currentPlugin && currentPlugin.onDrawEnd) {
-        currentPlugin.onDrawEnd(getDrawEventPramas());
+        currentPlugin.onDrawEnd(getDrawEventPramas(e));
       }
     });
   }
@@ -52736,7 +52765,7 @@ function Palette(props) {
     return function () {
       var currentPlugin = currentPluginRef.current; // unMount 时清除插件数据
 
-      currentPlugin && currentPlugin.onLeave && currentPlugin.onLeave(getDrawEventPramas());
+      currentPlugin && currentPlugin.onLeave && currentPlugin.onLeave(getDrawEventPramas(null));
     };
   }, []);
   Object(react__WEBPACK_IMPORTED_MODULE_1__["useEffect"])(function () {
@@ -52749,11 +52778,11 @@ function Palette(props) {
     var prevCurrentPlugin = currentPluginRef.current;
 
     if (props.currentPlugin && prevCurrentPlugin && props.currentPlugin.name !== prevCurrentPlugin.name && props.currentPlugin.params) {
-      prevCurrentPlugin.onLeave && prevCurrentPlugin.onLeave(getDrawEventPramas());
+      prevCurrentPlugin.onLeave && prevCurrentPlugin.onLeave(getDrawEventPramas(null));
     }
 
-    if (props.currentPlugin && props.currentPlugin.onClick) {
-      props.currentPlugin.onClick(getDrawEventPramas());
+    if (props.currentPlugin && props.currentPlugin.onEnter) {
+      props.currentPlugin.onEnter(getDrawEventPramas(null));
     }
 
     currentPluginRef.current = props.currentPlugin;
@@ -53115,7 +53144,8 @@ var transformerStyle = {
   anchorStroke: '#007AFF',
   borderStroke: '#007AFF',
   anchorFill: '#FFF',
-  anchorSize: 6
+  anchorSize: 6,
+  rotateAnchorOffset: 20
 };
 
 /***/ }),
@@ -53204,7 +53234,7 @@ function ReactImageEditor(props) {
     if (!plugin.params) {
       setTimeout(function () {
         setCurrentPlugin(null);
-      }, 1000);
+      });
     }
   }
 
@@ -53219,9 +53249,11 @@ function ReactImageEditor(props) {
     width: props.width,
     height: props.height,
     imageObj: imageObj,
+    plugins: plugins,
     currentPlugin: currentPlugin,
     currentPluginParamValue: currentPluginParamValue,
-    getStage: props.getStage
+    getStage: props.getStage,
+    handlePluginChange: handlePluginChange
   }), react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_components_Toolbar__WEBPACK_IMPORTED_MODULE_3__["default"], {
     width: props.width,
     plugins: plugins,
@@ -53255,55 +53287,170 @@ ReactImageEditor.defaultProps = {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var konva__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! konva */ "./node_modules/konva/lib/index.js");
 /* harmony import */ var konva__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(konva__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../constants */ "./src/constants.ts");
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../utils */ "./src/utils.ts");
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
+
+
 
 var lastArrow = null;
+var transformer = null;
+var selectedNode = null;
 var isPaint = false;
+var started = false;
 var startPoints = [0, 0];
 var defalutParamValue = {
   strokeWidth: 2,
   lineType: 'solid',
   color: '#F5222D'
 };
+
+function enableTransform(drawEventPramas, node) {
+  var stage = drawEventPramas.stage,
+      layer = drawEventPramas.layer;
+
+  if (!transformer) {
+    transformer = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Transformer(_extends(_extends({}, _constants__WEBPACK_IMPORTED_MODULE_1__["transformerStyle"]), {
+      rotateEnabled: true
+    }));
+    layer.add(transformer);
+    transformer.attachTo(node);
+    node.on('mouseenter', function () {
+      stage.container().style.cursor = 'move';
+    });
+    node.on('mouseleave', function () {
+      stage.container().style.cursor = 'default';
+    });
+    stage.container().style.cursor = 'move';
+  }
+
+  node && node.draggable(true);
+  layer.draw();
+}
+
+function disableTransform(drawEventPramas, node, remove) {
+  var stage = drawEventPramas.stage,
+      layer = drawEventPramas.layer,
+      historyStack = drawEventPramas.historyStack;
+
+  if (transformer) {
+    transformer.remove();
+    transformer = null;
+  }
+
+  if (node) {
+    node.draggable(false);
+    node.off('mouseenter');
+    node.off('mouseleave');
+    stage.container().style.cursor = 'default';
+
+    if (remove) {
+      node.hide(); // 使用隐藏节点占位并覆盖堆栈中已有节点
+
+      historyStack.push(node.toObject());
+      node.remove();
+    }
+  }
+
+  selectedNode = null;
+  layer.draw();
+}
+
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: 'arrow',
   iconfont: 'iconfont icon-arrow',
   title: '插入箭头',
   params: ['strokeWidth', 'color'],
   defalutParamValue: defalutParamValue,
-  onDrawStart: function onDrawStart(_ref) {
-    var stage = _ref.stage,
-        layer = _ref.layer,
-        paramValue = _ref.paramValue;
-    isPaint = true;
-    var pos = stage.getPointerPosition();
-    startPoints = [pos.x, pos.y];
-    var strokeColor = paramValue && paramValue.color ? paramValue.color : defalutParamValue.color;
-    lastArrow = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Arrow({
-      stroke: strokeColor,
-      strokeWidth: paramValue && paramValue.strokeWidth ? paramValue.strokeWidth : defalutParamValue.strokeWidth,
-      globalCompositeOperation: 'source-over',
-      points: startPoints,
-      dashEnabled: !!(paramValue && paramValue.lineType && paramValue.lineType === 'dash'),
-      dash: [8],
-      fill: strokeColor
+  shapeName: 'arrow',
+  onEnter: function onEnter(drawEventPramas) {
+    var stage = drawEventPramas.stage,
+        layer = drawEventPramas.layer;
+    var container = stage.container();
+    container.tabIndex = 1; // make it focusable
+
+    container.focus();
+    container.addEventListener('keyup', function (e) {
+      if (e.key === 'Backspace' && selectedNode) {
+        disableTransform(drawEventPramas, selectedNode, true);
+        layer.draw();
+      }
     });
-    layer.add(lastArrow);
   },
-  onDraw: function onDraw(_ref2) {
-    var stage = _ref2.stage,
-        layer = _ref2.layer;
-    if (!isPaint) return;
+  onClick: function onClick(drawEventPramas) {
+    var event = drawEventPramas.event;
+
+    if (event.target.name && event.target.name() === 'arrow') {
+      // 之前没有选中节点或者在相同节点之间切换点击
+      if (!selectedNode || selectedNode._id !== event.target._id) {
+        selectedNode && disableTransform(drawEventPramas, selectedNode);
+        enableTransform(drawEventPramas, event.target);
+        selectedNode = event.target;
+      }
+    } else {
+      disableTransform(drawEventPramas, selectedNode);
+    }
+  },
+  onDrawStart: function onDrawStart() {
+    isPaint = true;
+  },
+  onDraw: function onDraw(drawEventPramas) {
+    var stage = drawEventPramas.stage,
+        layer = drawEventPramas.layer,
+        paramValue = drawEventPramas.paramValue,
+        historyStack = drawEventPramas.historyStack;
+    if (!isPaint || transformer) return;
+
+    if (!started) {
+      var _pos = stage.getPointerPosition();
+
+      startPoints = [_pos.x, _pos.y];
+      var strokeColor = paramValue && paramValue.color ? paramValue.color : defalutParamValue.color;
+      lastArrow = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Arrow({
+        id: Object(_utils__WEBPACK_IMPORTED_MODULE_2__["uuid"])(),
+        name: 'arrow',
+        stroke: strokeColor,
+        strokeWidth: paramValue && paramValue.strokeWidth ? paramValue.strokeWidth : defalutParamValue.strokeWidth,
+        globalCompositeOperation: 'source-over',
+        points: startPoints,
+        dashEnabled: !!(paramValue && paramValue.lineType && paramValue.lineType === 'dash'),
+        dash: [8],
+        fill: strokeColor,
+        strokeScaleEnabled: false
+      });
+      lastArrow.on('transformend', function () {
+        historyStack.push(this.toObject());
+      });
+      lastArrow.on('dragend', function () {
+        historyStack.push(this.toObject());
+      });
+      layer.add(lastArrow);
+      started = true;
+    }
+
     var pos = stage.getPointerPosition();
     lastArrow.points([startPoints[0], startPoints[1], pos.x, pos.y]);
     layer.batchDraw();
   },
-  onDrawEnd: function onDrawEnd(_ref3) {
-    var historyStack = _ref3.historyStack;
+  onDrawEnd: function onDrawEnd(drawEventPramas) {
+    var historyStack = drawEventPramas.historyStack; // mouseup event is triggered by move event but click event
+
+    if (started) {
+      disableTransform(drawEventPramas, selectedNode);
+
+      if (lastArrow) {
+        historyStack.push(lastArrow.toObject());
+      }
+    }
+
     isPaint = false;
-    historyStack.push(lastArrow);
+    started = false;
   },
-  onLeave: function onLeave() {
+  onLeave: function onLeave(drawEventPramas) {
     isPaint = false;
+    started = false;
+    disableTransform(drawEventPramas, selectedNode);
   }
 });
 
@@ -53320,42 +53467,146 @@ var defalutParamValue = {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var konva__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! konva */ "./node_modules/konva/lib/index.js");
 /* harmony import */ var konva__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(konva__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../constants */ "./src/constants.ts");
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../utils */ "./src/utils.ts");
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
+
+
 
 var lastCircle = null;
-var isPaint = false;
+var transformer = null;
+var selectedNode = null;
+var isPaint = false; // 防止切换插件时，onDraw 没有释放
+
+var started = false; // start draw 的标志
+
 var startPoint = [0, 0];
 var defalutParamValue = {
   strokeWidth: 2,
   lineType: 'solid',
   color: '#F5222D'
 };
+
+function enableTransform(drawEventPramas, node) {
+  var stage = drawEventPramas.stage,
+      layer = drawEventPramas.layer;
+
+  if (!transformer) {
+    transformer = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Transformer(_extends({}, _constants__WEBPACK_IMPORTED_MODULE_1__["transformerStyle"]));
+    layer.add(transformer);
+    transformer.attachTo(node);
+    node.on('mouseenter', function () {
+      stage.container().style.cursor = 'move';
+    });
+    node.on('mouseleave', function () {
+      stage.container().style.cursor = 'default';
+    });
+    stage.container().style.cursor = 'move';
+  }
+
+  node && node.draggable(true);
+  layer.draw();
+}
+
+function disableTransform(drawEventPramas, node, remove) {
+  var stage = drawEventPramas.stage,
+      layer = drawEventPramas.layer,
+      historyStack = drawEventPramas.historyStack;
+
+  if (transformer) {
+    transformer.remove();
+    transformer = null;
+  }
+
+  if (node) {
+    node.draggable(false);
+    node.off('mouseenter');
+    node.off('mouseleave');
+    stage.container().style.cursor = 'default';
+
+    if (remove) {
+      node.hide(); // 使用隐藏节点占位并覆盖堆栈中已有节点
+
+      historyStack.push(node.toObject());
+      node.remove();
+    }
+  }
+
+  selectedNode = null;
+  layer.draw();
+}
+
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: 'circle',
   iconfont: 'iconfont icon-circle',
   title: '插入圆圈',
   params: ['strokeWidth', 'lineType', 'color'],
   defalutParamValue: defalutParamValue,
-  onDrawStart: function onDrawStart(_ref) {
-    var stage = _ref.stage,
-        layer = _ref.layer,
-        paramValue = _ref.paramValue;
-    isPaint = true;
-    var pos = stage.getPointerPosition();
-    startPoint = [pos.x, pos.y];
-    lastCircle = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Circle({
-      stroke: paramValue && paramValue.color ? paramValue.color : defalutParamValue.color,
-      strokeWidth: paramValue && paramValue.strokeWidth ? paramValue.strokeWidth : defalutParamValue.strokeWidth,
-      globalCompositeOperation: 'source-over',
-      radius: 0,
-      dashEnabled: !!(paramValue && paramValue.lineType && paramValue.lineType === 'dash'),
-      dash: [8]
+  shapeName: 'circle',
+  onEnter: function onEnter(drawEventPramas) {
+    var stage = drawEventPramas.stage,
+        layer = drawEventPramas.layer;
+    var container = stage.container();
+    container.tabIndex = 1; // make it focusable
+
+    container.focus();
+    container.addEventListener('keyup', function (e) {
+      if (e.key === 'Backspace' && selectedNode) {
+        disableTransform(drawEventPramas, selectedNode, true);
+        layer.draw();
+      }
     });
-    layer.add(lastCircle);
   },
-  onDraw: function onDraw(_ref2) {
-    var stage = _ref2.stage,
-        layer = _ref2.layer;
-    if (!isPaint) return;
+  onClick: function onClick(drawEventPramas) {
+    var event = drawEventPramas.event;
+
+    if (event.target.name && event.target.name() === 'circle') {
+      // 之前没有选中节点或者在相同节点之间切换点击
+      if (!selectedNode || selectedNode._id !== event.target._id) {
+        selectedNode && disableTransform(drawEventPramas, selectedNode);
+        enableTransform(drawEventPramas, event.target);
+        selectedNode = event.target;
+      }
+    } else {
+      disableTransform(drawEventPramas, selectedNode);
+    }
+  },
+  onDrawStart: function onDrawStart() {
+    isPaint = true;
+  },
+  onDraw: function onDraw(drawEventPramas) {
+    var stage = drawEventPramas.stage,
+        layer = drawEventPramas.layer,
+        paramValue = drawEventPramas.paramValue,
+        historyStack = drawEventPramas.historyStack;
+    if (!isPaint || transformer) return;
+
+    if (!started) {
+      var _pos = stage.getPointerPosition();
+
+      startPoint = [_pos.x, _pos.y];
+      lastCircle = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Circle({
+        id: Object(_utils__WEBPACK_IMPORTED_MODULE_2__["uuid"])(),
+        name: 'circle',
+        stroke: paramValue && paramValue.color ? paramValue.color : defalutParamValue.color,
+        strokeWidth: paramValue && paramValue.strokeWidth ? paramValue.strokeWidth : defalutParamValue.strokeWidth,
+        globalCompositeOperation: 'source-over',
+        radius: 0,
+        dashEnabled: !!(paramValue && paramValue.lineType && paramValue.lineType === 'dash'),
+        dash: [8],
+        strokeScaleEnabled: false
+      });
+      lastCircle.on('transformend', function () {
+        historyStack.push(this.toObject());
+      });
+      lastCircle.on('dragend', function () {
+        historyStack.push(this.toObject());
+      });
+      layer.add(lastCircle);
+      started = true;
+    }
+
     var pos = stage.getPointerPosition();
     var radius = Math.sqrt(Math.pow(pos.x - startPoint[0], 2) + Math.pow(pos.y - startPoint[1], 2)) / 2;
     lastCircle.x((pos.x + startPoint[0]) / 2);
@@ -53363,13 +53614,24 @@ var defalutParamValue = {
     lastCircle.setAttr('radius', radius);
     layer.batchDraw();
   },
-  onDrawEnd: function onDrawEnd(_ref3) {
-    var historyStack = _ref3.historyStack;
+  onDrawEnd: function onDrawEnd(drawEventPramas) {
+    var historyStack = drawEventPramas.historyStack; // mouseup event is triggered by move event but click event
+
+    if (started) {
+      disableTransform(drawEventPramas, selectedNode);
+
+      if (lastCircle) {
+        historyStack.push(lastCircle.toObject());
+      }
+    }
+
     isPaint = false;
-    historyStack.push(lastCircle);
+    started = false;
   },
-  onLeave: function onLeave() {
+  onLeave: function onLeave(drawEventPramas) {
     isPaint = false;
+    started = false;
+    disableTransform(drawEventPramas, selectedNode);
   }
 });
 
@@ -53503,7 +53765,7 @@ function reset() {
   iconfont: 'iconfont icon-cut',
   title: '图片裁剪',
   params: [],
-  onClick: function onClick(_ref) {
+  onEnter: function onEnter(_ref) {
     var stage = _ref.stage;
     stage.container().style.cursor = 'crosshair';
   },
@@ -53700,7 +53962,7 @@ __webpack_require__.r(__webpack_exports__);
   name: 'download',
   iconfont: 'iconfont icon-download',
   title: '下载图片',
-  onClick: function onClick(_ref) {
+  onEnter: function onEnter(_ref) {
     var stage = _ref.stage,
         pixelRatio = _ref.pixelRatio;
     var canvas = stage.toCanvas({
@@ -54052,55 +54314,181 @@ var defalutParamValue = {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var konva__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! konva */ "./node_modules/konva/lib/index.js");
 /* harmony import */ var konva__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(konva__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../constants */ "./src/constants.ts");
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../utils */ "./src/utils.ts");
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
+
+
 
 var lastRect = null;
-var isPaint = false;
+var transformer = null;
+var selectedNode = null;
+var isPaint = false; // 防止切换插件时，onDraw 没有释放
+
+var started = false; // start draw 的标志
+
 var startPoint = [0, 0];
 var defalutParamValue = {
   strokeWidth: 2,
   lineType: 'solid',
   color: '#F5222D'
 };
+
+function enableTransform(drawEventPramas, node) {
+  var stage = drawEventPramas.stage,
+      layer = drawEventPramas.layer;
+
+  if (!transformer) {
+    transformer = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Transformer(_extends(_extends({}, _constants__WEBPACK_IMPORTED_MODULE_1__["transformerStyle"]), {
+      borderStrokeWidth: 0
+    }));
+    layer.add(transformer);
+    transformer.attachTo(node);
+    node.on('mouseenter', function () {
+      stage.container().style.cursor = 'move';
+    });
+    node.on('mouseleave', function () {
+      stage.container().style.cursor = 'default';
+    });
+    stage.container().style.cursor = 'move';
+  }
+
+  node && node.draggable(true);
+  layer.draw();
+}
+
+function disableTransform(drawEventPramas, node, remove) {
+  var stage = drawEventPramas.stage,
+      layer = drawEventPramas.layer,
+      historyStack = drawEventPramas.historyStack;
+
+  if (transformer) {
+    transformer.remove();
+    transformer = null;
+  }
+
+  if (node) {
+    node.draggable(false);
+    node.off('mouseenter');
+    node.off('mouseleave');
+    stage.container().style.cursor = 'default';
+
+    if (remove) {
+      node.hide(); // 使用隐藏节点占位并覆盖堆栈中已有节点
+
+      historyStack.push(node.toObject());
+      node.remove();
+    }
+  }
+
+  selectedNode = null;
+  layer.draw();
+}
+
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: 'rect',
   iconfont: 'iconfont icon-square',
   title: '插入矩形',
   params: ['strokeWidth', 'lineType', 'color'],
   defalutParamValue: defalutParamValue,
-  onDrawStart: function onDrawStart(_ref) {
-    var stage = _ref.stage,
-        layer = _ref.layer,
-        paramValue = _ref.paramValue;
-    isPaint = true;
-    var pos = stage.getPointerPosition();
-    startPoint = [pos.x, pos.y];
-    lastRect = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Rect({
-      stroke: paramValue && paramValue.color ? paramValue.color : defalutParamValue.color,
-      strokeWidth: paramValue && paramValue.strokeWidth ? paramValue.strokeWidth : defalutParamValue.strokeWidth,
-      globalCompositeOperation: 'source-over',
-      x: pos.x,
-      y: pos.y,
-      dashEnabled: !!(paramValue && paramValue.lineType && paramValue.lineType === 'dash'),
-      dash: [8]
+  shapeName: 'rect',
+  onEnter: function onEnter(drawEventPramas) {
+    var stage = drawEventPramas.stage,
+        layer = drawEventPramas.layer;
+    var container = stage.container();
+    container.tabIndex = 1; // make it focusable
+
+    container.focus();
+    container.addEventListener('keyup', function (e) {
+      if (e.key === 'Backspace' && selectedNode) {
+        disableTransform(drawEventPramas, selectedNode, true);
+        layer.draw();
+      }
     });
-    layer.add(lastRect);
   },
-  onDraw: function onDraw(_ref2) {
-    var stage = _ref2.stage,
-        layer = _ref2.layer;
-    if (!isPaint) return;
+  onClick: function onClick(drawEventPramas) {
+    var event = drawEventPramas.event;
+
+    if (event.target.name && event.target.name() === 'rect') {
+      // 之前没有选中节点或者在相同节点之间切换点击
+      if (!selectedNode || selectedNode._id !== event.target._id) {
+        selectedNode && disableTransform(drawEventPramas, selectedNode);
+        enableTransform(drawEventPramas, event.target);
+        selectedNode = event.target;
+      }
+    } else {
+      disableTransform(drawEventPramas, selectedNode);
+    }
+  },
+  onDrawStart: function onDrawStart() {
+    isPaint = true;
+  },
+  onDraw: function onDraw(drawEventPramas) {
+    var stage = drawEventPramas.stage,
+        layer = drawEventPramas.layer,
+        paramValue = drawEventPramas.paramValue,
+        historyStack = drawEventPramas.historyStack;
+    if (!isPaint || transformer) return;
+
+    if (!started) {
+      var _pos = stage.getPointerPosition();
+
+      startPoint = [_pos.x, _pos.y];
+      lastRect = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Rect({
+        id: Object(_utils__WEBPACK_IMPORTED_MODULE_2__["uuid"])(),
+        name: 'rect',
+        stroke: paramValue && paramValue.color ? paramValue.color : defalutParamValue.color,
+        strokeWidth: paramValue && paramValue.strokeWidth ? paramValue.strokeWidth : defalutParamValue.strokeWidth,
+        globalCompositeOperation: 'source-over',
+        x: _pos.x,
+        y: _pos.y,
+        dashEnabled: !!(paramValue && paramValue.lineType && paramValue.lineType === 'dash'),
+        dash: [8],
+        strokeScaleEnabled: false
+      });
+      lastRect.on('transformend', function () {
+        historyStack.push(this.toObject());
+      });
+      lastRect.on('dragend', function () {
+        historyStack.push(this.toObject());
+      });
+      layer.add(lastRect);
+      started = true;
+    }
+
     var pos = stage.getPointerPosition();
     lastRect.width(pos.x - startPoint[0]);
     lastRect.height(pos.y - startPoint[1]);
     layer.batchDraw();
   },
-  onDrawEnd: function onDrawEnd(_ref3) {
-    var historyStack = _ref3.historyStack;
+  onDrawEnd: function onDrawEnd(drawEventPramas) {
+    var historyStack = drawEventPramas.historyStack; // mouseup event is triggered by move event but click event
+
+    if (started) {
+      disableTransform(drawEventPramas, selectedNode);
+
+      if (lastRect) {
+        historyStack.push(lastRect.toObject());
+      }
+    }
+
     isPaint = false;
-    historyStack.push(lastRect);
+    started = false;
   },
-  onLeave: function onLeave() {
+  onLeave: function onLeave(drawEventPramas) {
     isPaint = false;
+    started = false;
+    disableTransform(drawEventPramas, selectedNode);
+  },
+  onNodeRecreate: function onNodeRecreate(_ref, node) {
+    var historyStack = _ref.historyStack;
+    node.on('transformend', function () {
+      historyStack.push(this.toObject());
+    });
+    node.on('dragend', function () {
+      historyStack.push(this.toObject());
+    });
   }
 });
 
@@ -54115,34 +54503,43 @@ var defalutParamValue = {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-var repealCount = 0;
-var timer = null;
+/* harmony import */ var konva__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! konva */ "./node_modules/konva/lib/index.js");
+/* harmony import */ var konva__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(konva__WEBPACK_IMPORTED_MODULE_0__);
+
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: 'repeal',
   iconfont: 'iconfont icon-repeal',
   title: '撤销',
-  onClick: function onClick(_ref) {
-    var layer = _ref.layer,
-        historyStack = _ref.historyStack;
-    repealCount++;
-    clearTimeout(timer);
-    timer = setTimeout(function () {
-      layer.removeChildren();
+  onEnter: function onEnter(drawEventPramas) {
+    var layer = drawEventPramas.layer,
+        historyStack = drawEventPramas.historyStack,
+        plugins = drawEventPramas.plugins;
+    layer.removeChildren();
+    historyStack.pop();
+    historyStack.forEach(function (node, index) {
+      var flag = false;
 
-      for (var i = repealCount; i > 0; i--) {
-        if (historyStack.length <= 0) {
-          repealCount = 0;
+      for (var i = index + 1; i < historyStack.length; i++) {
+        if (historyStack[i].attrs.id === node.attrs.id) {
+          flag = true;
           break;
         }
-
-        repealCount--;
-        historyStack.pop();
       }
 
-      historyStack.forEach(function (history) {
-        layer.add(history);
-      });
-    }, 500);
+      if (!flag) {
+        var recreatedNode = konva__WEBPACK_IMPORTED_MODULE_0___default.a.Node.create(node);
+        layer.add(recreatedNode);
+        setTimeout(function () {
+          for (var _i = 0; _i < plugins.length; _i++) {
+            if (plugins[_i].shapeName && plugins[_i].shapeName === recreatedNode.name()) {
+              plugins[_i].onNodeRecreate && plugins[_i].onNodeRecreate(drawEventPramas, recreatedNode);
+              break;
+            }
+          }
+        });
+      }
+    });
+    layer.draw();
   }
 });
 
@@ -54159,7 +54556,15 @@ var timer = null;
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var konva__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! konva */ "./node_modules/konva/lib/index.js");
 /* harmony import */ var konva__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(konva__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../constants */ "./src/constants.ts");
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../utils */ "./src/utils.ts");
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
+
+
+
+var transformer = null;
+var selectedNode = null;
 var defalutParamValue = {
   fontSize: 12,
   color: '#F5222D'
@@ -54196,9 +54601,9 @@ function createTextarea(stage, layer, transformer, textNode, historyStack) {
   textarea.value = textNode.text();
   textarea.style.position = 'absolute';
   textarea.style.left = container.left + textNode.x() + 'px';
-  textarea.style.top = container.top + textNode.y() + 'px';
-  textarea.style.width = textNode.width() - 5 + 'px';
-  textarea.style.height = textNode.height() - 5 + 'px';
+  textarea.style.top = container.top + textNode.y() + 12 + 'px';
+  textarea.style.width = textNode.width() + 'px';
+  textarea.style.height = textNode.height() + 'px';
   textarea.style.lineHeight = String(textNode.lineHeight());
   textarea.style.padding = textNode.padding() + 'px';
   textarea.style.margin = '0px';
@@ -54231,9 +54636,62 @@ function createTextarea(stage, layer, transformer, textNode, historyStack) {
     textarea.parentNode.removeChild(textarea);
     layer.draw();
     removeTextareaBlurModal();
-    historyStack.push(textNode);
+    historyStack.push(textNode.toObject());
   });
   return textarea;
+}
+
+function enableTransform(drawEventPramas, node) {
+  var stage = drawEventPramas.stage,
+      layer = drawEventPramas.layer;
+
+  if (!transformer) {
+    transformer = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Transformer(_extends(_extends({}, _constants__WEBPACK_IMPORTED_MODULE_1__["transformerStyle"]), {
+      enabledAnchors: [],
+      padding: 3
+    }));
+    layer.add(transformer);
+    transformer.attachTo(node);
+    node.on('mouseenter', function () {
+      stage.container().style.cursor = 'move';
+    });
+    node.on('mouseleave', function () {
+      stage.container().style.cursor = 'text';
+    });
+    stage.container().style.cursor = 'move';
+  }
+
+  node && node.draggable(true);
+  layer.draw();
+}
+
+function disableTransform(drawEventPramas, node, remove) {
+  var stage = drawEventPramas.stage,
+      layer = drawEventPramas.layer,
+      historyStack = drawEventPramas.historyStack;
+
+  if (transformer) {
+    transformer.remove();
+    transformer = null;
+  }
+
+  if (node) {
+    node.draggable(false);
+    node.off('mouseenter');
+    node.off('mouseleave');
+    stage.container().style.cursor = 'text';
+
+    if (remove) {
+      node.hide(); // 使用隐藏节点占位并覆盖堆栈中已有节点
+
+      historyStack.push(node.toObject());
+      node.remove();
+      node.remove();
+    }
+  }
+
+  selectedNode = null;
+  layer.draw();
 }
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -54242,65 +54700,113 @@ function createTextarea(stage, layer, transformer, textNode, historyStack) {
   title: '插入文字',
   params: ['fontSize', 'color'],
   defalutParamValue: defalutParamValue,
-  onClick: function onClick(_ref) {
-    var stage = _ref.stage;
-    stage.container().style.cursor = 'text';
+  shapeName: 'text',
+  onEnter: function onEnter(drawEventPramas) {
+    var stage = drawEventPramas.stage,
+        layer = drawEventPramas.layer;
+    var container = stage.container();
+    container.style.cursor = 'text';
+    container.tabIndex = 1; // make it focusable
+
+    container.focus();
+    container.addEventListener('keyup', function (e) {
+      if (e.key === 'Backspace' && selectedNode) {
+        disableTransform(drawEventPramas, selectedNode, true);
+        layer.draw();
+      }
+    });
   },
-  onStageClick: function onStageClick(_ref2) {
-    var stage = _ref2.stage,
-        layer = _ref2.layer,
-        paramValue = _ref2.paramValue,
-        historyStack = _ref2.historyStack;
+  onClick: function onClick(drawEventPramas) {
+    var event = drawEventPramas.event,
+        stage = drawEventPramas.stage,
+        layer = drawEventPramas.layer,
+        paramValue = drawEventPramas.paramValue,
+        historyStack = drawEventPramas.historyStack;
+
+    if (event.target.name && event.target.name() === 'text') {
+      // 之前没有选中节点或者在相同节点之间切换点击
+      if (!selectedNode || selectedNode._id !== event.target._id) {
+        selectedNode && disableTransform(drawEventPramas, selectedNode);
+        enableTransform(drawEventPramas, event.target);
+        selectedNode = event.target;
+      }
+
+      return;
+    } else if (selectedNode) {
+      disableTransform(drawEventPramas, selectedNode);
+      return;
+    }
+
     var fontSize = paramValue && paramValue.fontSize ? paramValue.fontSize : defalutParamValue.fontSize;
     var color = paramValue && paramValue.color ? paramValue.color : defalutParamValue.color;
     var startPos = stage.getPointerPosition();
     var textNode = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Text({
+      id: Object(_utils__WEBPACK_IMPORTED_MODULE_2__["uuid"])(),
+      name: 'text',
       x: startPos.x,
       y: startPos.y - 10,
       fontSize: fontSize,
-      draggable: true,
       fill: color,
       padding: 3,
       lineHeight: 1.2
     });
-    textNode.on('mouseenter', function () {
-      stage.container().style.cursor = 'move';
+    textNode.on('transformend', function () {
+      historyStack.push(this.toObject());
     });
-    textNode.on('mouseleave', function () {
-      stage.container().style.cursor = 'text';
+    textNode.on('dragend', function () {
+      historyStack.push(this.toObject());
     }); // 由于 konvajs 的文本渲染和浏览器渲染的样式不一致，所以使用 Transformer 的边框来代替 textarea 自身的边框
 
-    var transformer = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Transformer({
+    var textareaTransformer = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Transformer({
       node: textNode,
       enabledAnchors: [],
       rotateEnabled: false,
       borderStroke: color
     });
     layer.add(textNode);
-    layer.add(transformer);
+    layer.add(textareaTransformer);
     textNode.hide();
     layer.draw();
-    var textarea = createTextarea(stage, layer, transformer, textNode, historyStack);
+    var textarea = createTextarea(stage, layer, textareaTransformer, textNode, historyStack);
     document.body.appendChild(textarea);
     textarea.focus();
     addTextareaBlurModal(stage);
     textNode.on('dblclick dbltap', function (e) {
+      // dblclick 前会触发两次 onClick 事件，因此要清楚 onClick 事件里的状态
+      disableTransform(drawEventPramas, selectedNode);
       e.cancelBubble = true;
-      var textarea = createTextarea(stage, layer, transformer, textNode, historyStack);
+      var textarea = createTextarea(stage, layer, textareaTransformer, textNode, historyStack);
       document.body.appendChild(textarea);
       textarea.focus();
       textNode.hide();
-      transformer.show();
+      textareaTransformer.show();
       layer.draw();
       addTextareaBlurModal(stage);
     });
   },
-  onLeave: function onLeave(_ref3) {
-    var stage = _ref3.stage;
+  onLeave: function onLeave(drawEventPramas) {
+    var stage = drawEventPramas.stage;
     stage.container().style.cursor = 'default';
     removeTextareaBlurModal();
+    disableTransform(drawEventPramas, selectedNode);
   }
 });
+
+/***/ }),
+
+/***/ "./src/utils.ts":
+/*!**********************!*\
+  !*** ./src/utils.ts ***!
+  \**********************/
+/*! exports provided: uuid */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "uuid", function() { return uuid; });
+function uuid() {
+  return '_' + Math.random().toString(36).substr(2, 9);
+}
 
 /***/ }),
 
