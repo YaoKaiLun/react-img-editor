@@ -76,7 +76,7 @@ export default function ReactImageEditor(props: ReactImageEditorProps) {
           <>
             <Palette
               width={props.width!}
-              height={props.height!}
+              height={props.height! - 42}
               imageObj={imageObj}
               plugins={plugins!}
               currentPlugin={currentPlugin}

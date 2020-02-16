@@ -16,6 +16,7 @@ function MultipleInstance() {
         plugins={[]}
         defaultPluginName="text"
       />
+      <div style={{ width: '10px' }}></div>
       <ReactImgEditor
         src={image2}
         width={500}
