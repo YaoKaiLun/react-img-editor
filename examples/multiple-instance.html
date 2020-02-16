@@ -2,7 +2,7 @@
 <html>
 
 <head>
-  <title>simple.js - example - react-img-editor@0.1.2</title>
+  <title>multiple-instance.js - example - react-img-editor@0.1.2</title>
   <meta name="viewport"
         content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
   <meta charset="utf-8"/>
@@ -269,51 +269,37 @@ Monokai Sublime style. Derived from Monokai by noformnocontent http://nn.mit-lic
     </div>
     <div class="example" id="__react-content"></div>
 
-    <div class="highlight"><pre><code language="js"><span class="hljs-keyword">import</span> React, { useRef } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
+    <div class="highlight"><pre><code language="js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
 <span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>
 <span class="hljs-keyword">import</span> ReactImgEditor <span class="hljs-keyword">from</span> <span class="hljs-string">'../src/index'</span>
 <span class="hljs-keyword">import</span> <span class="hljs-string">'../assets/index.less'</span>
 
-function Example() {
-  const stageRef = useRef&lt;any&gt;(null)
-
-  function setStage(stage) {
-    stageRef.current = stage
-  }
-
-  function downloadImage() {
-    const canvas = stageRef.current.toCanvas({ pixelRatio: stageRef.current._pixelRatio })
-    canvas.toBlob(function(blob: any) {
-      const link = document.createElement(<span class="hljs-string">'a'</span>)
-      link.download = <span class="hljs-string">''</span>
-      link.href = URL.createObjectURL(blob)
-      link.click()
-    }, <span class="hljs-string">'image/jpeg'</span>)
-  }
-
+function MultipleInstance() {
   const image1 = <span class="hljs-string">'https://cstore-public.seewo.com/faq-service/4e3f2924f1d4432f82e760468bf680f0'</span>
-  // const image2 = <span class="hljs-string">'https://cvte-dev-public.seewo.com/faq-service-test/4db524ec93324794b983bf7cd78b2ae1'</span>
-  // const image3 = <span class="hljs-string">'https://cvte-dev-public.seewo.com/faq-service-test/bfdcc5337dfb43ce823a4c9743aba99c'</span>
-  // const image4 = <span class="hljs-string">'https://cvte-dev-public.seewo.com/faq-service-test/bc87ceeb7b1a473da41e025e656af966'</span>
+  const image2 = <span class="hljs-string">'https://cvte-dev-public.seewo.com/faq-service-test/4db524ec93324794b983bf7cd78b2ae1'</span>
 
   return (
-    &lt;&gt;
+    &lt;div style={{display: <span class="hljs-string">'flex'</span>}}&gt;
       &lt;ReactImgEditor
         src={image1}
-        width={736}
+        width={500}
         height={414}
         plugins={[]}
-        getStage={setStage}
         defaultPluginName=<span class="hljs-string">"text"</span>
       /&gt;
-      &lt;div style={{ marginTop: <span class="hljs-string">'50px'</span> }}&gt;
-        &lt;button onClick={downloadImage}&gt;download&lt;/button&gt;
-      &lt;/div&gt;
-    &lt;/&gt;
+      &lt;div style={{ width: <span class="hljs-string">'10px'</span> }}&gt;&lt;/div&gt;
+      &lt;ReactImgEditor
+        src={image2}
+        width={500}
+        height={414}
+        plugins={[]}
+        defaultPluginName=<span class="hljs-string">"rect"</span>
+      /&gt;
+    &lt;/div&gt;
   )
 }
 
-ReactDOM.render(&lt;Example /&gt;, document.getElementById(<span class="hljs-string">'__react-content'</span>))</code></pre></div>
+ReactDOM.render(&lt;MultipleInstance /&gt;, document.getElementById(<span class="hljs-string">'__react-content'</span>))</code></pre></div>
   </div>
   <a href="https://github.com/YaoKaiLun/react-img-editor#readme">
     <img style="position: absolute; top: 0; right: 0; border: 0;"
@@ -323,7 +309,7 @@ ReactDOM.render(&lt;Example /&gt;, document.getElementById(<span class="hljs-str
   </a>
   <script>FastClick.attach(document.body);</script>
   <script src="../common.js?nowrap"></script>
-  <script src="simple.js?nowrap"></script>
+  <script src="multiple-instance.js?nowrap"></script>
 </body>
 
 </html>

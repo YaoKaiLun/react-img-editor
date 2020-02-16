@@ -57,7 +57,7 @@
 /******/ 	// undefined = chunk not loaded, null = chunk preloaded/prefetched
 /******/ 	// Promise = chunk loading, 0 = chunk loaded
 /******/ 	var installedChunks = {
-/******/ 		"examples/simple": 0
+/******/ 		"examples/multiple-instance": 0
 /******/ 	};
 /******/
 /******/ 	var deferredModules = [];
@@ -148,17 +148,17 @@
 /******/
 /******/
 /******/ 	// add entry module to deferred list
-/******/ 	deferredModules.push([1,"common"]);
+/******/ 	deferredModules.push([0,"common"]);
 /******/ 	// run deferred modules when ready
 /******/ 	return checkDeferredModules();
 /******/ })
 /************************************************************************/
 /******/ ({
 
-/***/ "./examples/simple.tsx":
-/*!*****************************!*\
-  !*** ./examples/simple.tsx ***!
-  \*****************************/
+/***/ "./examples/multiple-instance.tsx":
+/*!****************************************!*\
+  !*** ./examples/multiple-instance.tsx ***!
+  \****************************************/
 /*! no exports provided */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -176,60 +176,47 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-function Example() {
-  var stageRef = Object(react__WEBPACK_IMPORTED_MODULE_0__["useRef"])(null);
-
-  function setStage(stage) {
-    stageRef.current = stage;
-  }
-
-  function downloadImage() {
-    var canvas = stageRef.current.toCanvas({
-      pixelRatio: stageRef.current._pixelRatio
-    });
-    canvas.toBlob(function (blob) {
-      var link = document.createElement('a');
-      link.download = '';
-      link.href = URL.createObjectURL(blob);
-      link.click();
-    }, 'image/jpeg');
-  }
-
-  var image1 = 'https://cstore-public.seewo.com/faq-service/4e3f2924f1d4432f82e760468bf680f0'; // const image2 = 'https://cvte-dev-public.seewo.com/faq-service-test/4db524ec93324794b983bf7cd78b2ae1'
-  // const image3 = 'https://cvte-dev-public.seewo.com/faq-service-test/bfdcc5337dfb43ce823a4c9743aba99c'
-  // const image4 = 'https://cvte-dev-public.seewo.com/faq-service-test/bc87ceeb7b1a473da41e025e656af966'
-
-  return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_0___default.a.Fragment, null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_src_index__WEBPACK_IMPORTED_MODULE_2__["default"], {
+function MultipleInstance() {
+  var image1 = 'https://cstore-public.seewo.com/faq-service/4e3f2924f1d4432f82e760468bf680f0';
+  var image2 = 'https://cvte-dev-public.seewo.com/faq-service-test/4db524ec93324794b983bf7cd78b2ae1';
+  return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+    style: {
+      display: 'flex'
+    }
+  }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_src_index__WEBPACK_IMPORTED_MODULE_2__["default"], {
     src: image1,
-    width: 736,
+    width: 500,
     height: 414,
     plugins: [],
-    getStage: setStage,
     defaultPluginName: "text"
   }), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
     style: {
-      marginTop: '50px'
+      width: '10px'
     }
-  }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
-    onClick: downloadImage
-  }, "download")));
+  }), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_src_index__WEBPACK_IMPORTED_MODULE_2__["default"], {
+    src: image2,
+    width: 500,
+    height: 414,
+    plugins: [],
+    defaultPluginName: "rect"
+  }));
 }
 
-react_dom__WEBPACK_IMPORTED_MODULE_1___default.a.render(react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(Example, null), document.getElementById('__react-content'));
+react_dom__WEBPACK_IMPORTED_MODULE_1___default.a.render(react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(MultipleInstance, null), document.getElementById('__react-content'));
 
 /***/ }),
 
-/***/ 1:
-/*!***********************************!*\
-  !*** multi ./examples/simple.tsx ***!
-  \***********************************/
+/***/ 0:
+/*!**********************************************!*\
+  !*** multi ./examples/multiple-instance.tsx ***!
+  \**********************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(/*! ./examples/simple.tsx */"./examples/simple.tsx");
+module.exports = __webpack_require__(/*! ./examples/multiple-instance.tsx */"./examples/multiple-instance.tsx");
 
 
 /***/ })
 
 /******/ });
-//# sourceMappingURL=simple.js.map
+//# sourceMappingURL=multiple-instance.js.map

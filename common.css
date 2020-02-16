@@ -305,6 +305,9 @@
   -webkit-box-pack: center;
           justify-content: center;
 }
+.react-img-editor-container {
+  position: relative;
+}
 .react-img-editor-toolbar {
   display: -webkit-box;
   display: flex;
@@ -342,7 +345,7 @@
   -webkit-box-align: center;
           align-items: center;
   box-sizing: border-box;
-  height: 44px;
+  height: 40px;
   background-color: #FFF;
   border-radius: 2px;
   color: #A9A9AC;
@@ -428,4 +431,4 @@
 }
 
 
-/*# sourceMappingURL=simple.css.map*/
+/*# sourceMappingURL=common.css.map*/
