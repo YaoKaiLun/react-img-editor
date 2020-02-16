@@ -111,7 +111,9 @@ export default function Palette(props: PaletteProps) {
             && (!currentPlugin || !currentPlugin.shapeName || name !== currentPlugin.shapeName)) {
             (function(event: any) {
               setTimeout(() => {
-                plugins[i].onClick && plugins[i].onClick(getDrawEventPramas(event))
+                if (plugins[i].onClick) {
+                  plugins[i].onClick(getDrawEventPramas(event))
+                }
               })
             })(e)
             props.handlePluginChange(plugins[i])

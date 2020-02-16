@@ -24,7 +24,9 @@ export default {
         setTimeout(() => {
           for (let i = 0; i < plugins.length; i++) {
             if (plugins[i].shapeName && plugins[i].shapeName === recreatedNode.name()) {
-              plugins[i].onNodeRecreate && plugins[i].onNodeRecreate(drawEventPramas, recreatedNode)
+              if (plugins[i].onNodeRecreate) {
+                plugins[i].onNodeRecreate(drawEventPramas, recreatedNode)
+              }
               break
             }
           }
