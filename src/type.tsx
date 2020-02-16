@@ -1,3 +1,5 @@
+import Plugin from './plugins/Plugin'
+
 export interface DrawEventPramas {
   stage: any;
   imageLayer: any;
@@ -8,22 +10,7 @@ export interface DrawEventPramas {
   historyStack: any[];
   pixelRatio: number;
   event?: any;
-  plugins: PluginProps[];
-}
-export interface PluginProps {
-  name: string;
-  iconfont: string;
-  title: string;
-  params?: PluginParamName[];
-  defalutParamValue?: PluginParamValue;
-  shapeName?: string;
-  onEnter?: (params: DrawEventPramas) => void;
-  onDrawStart?: (params: DrawEventPramas) => void;
-  onClick?: (params: DrawEventPramas) => void;
-  onDraw?: (params: DrawEventPramas) => void;
-  onDrawEnd?: (params: DrawEventPramas) => void;
-  onLeave?: (params: DrawEventPramas) => void;
-  onNodeRecreate?: (params: DrawEventPramas, node: any) => void;
+  plugins: Plugin[];
 }
 export type PluginParamName = 'strokeWidth' | 'color' | 'fontSize' | 'lineType'
 export interface PluginParamValue {

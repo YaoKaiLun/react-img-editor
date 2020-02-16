@@ -1,19 +1,20 @@
 import ParamSetting from './ParamSetting'
+import Plugin from '../plugins/Plugin'
 import React from 'react'
 import Tooltip from 'rc-tooltip'
-import { PluginProps, PluginParamValue } from '../type'
+import { PluginParamValue } from '../type'
 import { prefixCls } from '../constants'
 import 'rc-tooltip/assets/bootstrap_white.css'
 
 interface ToolbarProps {
   width: number;
-  plugins: PluginProps[];
+  plugins: Plugin[];
   toolbar: {
     items: string[];
   };
-  currentPlugin: PluginProps | null;
+  currentPlugin: Plugin | null;
   currentPluginParamValue: PluginParamValue | null;
-  handlePluginChange: (plugin: PluginProps) => void;
+  handlePluginChange: (plugin: Plugin) => void;
   handlePluginParamValueChange: (paramValue: PluginParamValue) => void;
 }
 
@@ -23,7 +24,7 @@ export default function Toolbar(props: ToolbarProps) {
     width: props.width,
   }
 
-  function renderPlugin(plugin: PluginProps) {
+  function renderPlugin(plugin: Plugin) {
     const isActivated = !!(props.currentPlugin && props.currentPlugin.name === plugin.name)
     const paramNames = props.currentPlugin ? props.currentPlugin.params : []
 

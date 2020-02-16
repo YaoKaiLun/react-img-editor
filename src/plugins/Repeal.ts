@@ -1,11 +1,13 @@
 import Konva from 'konva'
-import { PluginProps } from '../type'
+import Plugin from './Plugin'
+import { DrawEventPramas } from '../type'
 
-export default {
-  name: 'repeal',
-  iconfont: 'iconfont icon-repeal',
-  title: '撤销',
-  onEnter: (drawEventPramas) => {
+export default class Repeal extends Plugin {
+  name = 'repeal'
+  iconfont = 'iconfont icon-repeal'
+  title = '撤销'
+
+  onEnter = (drawEventPramas: DrawEventPramas) => {
     const {layer, historyStack, plugins} = drawEventPramas
     layer.removeChildren()
     historyStack.pop()
@@ -33,5 +35,5 @@ export default {
     })
 
     layer.draw()
-  },
-}  as PluginProps
+  }
+}

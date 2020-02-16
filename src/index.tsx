@@ -1,14 +1,15 @@
-import corePlugins from './plugins'
+import Plugin from './plugins/Plugin'
+import PluginFactory from './plugins/PluginFactory'
 import Palette from './components/Palette'
 import React, { useEffect, useState } from 'react'
 import Toolbar from './components/Toolbar'
-import { PluginProps, PluginParamValue } from './type'
+import { PluginParamValue } from './type'
 
 interface ReactImageEditorProps {
   width?: number;
   height?: number;
   style?: React.CSSProperties;
-  plugins?: PluginProps[];
+  plugins?: Plugin[];
   toolbar?: {
     items: string[];
   };
@@ -29,7 +30,8 @@ export default function ReactImageEditor(props: ReactImageEditorProps) {
     image.src = props.src
   }, [props.src])
 
-  const plugins = [...corePlugins, ...props.plugins!]
+  const pluginFactory = new PluginFactory()
+  const plugins = [...pluginFactory.plugins, ...props.plugins!]
   let defaultPlugin = null
   let defalutParamValue = {}
   for(let i = 0; i < plugins.length; i++) {
@@ -44,10 +46,10 @@ export default function ReactImageEditor(props: ReactImageEditorProps) {
     }
   }
 
-  const [currentPlugin, setCurrentPlugin] = useState<PluginProps | null>(defaultPlugin)
+  const [currentPlugin, setCurrentPlugin] = useState<Plugin | null>(defaultPlugin)
   const [currentPluginParamValue, setCurrentPluginParamValue] = useState<PluginParamValue>(defalutParamValue)
 
-  function handlePluginChange(plugin: PluginProps) {
+  function handlePluginChange(plugin: Plugin) {
     setCurrentPlugin(plugin)
     plugin.defalutParamValue && setCurrentPluginParamValue(plugin.defalutParamValue)
     if (!plugin.params) {

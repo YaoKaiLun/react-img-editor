@@ -1,18 +1,19 @@
 import Konva from 'konva'
+import Plugin from '../plugins/Plugin'
 import React, { useEffect, useRef } from 'react'
-import { PluginProps, PluginParamValue, DrawEventPramas } from '../type'
+import { PluginParamValue, DrawEventPramas } from '../type'
 import { prefixCls } from '../constants'
-import plugins from '../plugins'
+import { uuid } from '../utils'
 
 interface PaletteProps {
   width: number;
   height: number;
   imageObj: HTMLImageElement;
-  plugins: PluginProps[];
-  currentPlugin: PluginProps | null;
+  plugins: Plugin[];
+  currentPlugin: Plugin | null;
   currentPluginParamValue: PluginParamValue | null;
   getStage?: (stage: any) => void;
-  handlePluginChange: (plugin: PluginProps) => void;
+  handlePluginChange: (plugin: Plugin) => void;
 }
 
 export default function Palette(props: PaletteProps) {
@@ -28,6 +29,7 @@ export default function Palette(props: PaletteProps) {
   const scaleRatio  = Math.min (wRatio, hRatio, 1)
   const canvasWidth = Math.round(imageNatureWidth * scaleRatio)
   const canvasHeight = Math.round(imageNatureHeight * scaleRatio)
+  const containerIdRef = useRef(prefixCls + uuid())
   const stageRef = useRef<any>(null)
   const imageRef = useRef<any>(null)
   const layerRef = useRef<any>(null)
@@ -39,7 +41,7 @@ export default function Palette(props: PaletteProps) {
 
   function initPalette() {
     stageRef.current = new Konva.Stage({
-      container: 'react-img-editor',
+      container: containerIdRef.current,
       width: canvasWidth,
       height: canvasHeight,
     })
@@ -106,15 +108,15 @@ export default function Palette(props: PaletteProps) {
         const name = e.target.name()
         for (let i = 0; i < props.plugins.length; i++) {
           // 点击具体图形，会切到对应的插件去
-          if (plugins[i].shapeName
-            && plugins[i].shapeName === name
+          if (props.plugins[i].shapeName
+            && props.plugins[i].shapeName === name
             && (!currentPlugin || !currentPlugin.shapeName || name !== currentPlugin.shapeName)) {
             (function(event: any) {
               setTimeout(() => {
-                plugins[i].onClick && plugins[i].onClick!(getDrawEventPramas(event))
+                props.plugins[i].onClick && props.plugins[i].onClick!(getDrawEventPramas(event))
               })
             })(e)
-            props.handlePluginChange(plugins[i])
+            props.handlePluginChange(props.plugins[i])
             return
           }
         }
@@ -160,7 +162,7 @@ export default function Palette(props: PaletteProps) {
     removeEvents()
     historyStack.current = []
     stageRef.current = new Konva.Stage({
-      container: 'react-img-editor',
+      container: containerIdRef.current,
       width: width,
       height: height,
     })
@@ -223,7 +225,7 @@ export default function Palette(props: PaletteProps) {
 
   return (
     <div className={`${prefixCls}-palette`} style={style}>
-      <div id={prefixCls} />
+      <div id={containerIdRef.current} />
     </div>
   )
 }

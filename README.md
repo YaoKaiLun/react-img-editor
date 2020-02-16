@@ -27,7 +27,7 @@ import 'react-img-editor/assets/index.css'
 | width | 画板宽度 | number? | 700 |
 | height | 画板高度 | number? | 500 |
 | style | 画板样式 | React.CSSProperties | - |
-| plugins | 自定义的插件 | PluginProps[] | [] |
+| plugins | 自定义的插件 | Plugin[] | [] |
 | toolbar | 工具栏配置 | { items: string[] } | {items: ['pen', 'eraser', 'arrow', 'rect', 'circle', 'mosaic', 'text', 'repeal', 'download', 'crop']} |
 | getStage | 获取 KonvaJS 的 [Stage](https://konvajs.org/api/Konva.Stage.html) 对象，可用于下载图片等操作 | (stage: any) => void |
 | defaultPluginName | 默认选中的插件名称 | string? | - |
