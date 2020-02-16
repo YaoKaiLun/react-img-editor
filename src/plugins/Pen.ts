@@ -29,6 +29,9 @@ export default class Pen extends Plugin {
       points: [pos.x, pos.y],
       dashEnabled: !!(paramValue && paramValue.lineType && paramValue.lineType === 'dash'),
       dash: [8],
+      tension: 1,
+      lineCap: 'round',
+      lineJoin: 'round',
     })
     layer.add(this.lastLine)
   }
