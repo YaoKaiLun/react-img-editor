@@ -1,10 +1,7 @@
 import Konva from 'konva'
 import { DrawEventPramas, PluginProps } from '../type'
 import { transformerStyle } from '../constants'
-
-function uuid() {
-  return '_' + Math.random().toString(36).substr(2, 9)
-}
+import { uuid } from '../utils'
 
 let lastRect: any = null
 let transformer: any = null
@@ -86,6 +83,7 @@ export default {
 
   onClick: (drawEventPramas) => {
     const {event} = drawEventPramas
+
     if (event.target.name && event.target.name() === 'rect') {
       // 之前没有选中节点或者在相同节点之间切换点击
       if (!selectedNode || selectedNode._id !== event.target._id) {
@@ -102,7 +100,9 @@ export default {
     isPaint = true
   },
 
-  onDraw: ({stage, layer, paramValue, historyStack}) => {
+  onDraw: (drawEventPramas) => {
+    const {stage, layer, paramValue, historyStack} = drawEventPramas
+
     if (!isPaint || transformer) return
 
     if (!started) {
