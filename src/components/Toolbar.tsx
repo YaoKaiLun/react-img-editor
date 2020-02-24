@@ -1,40 +1,37 @@
 import ParamSetting from './ParamSetting'
 import Plugin from '../plugins/Plugin'
-import React from 'react'
+import React, { useContext } from 'react'
 import Tooltip from 'rc-tooltip'
-import { PluginParamValue } from '../type'
-import { prefixCls } from '../constants'
+import { prefixCls } from '../common/constants'
+import { EditorContext } from './EditorContext'
 import 'rc-tooltip/assets/bootstrap_white.css'
 
-interface ToolbarProps {
-  width: number;
-  plugins: Plugin[];
-  toolbar: {
-    items: string[];
-  };
-  currentPlugin: Plugin | null;
-  currentPluginParamValue: PluginParamValue | null;
-  handlePluginChange: (plugin: Plugin) => void;
-  handlePluginParamValueChange: (paramValue: PluginParamValue) => void;
-}
+export default function Toolbar() {
+  const {
+    containerWidth,
+    plugins,
+    toolbar,
+    currentPlugin,
+    paramValue,
+    handlePluginChange,
+    handlePluginParamValueChange,
+    toolbarItemConfig,
+  } = useContext(EditorContext)
 
-export default function Toolbar(props: ToolbarProps) {
-  const { plugins } = props
-  const style = {
-    width: props.width,
-  }
+  const style = { width: containerWidth }
 
   function renderPlugin(plugin: Plugin) {
-    const isActivated = !!(props.currentPlugin && props.currentPlugin.name === plugin.name)
-    const paramNames = props.currentPlugin ? props.currentPlugin.params : []
+    const isActivated = !!(currentPlugin && currentPlugin.name === plugin.name)
+    const paramNames = currentPlugin ? currentPlugin.params : []
+    const isDisabled = toolbarItemConfig[plugin.name].disable
 
     if (!paramNames || paramNames.length === 0) {
       return (
         <span
           key={plugin.name}
-          className={`${prefixCls}-toolbar-icon ${isActivated ? 'activated' : ''}`}
+          className={`${prefixCls}-toolbar-icon ${isActivated ? 'activated' : ''} ${isDisabled ? 'disabled' : ''}`}
         >
-          <i title={plugin.title} className={plugin.iconfont} onClick={() => props.handlePluginChange(plugin)} />
+          <i title={plugin.title} className={plugin.iconfont} onClick={() => handlePluginChange(plugin)} />
         </span>
       )
     }
@@ -46,8 +43,8 @@ export default function Toolbar(props: ToolbarProps) {
         overlay={(
           <ParamSetting
             paramNames={paramNames}
-            paramValue={props.currentPluginParamValue}
-            onChange={props.handlePluginParamValueChange}
+            paramValue={paramValue}
+            onChange={handlePluginParamValueChange}
           />
         )}
         visible={isActivated}
@@ -56,9 +53,9 @@ export default function Toolbar(props: ToolbarProps) {
       >
         <span
           key={plugin.name}
-          className={`${prefixCls}-toolbar-icon ${isActivated ? 'activated' : ''}`}
+          className={`${prefixCls}-toolbar-icon ${isActivated ? 'activated' : ''} ${isDisabled ? 'disabled' : ''}`}
         >
-          <i title={plugin.title} className={plugin.iconfont} onClick={() => props.handlePluginChange(plugin)} />
+          <i title={plugin.title} className={plugin.iconfont} onClick={() => handlePluginChange(plugin)} />
         </span>
       </Tooltip>
     )
@@ -67,7 +64,7 @@ export default function Toolbar(props: ToolbarProps) {
   return (
     <div className={`${prefixCls}-toolbar`} style={style}>
       {
-        props.toolbar.items.map(item => {
+        toolbar.items.map(item => {
           for(let i = 0; i < plugins.length; i++) {
             if (plugins[i].name === item) {
               return renderPlugin(plugins[i])

@@ -3,7 +3,8 @@ import PluginFactory from './plugins/PluginFactory'
 import Palette from './components/Palette'
 import React, { useEffect, useState } from 'react'
 import Toolbar from './components/Toolbar'
-import { PluginParamValue } from './type'
+import { PluginParamValue } from './common/type'
+import { EditorContext } from './components/EditorContext'
 
 interface ReactImageEditorProps {
   width?: number;
@@ -21,14 +22,6 @@ interface ReactImageEditorProps {
 export default function ReactImageEditor(props: ReactImageEditorProps) {
   const [imageObj, setImageObj] = useState<HTMLImageElement | null>(null)
 
-  useEffect(() => {
-    const image = new Image()
-    image.onload = () => {
-      setImageObj(image)
-    }
-    image.crossOrigin = 'anonymous'
-    image.src = props.src
-  }, [props.src])
 
   const pluginFactory = new PluginFactory()
   const plugins = [...pluginFactory.plugins, ...props.plugins!]
@@ -47,11 +40,29 @@ export default function ReactImageEditor(props: ReactImageEditorProps) {
   }
 
   const [currentPlugin, setCurrentPlugin] = useState<Plugin | null>(defaultPlugin)
-  const [currentPluginParamValue, setCurrentPluginParamValue] = useState<PluginParamValue>(defalutParamValue)
+  const [paramValue, setParamValue] = useState<PluginParamValue>(defalutParamValue)
+
+  const config = {}
+  plugins.map(plugin => {
+    config[plugin.name] = {
+      disable: false,
+    }
+  })
+
+  const [toolbarItemConfig, setToolbarItemConfig] = useState(config)
+
+  useEffect(() => {
+    const image = new Image()
+    image.onload = () => {
+      setImageObj(image)
+    }
+    image.crossOrigin = 'anonymous'
+    image.src = props.src
+  }, [props.src])
 
   function handlePluginChange(plugin: Plugin) {
     setCurrentPlugin(plugin)
-    plugin.defalutParamValue && setCurrentPluginParamValue(plugin.defalutParamValue)
+    plugin.defalutParamValue && setParamValue(plugin.defalutParamValue)
     if (!plugin.params) {
       setTimeout(() => {
         setCurrentPlugin(null)
@@ -60,7 +71,11 @@ export default function ReactImageEditor(props: ReactImageEditorProps) {
   }
 
   function handlePluginParamValueChange(value: PluginParamValue) {
-    setCurrentPluginParamValue(value)
+    setParamValue(value)
+  }
+
+  function updateToolbarItemConfig(config: any) {
+    setToolbarItemConfig(config)
   }
 
   const style = {
@@ -70,32 +85,35 @@ export default function ReactImageEditor(props: ReactImageEditorProps) {
   }
 
   return (
-    <div className="react-img-editor" style={style}>
-      {
-        imageObj ? (
-          <>
-            <Palette
-              width={props.width!}
-              height={props.height! - 42}
-              imageObj={imageObj}
-              plugins={plugins!}
-              currentPlugin={currentPlugin}
-              currentPluginParamValue={currentPluginParamValue}
-              getStage={props.getStage}
-              handlePluginChange={handlePluginChange}
-            />
-            <Toolbar width={props.width!}
-              plugins={plugins!}
-              toolbar={props.toolbar!}
-              currentPlugin={currentPlugin}
-              currentPluginParamValue={currentPluginParamValue}
-              handlePluginChange={handlePluginChange}
-              handlePluginParamValueChange={handlePluginParamValueChange}
-            />
-          </>
-        ) : null
-      }
-    </div>
+    <EditorContext.Provider
+      value={{
+        containerWidth: props.width!,
+        containerHeight: props.height!,
+        plugins,
+        toolbar: props.toolbar!,
+        currentPlugin,
+        paramValue,
+        handlePluginChange,
+        handlePluginParamValueChange,
+        toolbarItemConfig,
+        updateToolbarItemConfig,
+      }}
+    >
+      <div className="react-img-editor" style={style}>
+        {
+          imageObj ? (
+            <>
+              <Palette
+                height={props.height! - 42}
+                imageObj={imageObj}
+                getStage={props.getStage}
+              />
+              <Toolbar />
+            </>
+          ) : null
+        }
+      </div>
+    </EditorContext.Provider>
   )
 }
 

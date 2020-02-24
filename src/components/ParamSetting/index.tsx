@@ -3,8 +3,8 @@ import FontSizeSetting from './FontSizeSetting'
 import LineTypeSetting from './LineTypeSetting'
 import React from 'react'
 import StrokeWidthSetting from './StrokeWidthSetting'
-import { PluginParamName, PluginParamValue } from '../../type'
-import { prefixCls } from '../../constants'
+import { PluginParamName, PluginParamValue } from '../../common/type'
+import { prefixCls } from '../../common/constants'
 
 interface ParamSettingProps {
   paramNames: PluginParamName[];

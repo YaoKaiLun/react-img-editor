@@ -1,5 +1,5 @@
 import React from 'react'
-import { prefixCls } from '../../constants'
+import { prefixCls } from '../../common/constants'
 
 interface ColorSettingProps {
   value?: string;

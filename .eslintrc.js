@@ -6,6 +6,7 @@ module.exports = {
     es6: true
   },
   parser: '@typescript-eslint/parser',
+  plugins: ['react-hooks'],
   extends: [
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
@@ -42,6 +43,9 @@ module.exports = {
     '@typescript-eslint/no-non-null-assertion': 0,
     '@typescript-eslint/ban-ts-ignore': 0,
     '@typescript-eslint/interface-name-prefix': 0,
+    '@typescript-eslint/no-use-before-define': 0,
+    "react-hooks/rules-of-hooks": 'error',
+    "react-hooks/exhaustive-deps": 'warn'
   },
   overrides: [
     {

@@ -1,7 +1,7 @@
 import Konva from 'konva'
 import Plugin from './Plugin'
-import { DrawEventPramas, PluginParamName, PluginParamValue } from '../type'
-import { uuid } from '../utils'
+import { DrawEventPramas, PluginParamName, PluginParamValue } from '../common/type'
+import { uuid } from '../common/utils'
 
 export default class Pen extends Plugin {
   name = 'pen'
@@ -18,8 +18,11 @@ export default class Pen extends Plugin {
   isPaint = false
 
   onDrawStart = (drawEventPramas: DrawEventPramas) => {
-    const {stage, layer, paramValue} = drawEventPramas
+    const {stage, drawLayer, paramValue} = drawEventPramas
     const pos = stage.getPointerPosition()
+
+    if (!pos) return
+
     this.isPaint = true
     this.lastLine = new Konva.Line({
       id: uuid(),
@@ -33,17 +36,18 @@ export default class Pen extends Plugin {
       lineCap: 'round',
       lineJoin: 'round',
     })
-    layer.add(this.lastLine)
+    drawLayer.add(this.lastLine)
   }
 
   onDraw = (drawEventPramas: DrawEventPramas) => {
-    if (!this.isPaint) return
-
-    const {stage, layer} = drawEventPramas
+    const {stage, drawLayer} = drawEventPramas
     const pos = stage.getPointerPosition()
+
+    if (!this.isPaint || !pos) return
+
     const newPoints = this.lastLine.points().concat([pos.x, pos.y])
     this.lastLine.points(newPoints)
-    layer.batchDraw()
+    drawLayer.batchDraw()
   }
 
   onDrawEnd = (drawEventPramas: DrawEventPramas) => {

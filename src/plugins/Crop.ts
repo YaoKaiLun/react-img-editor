@@ -1,8 +1,8 @@
 import Konva from 'konva'
 import Plugin from './Plugin'
-import { DrawEventPramas } from '../type'
-import { transformerStyle } from '../constants'
-import { uuid } from '../utils'
+import { DrawEventPramas } from '../common/type'
+import { transformerStyle } from '../common/constants'
+import { uuid } from '../common/utils'
 
 const toolbarWidth = 275
 const toolbarHeight = 40
@@ -130,15 +130,13 @@ export default class Crop extends Plugin {
   }
 
   onDrawStart = (drawEventPramas: DrawEventPramas) => {
-    // 当鼠标移出 stage 时，不会触发 mouseup，重新回到 stage 时，会重新触发 onDrawStart，这里就是为了防止重新触发 onDrawStart
-    if (this.isPaint) return
-
     const {stage} = drawEventPramas
+    const startPos = stage.getPointerPosition()
+    // 当鼠标移出 stage 时，不会触发 mouseup，重新回到 stage 时，会重新触发 onDrawStart，这里就是为了防止重新触发 onDrawStart
+    if (this.isPaint || !startPos) return
 
     if (document.getElementById(this.toolbarId)) return
     this.isPaint = true
-
-    const startPos = stage.getPointerPosition()
 
     this.virtualLayer = new Konva.Layer()
     stage.add(this.virtualLayer)
@@ -176,11 +174,12 @@ export default class Crop extends Plugin {
   }
 
   onDraw = (drawEventPramas: DrawEventPramas) => {
-    if (!this.isPaint) return
-    if (document.getElementById(this.toolbarId)) return
-
     const {stage} = drawEventPramas
     const endPos = stage.getPointerPosition()
+
+    if (!this.isPaint || !endPos) return
+    if (document.getElementById(this.toolbarId)) return
+
     // 绘制初始裁剪区域
     this.rect.width(endPos.x - this.getRectX())
     this.rect.height(endPos.y - this.getRectY())

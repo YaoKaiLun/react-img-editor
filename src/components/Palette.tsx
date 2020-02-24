@@ -1,173 +1,127 @@
 import Konva from 'konva'
-import Plugin from '../plugins/Plugin'
-import React, { useEffect, useRef } from 'react'
-import { PluginParamValue, DrawEventPramas } from '../type'
-import { prefixCls } from '../constants'
-import { uuid } from '../utils'
+import React from 'react'
+import { EditorContextProps,  withEditorContext } from './EditorContext'
+import { DrawEventPramas } from '../common/type'
+import { prefixCls } from '../common/constants'
+import { uuid } from '../common/utils'
+import { Stage } from 'konva/types/Stage'
+import { Layer } from 'konva/types/Layer'
 
-interface PaletteProps {
-  width: number;
+interface PaletteProps extends EditorContextProps {
   height: number;
   imageObj: HTMLImageElement;
-  plugins: Plugin[];
-  currentPlugin: Plugin | null;
-  currentPluginParamValue: PluginParamValue | null;
   getStage?: (stage: any) => void;
-  handlePluginChange: (plugin: Plugin) => void;
 }
 
-export default function Palette(props: PaletteProps) {
-  const style = {
-    width: props.width,
-    height: props.height,
+class Palette extends React.Component<PaletteProps> {
+  containerId = prefixCls + uuid()
+  canvasWidth: number
+  canvasHeight: number
+  pixelRatio: number
+  stage: Stage | null = null
+  imageLayer: Layer | null = null
+  drawLayer: Layer | null = null
+  imageData: ImageData | null = null
+  historyStack: any[] = []
+
+  constructor(props: PaletteProps) {
+    super(props)
+
+    const { containerWidth, imageObj } = props
+
+    const imageNatureWidth = imageObj.naturalWidth
+    const imageNatureHeight = imageObj.naturalHeight
+    const wRatio = containerWidth / imageNatureWidth
+    const hRatio = props.height / imageNatureHeight
+    const scaleRatio  = Math.min (wRatio, hRatio, 1)
+
+    this.canvasWidth = Math.round(imageNatureWidth * scaleRatio)
+    this.canvasHeight = Math.round(imageNatureHeight * scaleRatio)
+    this.pixelRatio = 1 / scaleRatio
+
+    Konva.pixelRatio = this.pixelRatio
   }
 
-  const imageNatureWidth = props.imageObj.naturalWidth
-  const imageNatureHeight = props.imageObj.naturalHeight
-  const wRatio = props.width / imageNatureWidth
-  const hRatio = props.height / imageNatureHeight
-  const scaleRatio  = Math.min (wRatio, hRatio, 1)
-  const canvasWidth = Math.round(imageNatureWidth * scaleRatio)
-  const canvasHeight = Math.round(imageNatureHeight * scaleRatio)
-  const containerIdRef = useRef(prefixCls + uuid())
-  const stageRef = useRef<any>(null)
-  const imageRef = useRef<any>(null)
-  const layerRef = useRef<any>(null)
-  const imageData = useRef<any>(null)
-  const historyStack = useRef<any[]>([])
-  const pixelRatio = 1 / scaleRatio
-  Konva.pixelRatio = pixelRatio
-  const currentPluginRef = useRef(props.currentPlugin)
+  componentDidMount() {
+    this.init()
 
-  function initPalette() {
-    stageRef.current = new Konva.Stage({
-      container: containerIdRef.current,
-      width: canvasWidth,
-      height: canvasHeight,
-    })
-    stageRef.current._pixelRatio = pixelRatio
-    props.getStage && props.getStage(stageRef.current)
-  }
-
-  function generateImageData(imgObj: any, width: number, height: number) {
-    const canvas = document.createElement('canvas')
-    canvas.width = width
-    canvas.height = height
-    const ctx = canvas.getContext('2d')
-    ctx!.drawImage(imgObj, 0, 0, width, height)
-    return ctx!.getImageData(0, 0, width, height)
-  }
-
-  function drawImage() {
-    const img = new Konva.Image({
-      x: 0,
-      y: 0,
-      image: props.imageObj,
-      width: canvasWidth,
-      height: canvasHeight,
-    })
-
-    const imageLayer = new Konva.Layer()
-    stageRef.current.add(imageLayer)
-    imageLayer.setZIndex(0)
-    imageLayer.add(img)
-    imageLayer.draw()
-    imageRef.current = imageLayer
-
-    imageData.current = generateImageData(props.imageObj, canvasWidth, canvasHeight)
-  }
-
-  function getDrawEventPramas(e: any) {
-    const drawEventPramas: DrawEventPramas = {
-      stage: stageRef.current,
-      imageLayer: imageRef.current,
-      layer: layerRef.current,
-      paramValue: props.currentPluginParamValue,
-      imageData: imageData.current,
-      // eslint-disable-next-line @typescript-eslint/no-use-before-define
-      reload,
-      historyStack: historyStack.current,
-      pixelRatio,
-      event: e,
-      plugins: props.plugins,
+    const { currentPlugin } = this.props
+    if (currentPlugin && currentPlugin.onEnter) {
+      currentPlugin.onEnter(this.getDrawEventPramas(null))
     }
-
-    return drawEventPramas
   }
 
-  function bindEvents() {
-    if (!stageRef.current) return
+  componentDidUpdate(prevProps: PaletteProps) {
+    const prevCurrentPlugin = prevProps.currentPlugin
+    const { currentPlugin } = this.props
 
-    stageRef.current.add(layerRef.current)
-    layerRef.current.setZIndex(1)
+    // 撤销等操作，点击后会再自动清除当前插件
+    if (currentPlugin !== prevCurrentPlugin) {
+      if (currentPlugin) {
+        this.bindEvents()
 
-    const { currentPlugin } = props
-
-    stageRef.current.on('click tap', (e: any) => {
-      if (e.target.name && e.target.name()) {
-        const name = e.target.name()
-        for (let i = 0; i < props.plugins.length; i++) {
-          // 点击具体图形，会切到对应的插件去
-          if (props.plugins[i].shapeName
-            && props.plugins[i].shapeName === name
-            && (!currentPlugin || !currentPlugin.shapeName || name !== currentPlugin.shapeName)) {
-            (function(event: any) {
-              setTimeout(() => {
-                props.plugins[i].onClick && props.plugins[i].onClick!(getDrawEventPramas(event))
-              })
-            })(e)
-            props.handlePluginChange(props.plugins[i])
-            return
-          }
+        if (currentPlugin.onEnter) {
+          currentPlugin.onEnter(this.getDrawEventPramas(null))
         }
       }
 
-      // 修复 stage 上元素双击事件不起作用
-      // if (e.target instanceof Konva.Text) return
-
-      if (currentPlugin && currentPlugin.onClick) {
-        currentPlugin.onClick(getDrawEventPramas(e))
+      if (prevCurrentPlugin && prevCurrentPlugin.onLeave) {
+        prevCurrentPlugin.onLeave(this.getDrawEventPramas(null))
       }
-    })
-
-    stageRef.current.on('mousedown touchstart', (e: any) => {
-      if (currentPlugin && currentPlugin.onDrawStart) {
-        currentPlugin.onDrawStart(getDrawEventPramas(e))
-      }
-    })
-
-    stageRef.current.on('mousemove touchmove', (e: any) => {
-      if (currentPlugin && currentPlugin.onDraw) {
-        currentPlugin.onDraw(getDrawEventPramas(e))
-      }
-    })
-
-    stageRef.current.on('mouseup touchend', (e: any) => {
-      if (currentPlugin && currentPlugin.onDrawEnd) {
-        currentPlugin.onDrawEnd(getDrawEventPramas(e))
-      }
-    })
+    }
   }
 
-  function removeEvents() {
-    if (!stageRef.current) return
-
-    stageRef.current.off('click tap')
-    stageRef.current.off('mousedown touchstart')
-    stageRef.current.off('mousemove touchmove')
-    stageRef.current.off('mouseup touchend')
+  componentWillUnmount() {
+    const { currentPlugin } = this.props
+    currentPlugin && currentPlugin.onLeave && currentPlugin.onLeave(this.getDrawEventPramas(null))
   }
 
-  function reload(imgObj: any, width: number, height: number) {
-    removeEvents()
-    historyStack.current = []
-    stageRef.current = new Konva.Stage({
-      container: containerIdRef.current,
+  init = () => {
+    const { getStage, imageObj } = this.props
+
+    this.stage = new Konva.Stage({
+      container: this.containerId,
+      width: this.canvasWidth,
+      height: this.canvasHeight,
+    })
+    // @ts-ignore
+    this.stage._pixelRatio = this.pixelRatio
+    getStage && getStage(this.stage)
+
+    const img = new Konva.Image({
+      x: 0,
+      y: 0,
+      image: imageObj,
+      width: this.canvasWidth,
+      height: this.canvasHeight,
+    })
+    this.imageLayer = new Konva.Layer()
+    this.stage.add(this.imageLayer)
+    this.imageLayer.setZIndex(0)
+    this.imageLayer.add(img)
+    this.imageLayer.draw()
+
+    this.imageData = this.generateImageData(imageObj, this.canvasWidth, this.canvasHeight)
+
+    this.drawLayer = new Konva.Layer()
+    this.stage.add(this.drawLayer)
+    this.bindEvents()
+  }
+
+  // 裁剪等操作执行后需要重新初始化
+  reload = (imgObj: any, width: number, height: number) => {
+    const { getStage } = this.props
+
+    this.removeEvents()
+    this.historyStack = []
+    this.stage = new Konva.Stage({
+      container: this.containerId,
       width: width,
       height: height,
     })
-    stageRef.current._pixelRatio = pixelRatio
-    props.getStage && props.getStage(stageRef.current)
+    // @ts-ignore
+    this.stage._pixelRatio = this.pixelRatio
+    getStage && getStage(this.stage)
 
     const img = new Konva.Image({
       x: 0,
@@ -177,55 +131,129 @@ export default function Palette(props: PaletteProps) {
       height: height,
     })
 
-    const imageLayer = new Konva.Layer()
-    stageRef.current.add(imageLayer)
-    imageLayer.add(img)
-    imageLayer.draw()
-    imageRef.current = imageLayer
-    imageData.current = generateImageData(imgObj, width, height)
+    this.imageLayer = new Konva.Layer()
+    this.stage.add(this.imageLayer)
+    this.imageLayer.add(img)
+    this.imageLayer.draw()
 
-    layerRef.current = new Konva.Layer()
-    stageRef.current.add(layerRef.current)
-    bindEvents()
+    this.imageData = this.generateImageData(imgObj, width, height)
+
+    this.drawLayer = new Konva.Layer()
+    this.stage.add(this.drawLayer)
+    this.bindEvents()
   }
 
-  useEffect(() => {
-    initPalette()
-    drawImage()
-    layerRef.current = new Konva.Layer()
-    stageRef.current.add(layerRef.current)
+  bindEvents = () => {
+    if (!this.stage || !this.drawLayer) return
 
-    return () => {
-      const currentPlugin = currentPluginRef.current
-      // unMount 时清除插件数据
-      currentPlugin && currentPlugin.onLeave && currentPlugin.onLeave(getDrawEventPramas(null))
+    const { plugins, currentPlugin, handlePluginChange } = this.props
+    this.removeEvents()
+    this.stage.add(this.drawLayer)
+    this.drawLayer.setZIndex(1)
+
+    this.stage.on('click tap', (e: any) => {
+      if (e.target.name && e.target.name()) {
+        const name = e.target.name()
+        for (let i = 0; i < plugins.length; i++) {
+          // 点击具体图形，会切到对应的插件去
+          if (plugins[i].shapeName && plugins[i].shapeName === name
+            && (!currentPlugin || !currentPlugin.shapeName || name !== currentPlugin.shapeName)) {
+            ((event: any) => {
+              setTimeout(() => {
+                plugins[i].onClick && plugins[i].onClick!(this.getDrawEventPramas(event))
+              })
+            })(e)
+            handlePluginChange(plugins[i])
+            return
+          }
+        }
+      }
+
+      if (currentPlugin && currentPlugin.onClick) {
+        currentPlugin.onClick(this.getDrawEventPramas(e))
+      }
+    })
+
+    this.stage.on('mousedown touchstart', (e: any) => {
+      if (currentPlugin && currentPlugin.onDrawStart) {
+        currentPlugin.onDrawStart(this.getDrawEventPramas(e))
+      }
+    })
+
+    this.stage.on('mousemove touchmove', (e: any) => {
+      if (currentPlugin && currentPlugin.onDraw) {
+        currentPlugin.onDraw(this.getDrawEventPramas(e))
+      }
+    })
+
+    this.stage.on('mouseup touchend', (e: any) => {
+      if (currentPlugin && currentPlugin.onDrawEnd) {
+        currentPlugin.onDrawEnd(this.getDrawEventPramas(e))
+      }
+    })
+  }
+
+  removeEvents = () => {
+    if (!this.stage) return
+
+    this.stage.off('click tap')
+    this.stage.off('mousedown touchstart')
+    this.stage.off('mousemove touchmove')
+    this.stage.off('mouseup touchend')
+  }
+
+  // 主要用于在马赛克时，进行图片像素处理
+  generateImageData = (imgObj: any, width: number, height: number) => {
+    const canvas = document.createElement('canvas')
+    canvas.width = width
+    canvas.height = height
+    const ctx = canvas.getContext('2d')
+    ctx!.drawImage(imgObj, 0, 0, width, height)
+    return ctx!.getImageData(0, 0, width, height)
+  }
+
+  // 生命周期的统一参数生成函数
+  getDrawEventPramas = (e: any) => {
+    const props = this.props
+    const drawEventPramas: DrawEventPramas = {
+      event: e,
+      stage: this.stage!,
+      imageLayer: this.imageLayer!,
+      drawLayer: this.drawLayer!,
+      imageData: this.imageData!,
+      reload: this.reload,
+      historyStack: this.historyStack,
+      pixelRatio: this.pixelRatio,
+      // editor context
+      containerWidth: props.containerWidth,
+      containerHeight: props.containerHeight,
+      plugins: props.plugins,
+      toolbar: props.toolbar,
+      currentPlugin: props.currentPlugin,
+      handlePluginChange: props.handlePluginChange,
+      paramValue: props.paramValue,
+      handlePluginParamValueChange: props.handlePluginParamValueChange,
+      toolbarItemConfig: props.toolbarItemConfig,
+      updateToolbarItemConfig: props.updateToolbarItemConfig,
     }
-  }, [])
 
-  useEffect(() => {
-    bindEvents()
-    return () => {
-      removeEvents()
-    }
-  }, [props.imageObj, props.currentPlugin, props.currentPluginParamValue])
+    return drawEventPramas
+  }
 
-  useEffect(() => {
-    const prevCurrentPlugin = currentPluginRef.current
-    if (props.currentPlugin && prevCurrentPlugin &&
-      props.currentPlugin.name !== prevCurrentPlugin.name && props.currentPlugin.params) {
-      prevCurrentPlugin.onLeave && prevCurrentPlugin.onLeave(getDrawEventPramas(null))
+  render() {
+    const { height } = this.props
+    const { containerWidth } = this.context
+    const style = {
+      width: containerWidth,
+      height: height, // 高度是用户设置的高度减掉工具栏的高度
     }
 
-    if (props.currentPlugin && props.currentPlugin.onEnter) {
-      props.currentPlugin.onEnter(getDrawEventPramas(null))
-    }
-
-    currentPluginRef.current = props.currentPlugin
-  }, [props.currentPlugin])
-
-  return (
-    <div className={`${prefixCls}-palette`} style={style}>
-      <div id={containerIdRef.current} className={`${prefixCls}-container`} />
-    </div>
-  )
+    return (
+      <div className={`${prefixCls}-palette`} style={style}>
+        <div id={this.containerId} className={`${prefixCls}-container`} />
+      </div>
+    )
+  }
 }
+
+export default withEditorContext(Palette)

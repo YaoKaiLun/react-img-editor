@@ -1,5 +1,5 @@
 
-import { DrawEventPramas } from '../type'
+import { DrawEventPramas } from '../common/type'
 import Plugin from './Plugin'
 
 export default class Download extends Plugin {

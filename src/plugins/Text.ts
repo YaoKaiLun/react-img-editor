@@ -1,8 +1,8 @@
 import Konva from 'konva'
 import Plugin from './Plugin'
-import { DrawEventPramas, PluginParamValue, PluginParamName } from '../type'
-import { transformerStyle } from '../constants'
-import { uuid } from '../utils'
+import { DrawEventPramas, PluginParamValue, PluginParamName } from '../common/type'
+import { transformerStyle } from '../common/constants'
+import { uuid } from '../common/utils'
 
 export default class Text extends Plugin {
   name = 'text'
@@ -45,7 +45,7 @@ export default class Text extends Plugin {
     textareaBlurModal.addEventListener('click', this.removeTextareaBlurModal)
   }
 
-  createTextarea = (stage: any, layer: any, transformer: any, textNode: any, historyStack: any) => {
+  createTextarea = (stage: any, drawLayer: any, transformer: any, textNode: any, historyStack: any) => {
     const textarea = document.createElement('textarea')
     textarea.value = textNode.text()
     textarea.style.position = 'absolute'
@@ -69,7 +69,7 @@ export default class Text extends Plugin {
 
     textarea.addEventListener('keyup', (e: any) => {
       textNode.text(e.target.value)
-      layer.draw()
+      drawLayer.draw()
       textarea.style.width = textNode.width() + 'px'
       textarea.style.height = textNode.height() + 'px'
     })
@@ -85,7 +85,7 @@ export default class Text extends Plugin {
       }
 
       textarea.parentNode!.removeChild(textarea)
-      layer.draw()
+      drawLayer.draw()
       this.removeTextareaBlurModal()
       historyStack.push(textNode.toObject())
     })
@@ -94,11 +94,11 @@ export default class Text extends Plugin {
   }
 
   enableTransform = (drawEventPramas: DrawEventPramas, node: any) => {
-    const {stage, layer} = drawEventPramas
+    const {stage, drawLayer} = drawEventPramas
 
     if (!this.transformer) {
       this.transformer = new Konva.Transformer({ ...transformerStyle, enabledAnchors: [], padding: 2 })
-      layer.add(this.transformer)
+      drawLayer.add(this.transformer)
       this.transformer.attachTo(node)
       node.on('mouseenter', function() {
         stage.container().style.cursor = 'move'
@@ -110,11 +110,11 @@ export default class Text extends Plugin {
     }
 
     node && node.draggable(true)
-    layer.draw()
+    drawLayer.draw()
   }
 
   disableTransform = (drawEventPramas: DrawEventPramas, node: any, remove?: boolean) => {
-    const {stage, layer, historyStack} = drawEventPramas
+    const {stage, drawLayer, historyStack} = drawEventPramas
 
     if (this.transformer) {
       this.transformer.remove()
@@ -137,11 +137,11 @@ export default class Text extends Plugin {
     }
 
     this.selectedNode = null
-    layer.draw()
+    drawLayer.draw()
   }
 
   onEnter = (drawEventPramas: DrawEventPramas) => {
-    const {stage, layer} = drawEventPramas
+    const {stage, drawLayer} = drawEventPramas
     const container = stage.container()
     container.style.cursor = 'text'
     container.tabIndex = 1 // make it focusable
@@ -149,13 +149,13 @@ export default class Text extends Plugin {
     container.addEventListener('keyup', (e: any) => {
       if (e.key === 'Backspace' && this.selectedNode) {
         this.disableTransform(drawEventPramas, this.selectedNode, true)
-        layer.draw()
+        drawLayer.draw()
       }
     })
   }
 
   onClick = (drawEventPramas: DrawEventPramas) => {
-    const {event, stage, layer, paramValue, historyStack} = drawEventPramas
+    const {event, stage, drawLayer, paramValue, historyStack} = drawEventPramas
 
     if (event.target.name && event.target.name() === 'text') {
       // 之前没有选中节点或者在相同节点之间切换点击
@@ -173,6 +173,9 @@ export default class Text extends Plugin {
     const fontSize = (paramValue && paramValue.fontSize) ? paramValue.fontSize : this.defalutParamValue.fontSize
     const color = (paramValue && paramValue.color) ? paramValue.color : this.defalutParamValue.color
     const startPos = stage.getPointerPosition()
+
+    if (!startPos) return
+
     const textNode = new Konva.Text({
       id: uuid(),
       name: 'text',
@@ -195,12 +198,12 @@ export default class Text extends Plugin {
       borderStroke: color,
     })
 
-    layer.add(textNode)
-    layer.add(textareaTransformer)
+    drawLayer.add(textNode)
+    drawLayer.add(textareaTransformer)
     textNode.hide()
-    layer.draw()
+    drawLayer.draw()
 
-    const textarea = this.createTextarea(stage, layer, textareaTransformer, textNode, historyStack)
+    const textarea = this.createTextarea(stage, drawLayer, textareaTransformer, textNode, historyStack)
     stage.container().appendChild(textarea)
     textarea.focus()
     this.addTextareaBlurModal(stage)
@@ -210,12 +213,12 @@ export default class Text extends Plugin {
       this.disableTransform(drawEventPramas, this.selectedNode)
 
       e.cancelBubble = true
-      const textarea = this.createTextarea(stage, layer, textareaTransformer, textNode, historyStack)
+      const textarea = this.createTextarea(stage, drawLayer, textareaTransformer, textNode, historyStack)
       stage.container().appendChild(textarea)
       textarea.focus()
       textNode.hide()
       textareaTransformer.show()
-      layer.draw()
+      drawLayer.draw()
       this.addTextareaBlurModal(stage)
     })
   }

@@ -1,8 +1,8 @@
 
 import Konva from 'konva'
 import Plugin from './Plugin'
-import { DrawEventPramas, PluginParamValue, PluginParamName } from '../type'
-import { uuid } from '../utils'
+import { DrawEventPramas, PluginParamValue, PluginParamName } from '../common/type'
+import { uuid } from '../common/utils'
 
 const tileHeight = 5
 const tileWidth = 5
@@ -24,7 +24,7 @@ export default class Mosaic extends Plugin {
   height = 0
   rectGroup: any = null
 
-  drawTile = (tiles: any, layer: any) => {
+  drawTile = (tiles: any, drawLayer: any) => {
     tiles = [].concat(tiles)
     tiles.forEach((tile: any) => {
       if (tile.isFilled) {
@@ -70,8 +70,8 @@ export default class Mosaic extends Plugin {
       tile.isFilled = true
     })
 
-    layer.add(this.rectGroup)
-    layer.draw()
+    drawLayer.add(this.rectGroup)
+    drawLayer.draw()
   }
 
   getTilesByPoint = (x: number, y: number, strokeWidth: number) => {
@@ -135,12 +135,12 @@ export default class Mosaic extends Plugin {
   }
 
   onDraw = (drawEventPramas: DrawEventPramas) => {
-    if (!this.isPaint) return
-
-    const {stage, layer, paramValue} = drawEventPramas
-    const strokeWidth = (paramValue && paramValue.strokeWidth) ? paramValue.strokeWidth : this.defalutParamValue.strokeWidth
+    const {stage, drawLayer, paramValue} = drawEventPramas
     const pos = stage.getPointerPosition()
-    this.drawTile(this.getTilesByPoint(pos.x, pos.y, strokeWidth!), layer)
+    if (!this.isPaint || !pos) return
+
+    const strokeWidth = (paramValue && paramValue.strokeWidth) ? paramValue.strokeWidth : this.defalutParamValue.strokeWidth
+    this.drawTile(this.getTilesByPoint(pos.x, pos.y, strokeWidth!), drawLayer)
   }
 
   onDrawEnd = (drawEventPramas: DrawEventPramas) => {

@@ -1,8 +1,8 @@
 import Konva from 'konva'
 import Plugin from './Plugin'
-import { DrawEventPramas, PluginParamName, PluginParamValue } from '../type'
-import { transformerStyle } from '../constants'
-import { uuid } from '../utils'
+import { DrawEventPramas, PluginParamName, PluginParamValue } from '../common/type'
+import { transformerStyle } from '../common/constants'
+import { uuid } from '../common/utils'
 
 export default class Rect extends Plugin {
   name = 'rect'
@@ -24,11 +24,11 @@ export default class Rect extends Plugin {
   startPoint = [0, 0]
 
   enableTransform = (drawEventPramas: DrawEventPramas, node: any) => {
-    const {stage, layer} = drawEventPramas
+    const {stage, drawLayer} = drawEventPramas
 
     if (!this.transformer) {
       this.transformer = new Konva.Transformer({ ...transformerStyle, borderStrokeWidth: 0 })
-      layer.add(this.transformer)
+      drawLayer.add(this.transformer)
       this.transformer.attachTo(node)
       node.on('mouseenter', function() {
         stage.container().style.cursor = 'move'
@@ -40,11 +40,11 @@ export default class Rect extends Plugin {
     }
 
     node && node.draggable(true)
-    layer.draw()
+    drawLayer.draw()
   }
 
   disableTransform = (drawEventPramas: DrawEventPramas, node: any, remove?: boolean) => {
-    const {stage, layer, historyStack} = drawEventPramas
+    const {stage, drawLayer, historyStack} = drawEventPramas
 
     if (this.transformer) {
       this.transformer.remove()
@@ -66,18 +66,18 @@ export default class Rect extends Plugin {
     }
 
     this.selectedNode = null
-    layer.draw()
+    drawLayer.draw()
   }
 
   onEnter = (drawEventPramas: DrawEventPramas) => {
-    const {stage, layer} = drawEventPramas
+    const {stage, drawLayer} = drawEventPramas
     const container = stage.container()
     container.tabIndex = 1 // make it focusable
     container.focus()
     container.addEventListener('keyup', (e: any) => {
       if (e.key === 'Backspace' && this.selectedNode) {
         this.disableTransform(drawEventPramas, this.selectedNode, true)
-        layer.draw()
+        drawLayer.draw()
       }
     })
   }
@@ -102,12 +102,12 @@ export default class Rect extends Plugin {
   }
 
   onDraw = (drawEventPramas: DrawEventPramas) => {
-    const {stage, layer, paramValue, historyStack} = drawEventPramas
+    const {stage, drawLayer, paramValue, historyStack} = drawEventPramas
+    const pos = stage.getPointerPosition()
 
-    if (!this.isPaint || this.transformer) return
+    if (!this.isPaint || this.transformer || !pos) return
 
     if (!this.started) {
-      const pos = stage.getPointerPosition()
       this.startPoint = [pos.x, pos.y]
       this.lastRect = new Konva.Rect({
         id: uuid(),
@@ -127,14 +127,13 @@ export default class Rect extends Plugin {
       this.lastRect.on('dragend', function() {
         historyStack.push(this.toObject())
       })
-      layer.add(this.lastRect)
+      drawLayer.add(this.lastRect)
       this.started = true
     }
 
-    const pos = stage.getPointerPosition()
     this.lastRect.width(pos.x - this.startPoint[0])
     this.lastRect.height(pos.y - this.startPoint[1])
-    layer.batchDraw()
+    drawLayer.batchDraw()
   }
 
   onDrawEnd = (drawEventPramas: DrawEventPramas) => {

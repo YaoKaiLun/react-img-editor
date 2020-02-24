@@ -1,6 +1,6 @@
 import Konva from 'konva'
 import Plugin from './Plugin'
-import { DrawEventPramas } from '../type'
+import { DrawEventPramas } from '../common/type'
 
 export default class Repeal extends Plugin {
   name = 'repeal'
@@ -8,8 +8,8 @@ export default class Repeal extends Plugin {
   title = '撤销'
 
   onEnter = (drawEventPramas: DrawEventPramas) => {
-    const {layer, historyStack, plugins} = drawEventPramas
-    layer.removeChildren()
+    const {drawLayer, historyStack, plugins} = drawEventPramas
+    drawLayer.removeChildren()
     historyStack.pop()
 
     historyStack.forEach((node, index) => {
@@ -22,7 +22,7 @@ export default class Repeal extends Plugin {
       }
       if (!flag) {
         const recreatedNode = Konva.Node.create(node)
-        layer.add(recreatedNode)
+        drawLayer.add(recreatedNode)
         setTimeout(() => {
           for (let i = 0; i < plugins.length; i++) {
             if (plugins[i].shapeName && plugins[i].shapeName === recreatedNode.name()) {
@@ -34,6 +34,6 @@ export default class Repeal extends Plugin {
       }
     })
 
-    layer.draw()
+    drawLayer.draw()
   }
 }
