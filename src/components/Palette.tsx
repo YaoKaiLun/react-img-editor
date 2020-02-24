@@ -1,4 +1,5 @@
 import Konva from 'konva'
+import PubSub from '../common/PubSub'
 import React from 'react'
 import { EditorContextProps,  withEditorContext } from './EditorContext'
 import { DrawEventPramas } from '../common/type'
@@ -23,6 +24,7 @@ class Palette extends React.Component<PaletteProps> {
   drawLayer: Layer | null = null
   imageData: ImageData | null = null
   historyStack: any[] = []
+  pubSub: InstanceType<typeof PubSub>
 
   constructor(props: PaletteProps) {
     super(props)
@@ -40,6 +42,9 @@ class Palette extends React.Component<PaletteProps> {
     this.pixelRatio = 1 / scaleRatio
 
     Konva.pixelRatio = this.pixelRatio
+
+    this.pubSub = new PubSub(this.containerId)
+    this.subHistoryStack()
   }
 
   componentDidMount() {
@@ -202,6 +207,33 @@ class Palette extends React.Component<PaletteProps> {
     this.stage.off('mouseup touchend')
   }
 
+  subHistoryStack = () => {
+    this.pubSub.sub('PUSH_HISTORY', (_: any, node: any) => {
+      const { toolbarItemConfig, updateToolbarItemConfig } = this.props
+      // 撤销按钮更新为激活状态
+      if (this.historyStack.length === 0) {
+        const newToolbarItemConfig = { ...toolbarItemConfig }
+        if (newToolbarItemConfig.repeal) {
+          newToolbarItemConfig.repeal.disable = false
+          updateToolbarItemConfig(newToolbarItemConfig)
+        }
+      }
+      this.historyStack.push(node.toObject())
+    })
+
+    // 仅接收状态，不实际 pop history
+    this.pubSub.sub('POP_HISTORY', (_: any, historyStack: any[]) => {
+      const { toolbarItemConfig, updateToolbarItemConfig } = this.props
+      if (historyStack.length === 0) {
+        const newToolbarItemConfig = { ...toolbarItemConfig }
+        if (newToolbarItemConfig.repeal) {
+          newToolbarItemConfig.repeal.disable = true
+          updateToolbarItemConfig(newToolbarItemConfig)
+        }
+      }
+    })
+  }
+
   // 主要用于在马赛克时，进行图片像素处理
   generateImageData = (imgObj: any, width: number, height: number) => {
     const canvas = document.createElement('canvas')
@@ -224,6 +256,7 @@ class Palette extends React.Component<PaletteProps> {
       reload: this.reload,
       historyStack: this.historyStack,
       pixelRatio: this.pixelRatio,
+      pubSub: this.pubSub,
       // editor context
       containerWidth: props.containerWidth,
       containerHeight: props.containerHeight,

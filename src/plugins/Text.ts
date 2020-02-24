@@ -1,5 +1,6 @@
 import Konva from 'konva'
 import Plugin from './Plugin'
+import PubSub from '../common/PubSub'
 import { DrawEventPramas, PluginParamValue, PluginParamName } from '../common/type'
 import { transformerStyle } from '../common/constants'
 import { uuid } from '../common/utils'
@@ -45,7 +46,7 @@ export default class Text extends Plugin {
     textareaBlurModal.addEventListener('click', this.removeTextareaBlurModal)
   }
 
-  createTextarea = (stage: any, drawLayer: any, transformer: any, textNode: any, historyStack: any) => {
+  createTextarea = (stage: any, drawLayer: any, transformer: any, textNode: any, pubSub: PubSub) => {
     const textarea = document.createElement('textarea')
     textarea.value = textNode.text()
     textarea.style.position = 'absolute'
@@ -87,7 +88,7 @@ export default class Text extends Plugin {
       textarea.parentNode!.removeChild(textarea)
       drawLayer.draw()
       this.removeTextareaBlurModal()
-      historyStack.push(textNode.toObject())
+      pubSub.pub('PUSH_HISTORY', textNode)
     })
 
     return textarea
@@ -114,7 +115,7 @@ export default class Text extends Plugin {
   }
 
   disableTransform = (drawEventPramas: DrawEventPramas, node: any, remove?: boolean) => {
-    const {stage, drawLayer, historyStack} = drawEventPramas
+    const {stage, drawLayer, pubSub} = drawEventPramas
 
     if (this.transformer) {
       this.transformer.remove()
@@ -130,7 +131,7 @@ export default class Text extends Plugin {
       if (remove) {
         node.hide()
         // 使用隐藏节点占位并覆盖堆栈中已有节点
-        historyStack.push(node.toObject())
+        pubSub.pub('PUSH_HISTORY', node)
         node.remove()
         node.remove()
       }
@@ -155,7 +156,7 @@ export default class Text extends Plugin {
   }
 
   onClick = (drawEventPramas: DrawEventPramas) => {
-    const {event, stage, drawLayer, paramValue, historyStack} = drawEventPramas
+    const {event, stage, drawLayer, paramValue, pubSub} = drawEventPramas
 
     if (event.target.name && event.target.name() === 'text') {
       // 之前没有选中节点或者在相同节点之间切换点击
@@ -187,7 +188,7 @@ export default class Text extends Plugin {
       lineHeight: 1.1,
     })
     textNode.on('dragend', function() {
-      historyStack.push(this.toObject())
+      pubSub.pub('PUSH_HISTORY', this)
     })
 
     // 由于 konvajs 的文本渲染和浏览器渲染的样式不一致，所以使用 Transformer 的边框来代替 textarea 自身的边框
@@ -203,7 +204,7 @@ export default class Text extends Plugin {
     textNode.hide()
     drawLayer.draw()
 
-    const textarea = this.createTextarea(stage, drawLayer, textareaTransformer, textNode, historyStack)
+    const textarea = this.createTextarea(stage, drawLayer, textareaTransformer, textNode, pubSub)
     stage.container().appendChild(textarea)
     textarea.focus()
     this.addTextareaBlurModal(stage)
@@ -213,7 +214,7 @@ export default class Text extends Plugin {
       this.disableTransform(drawEventPramas, this.selectedNode)
 
       e.cancelBubble = true
-      const textarea = this.createTextarea(stage, drawLayer, textareaTransformer, textNode, historyStack)
+      const textarea = this.createTextarea(stage, drawLayer, textareaTransformer, textNode, pubSub)
       stage.container().appendChild(textarea)
       textarea.focus()
       textNode.hide()
@@ -231,9 +232,9 @@ export default class Text extends Plugin {
   }
 
   onNodeRecreate = (drawEventPramas: DrawEventPramas, node: any) => {
-    const {historyStack} = drawEventPramas
+    const {pubSub} = drawEventPramas
     node.on('dragend', function() {
-      historyStack.push(this.toObject())
+      pubSub.pub('PUSH_HISTORY', this)
     })
   }
 }

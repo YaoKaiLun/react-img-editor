@@ -42,10 +42,13 @@ export default function ReactImageEditor(props: ReactImageEditorProps) {
   const [currentPlugin, setCurrentPlugin] = useState<Plugin | null>(defaultPlugin)
   const [paramValue, setParamValue] = useState<PluginParamValue>(defalutParamValue)
 
-  const config = {}
+  // 生成默认 toolbarItemConfig
+  const config: any = {}
   plugins.map(plugin => {
-    config[plugin.name] = {
-      disable: false,
+    if (plugin.name === 'repeal') {
+      config[plugin.name] = { disable: true }
+    } else {
+      config[plugin.name] = { disable: false }
     }
   })
 

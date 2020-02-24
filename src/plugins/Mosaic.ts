@@ -144,9 +144,9 @@ export default class Mosaic extends Plugin {
   }
 
   onDrawEnd = (drawEventPramas: DrawEventPramas) => {
-    const {historyStack} = drawEventPramas
+    const {pubSub} = drawEventPramas
     this.isPaint = false
-    historyStack.push(this.rectGroup.toObject())
+    pubSub.pub('PUSH_HISTORY', this.rectGroup)
   }
 
   onLeave = () => {

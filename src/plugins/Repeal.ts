@@ -8,9 +8,11 @@ export default class Repeal extends Plugin {
   title = '撤销'
 
   onEnter = (drawEventPramas: DrawEventPramas) => {
-    const {drawLayer, historyStack, plugins} = drawEventPramas
+    const {drawLayer, historyStack, plugins, pubSub} = drawEventPramas
     drawLayer.removeChildren()
+
     historyStack.pop()
+    pubSub.pub('POP_HISTORY', historyStack)
 
     historyStack.forEach((node, index) => {
       let flag = false

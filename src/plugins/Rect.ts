@@ -44,7 +44,7 @@ export default class Rect extends Plugin {
   }
 
   disableTransform = (drawEventPramas: DrawEventPramas, node: any, remove?: boolean) => {
-    const {stage, drawLayer, historyStack} = drawEventPramas
+    const {stage, drawLayer, pubSub} = drawEventPramas
 
     if (this.transformer) {
       this.transformer.remove()
@@ -60,7 +60,7 @@ export default class Rect extends Plugin {
       if (remove) {
         node.hide()
         // 使用隐藏节点占位并覆盖堆栈中已有节点
-        historyStack.push(node.toObject())
+        pubSub.pub('PUSH_HISTORY', node)
         node.remove()
       }
     }
@@ -102,7 +102,7 @@ export default class Rect extends Plugin {
   }
 
   onDraw = (drawEventPramas: DrawEventPramas) => {
-    const {stage, drawLayer, paramValue, historyStack} = drawEventPramas
+    const {stage, drawLayer, paramValue, pubSub} = drawEventPramas
     const pos = stage.getPointerPosition()
 
     if (!this.isPaint || this.transformer || !pos) return
@@ -122,10 +122,10 @@ export default class Rect extends Plugin {
         strokeScaleEnabled: false,
       })
       this.lastRect.on('transformend', function() {
-        historyStack.push(this.toObject())
+        pubSub.pub('PUSH_HISTORY', this)
       })
       this.lastRect.on('dragend', function() {
-        historyStack.push(this.toObject())
+        pubSub.pub('PUSH_HISTORY', this)
       })
       drawLayer.add(this.lastRect)
       this.started = true
@@ -137,13 +137,13 @@ export default class Rect extends Plugin {
   }
 
   onDrawEnd = (drawEventPramas: DrawEventPramas) => {
-    const {historyStack} = drawEventPramas
+    const {pubSub} = drawEventPramas
 
     // mouseup event is triggered by move event but click event
     if (this.started) {
       this.disableTransform(drawEventPramas, this.selectedNode)
       if (this.lastRect) {
-        historyStack.push(this.lastRect.toObject())
+        pubSub.pub('PUSH_HISTORY', this.lastRect)
       }
     }
     this.isPaint = false
@@ -157,12 +157,12 @@ export default class Rect extends Plugin {
   }
 
   onNodeRecreate = (drawEventPramas: DrawEventPramas, node: any) => {
-    const {historyStack} = drawEventPramas
+    const {pubSub} = drawEventPramas
     node.on('transformend', function() {
-      historyStack.push(this.toObject())
+      pubSub.pub('PUSH_HISTORY', this)
     })
     node.on('dragend', function() {
-      historyStack.push(this.toObject())
+      pubSub.pub('PUSH_HISTORY', this)
     })
   }
 }

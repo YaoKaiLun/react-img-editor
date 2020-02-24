@@ -51,9 +51,9 @@ export default class Pen extends Plugin {
   }
 
   onDrawEnd = (drawEventPramas: DrawEventPramas) => {
-    const {historyStack} = drawEventPramas
+    const {pubSub} = drawEventPramas
     this.isPaint = false
-    historyStack.push(this.lastLine.toObject())
+    pubSub.pub('PUSH_HISTORY', this.lastLine)
   }
 
   onLeave = () => {
