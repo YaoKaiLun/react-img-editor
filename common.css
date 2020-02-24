@@ -317,6 +317,13 @@
           justify-content: center;
   height: 42px;
 }
+.react-img-editor-toolbar-seperator {
+  display: inline-block;
+  height: 16px;
+  width: 1px;
+  margin: 0 6px;
+  background-color: #D4D4D9;
+}
 .react-img-editor-toolbar-icon {
   padding: 5px;
 }
@@ -331,6 +338,10 @@
 }
 .react-img-editor-toolbar-icon:hover i {
   background-color: #F6F6F9;
+}
+.react-img-editor-toolbar-icon.disabled i {
+  color: #D4D4D9;
+  background-color: inherit;
 }
 .react-img-editor-tooltip {
   opacity: 1;

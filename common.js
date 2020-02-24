@@ -16677,6 +16677,354 @@ module.exports = ReactPropTypesSecret;
 
 /***/ }),
 
+/***/ "./node_modules/pubsub-js/src/pubsub.js":
+/*!**********************************************!*\
+  !*** ./node_modules/pubsub-js/src/pubsub.js ***!
+  \**********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+/* WEBPACK VAR INJECTION */(function(module) {/**
+ * Copyright (c) 2010,2011,2012,2013,2014 Morgan Roderick http://roderick.dk
+ * License: MIT - http://mrgnrdrck.mit-license.org
+ *
+ * https://github.com/mroderick/PubSubJS
+ */
+
+(function (root, factory){
+    'use strict';
+
+    var PubSub = {};
+    root.PubSub = PubSub;
+
+    var define = root.define;
+
+    factory(PubSub);
+
+    // AMD support
+    if (typeof define === 'function' && define.amd){
+        define(function() { return PubSub; });
+
+        // CommonJS and Node.js module support
+    } else if (true){
+        if (module !== undefined && module.exports) {
+            exports = module.exports = PubSub; // Node.js specific `module.exports`
+        }
+        exports.PubSub = PubSub; // CommonJS module 1.1.1 spec
+        module.exports = exports = PubSub; // CommonJS
+    }
+
+}(( typeof window === 'object' && window ) || this, function (PubSub){
+    'use strict';
+
+    var messages = {},
+        lastUid = -1;
+
+    function hasKeys(obj){
+        var key;
+
+        for (key in obj){
+            if ( obj.hasOwnProperty(key) ){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns a function that throws the passed exception, for use as argument for setTimeout
+     * @alias throwException
+     * @function
+     * @param { Object } ex An Error object
+     */
+    function throwException( ex ){
+        return function reThrowException(){
+            throw ex;
+        };
+    }
+
+    function callSubscriberWithDelayedExceptions( subscriber, message, data ){
+        try {
+            subscriber( message, data );
+        } catch( ex ){
+            setTimeout( throwException( ex ), 0);
+        }
+    }
+
+    function callSubscriberWithImmediateExceptions( subscriber, message, data ){
+        subscriber( message, data );
+    }
+
+    function deliverMessage( originalMessage, matchedMessage, data, immediateExceptions ){
+        var subscribers = messages[matchedMessage],
+            callSubscriber = immediateExceptions ? callSubscriberWithImmediateExceptions : callSubscriberWithDelayedExceptions,
+            s;
+
+        if ( !messages.hasOwnProperty( matchedMessage ) ) {
+            return;
+        }
+
+        for (s in subscribers){
+            if ( subscribers.hasOwnProperty(s)){
+                callSubscriber( subscribers[s], originalMessage, data );
+            }
+        }
+    }
+
+    function createDeliveryFunction( message, data, immediateExceptions ){
+        return function deliverNamespaced(){
+            var topic = String( message ),
+                position = topic.lastIndexOf( '.' );
+
+            // deliver the message as it is now
+            deliverMessage(message, message, data, immediateExceptions);
+
+            // trim the hierarchy and deliver message to each level
+            while( position !== -1 ){
+                topic = topic.substr( 0, position );
+                position = topic.lastIndexOf('.');
+                deliverMessage( message, topic, data, immediateExceptions );
+            }
+        };
+    }
+
+    function messageHasSubscribers( message ){
+        var topic = String( message ),
+            found = Boolean(messages.hasOwnProperty( topic ) && hasKeys(messages[topic])),
+            position = topic.lastIndexOf( '.' );
+
+        while ( !found && position !== -1 ){
+            topic = topic.substr( 0, position );
+            position = topic.lastIndexOf( '.' );
+            found = Boolean(messages.hasOwnProperty( topic ) && hasKeys(messages[topic]));
+        }
+
+        return found;
+    }
+
+    function publish( message, data, sync, immediateExceptions ){
+        message = (typeof message === 'symbol') ? message.toString() : message;
+
+        var deliver = createDeliveryFunction( message, data, immediateExceptions ),
+            hasSubscribers = messageHasSubscribers( message );
+
+        if ( !hasSubscribers ){
+            return false;
+        }
+
+        if ( sync === true ){
+            deliver();
+        } else {
+            setTimeout( deliver, 0 );
+        }
+        return true;
+    }
+
+    /**
+     * Publishes the message, passing the data to it's subscribers
+     * @function
+     * @alias publish
+     * @param { String } message The message to publish
+     * @param {} data The data to pass to subscribers
+     * @return { Boolean }
+     */
+    PubSub.publish = function( message, data ){
+        return publish( message, data, false, PubSub.immediateExceptions );
+    };
+
+    /**
+     * Publishes the message synchronously, passing the data to it's subscribers
+     * @function
+     * @alias publishSync
+     * @param { String } message The message to publish
+     * @param {} data The data to pass to subscribers
+     * @return { Boolean }
+     */
+    PubSub.publishSync = function( message, data ){
+        return publish( message, data, true, PubSub.immediateExceptions );
+    };
+
+    /**
+     * Subscribes the passed function to the passed message. Every returned token is unique and should be stored if you need to unsubscribe
+     * @function
+     * @alias subscribe
+     * @param { String } message The message to subscribe to
+     * @param { Function } func The function to call when a new message is published
+     * @return { String }
+     */
+    PubSub.subscribe = function( message, func ){
+        if ( typeof func !== 'function'){
+            return false;
+        }
+
+        message = (typeof message === 'symbol') ? message.toString() : message;
+
+        // message is not registered yet
+        if ( !messages.hasOwnProperty( message ) ){
+            messages[message] = {};
+        }
+
+        // forcing token as String, to allow for future expansions without breaking usage
+        // and allow for easy use as key names for the 'messages' object
+        var token = 'uid_' + String(++lastUid);
+        messages[message][token] = func;
+        
+        // return token for unsubscribing
+        return token;
+    };
+
+    /**
+     * Subscribes the passed function to the passed message once
+     * @function
+     * @alias subscribeOnce
+     * @param { String } message The message to subscribe to
+     * @param { Function } func The function to call when a new message is published
+     * @return { PubSub }
+     */
+    PubSub.subscribeOnce = function( message, func ){
+        var token = PubSub.subscribe( message, function(){
+            // before func apply, unsubscribe message
+            PubSub.unsubscribe( token );
+            func.apply( this, arguments );
+        });
+        return PubSub;
+    };
+
+    /**
+     * Clears all subscriptions
+     * @function
+     * @public
+     * @alias clearAllSubscriptions
+     */
+    PubSub.clearAllSubscriptions = function clearAllSubscriptions(){
+        messages = {};
+    };
+
+    /**
+     * Clear subscriptions by the topic
+     * @function
+     * @public
+     * @alias clearAllSubscriptions
+     * @return { int }
+     */
+    PubSub.clearSubscriptions = function clearSubscriptions(topic){
+        var m;
+        for (m in messages){
+            if (messages.hasOwnProperty(m) && m.indexOf(topic) === 0){
+                delete messages[m];
+            }
+        }
+    };
+
+    /** 
+       Count subscriptions by the topic
+     * @function
+     * @public
+     * @alias countSubscriptions
+     * @return { Array }
+    */
+    PubSub.countSubscriptions = function countSubscriptions(topic){
+        var m;
+        var count = 0;
+        for (m in messages){
+            if (messages.hasOwnProperty(m) && m.indexOf(topic) === 0){
+                count++;
+            }
+        }
+        return count;
+    };
+
+    
+    /** 
+       Gets subscriptions by the topic
+     * @function
+     * @public
+     * @alias getSubscriptions
+    */
+    PubSub.getSubscriptions = function getSubscriptions(topic){
+        var m;
+        var list = [];
+        for (m in messages){
+            if (messages.hasOwnProperty(m) && m.indexOf(topic) === 0){
+                list.push(m);
+            }
+        }
+        return list;
+    };
+
+    /**
+     * Removes subscriptions
+     *
+     * - When passed a token, removes a specific subscription.
+     *
+	 * - When passed a function, removes all subscriptions for that function
+     *
+	 * - When passed a topic, removes all subscriptions for that topic (hierarchy)
+     * @function
+     * @public
+     * @alias subscribeOnce
+     * @param { String | Function } value A token, function or topic to unsubscribe from
+     * @example // Unsubscribing with a token
+     * var token = PubSub.subscribe('mytopic', myFunc);
+     * PubSub.unsubscribe(token);
+     * @example // Unsubscribing with a function
+     * PubSub.unsubscribe(myFunc);
+     * @example // Unsubscribing from a topic
+     * PubSub.unsubscribe('mytopic');
+     */
+    PubSub.unsubscribe = function(value){
+        var descendantTopicExists = function(topic) {
+                var m;
+                for ( m in messages ){
+                    if ( messages.hasOwnProperty(m) && m.indexOf(topic) === 0 ){
+                        // a descendant of the topic exists:
+                        return true;
+                    }
+                }
+
+                return false;
+            },
+            isTopic    = typeof value === 'string' && ( messages.hasOwnProperty(value) || descendantTopicExists(value) ),
+            isToken    = !isTopic && typeof value === 'string',
+            isFunction = typeof value === 'function',
+            result = false,
+            m, message, t;
+
+        if (isTopic){
+            PubSub.clearSubscriptions(value);
+            return;
+        }
+
+        for ( m in messages ){
+            if ( messages.hasOwnProperty( m ) ){
+                message = messages[m];
+
+                if ( isToken && message[value] ){
+                    delete message[value];
+                    result = value;
+                    // tokens are unique, so we can just stop here
+                    break;
+                }
+
+                if (isFunction) {
+                    for ( t in message ){
+                        if (message.hasOwnProperty(t) && message[t] === value){
+                            delete message[t];
+                            result = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        return result;
+    };
+}));
+
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../webpack/buildin/module.js */ "./node_modules/webpack/buildin/module.js")(module)))
+
+/***/ }),
+
 /***/ "./node_modules/raf/index.js":
 /*!***********************************!*\
   !*** ./node_modules/raf/index.js ***!
@@ -52422,6 +52770,192 @@ module.exports = g;
 
 /***/ }),
 
+/***/ "./node_modules/webpack/buildin/module.js":
+/*!***********************************!*\
+  !*** (webpack)/buildin/module.js ***!
+  \***********************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = function(module) {
+	if (!module.webpackPolyfill) {
+		module.deprecate = function() {};
+		module.paths = [];
+		// module.parent = undefined by default
+		if (!module.children) module.children = [];
+		Object.defineProperty(module, "loaded", {
+			enumerable: true,
+			get: function() {
+				return module.l;
+			}
+		});
+		Object.defineProperty(module, "id", {
+			enumerable: true,
+			get: function() {
+				return module.i;
+			}
+		});
+		module.webpackPolyfill = 1;
+	}
+	return module;
+};
+
+
+/***/ }),
+
+/***/ "./src/common/PubSub.ts":
+/*!******************************!*\
+  !*** ./src/common/PubSub.ts ***!
+  \******************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return PubSub; });
+/* harmony import */ var pubsub_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! pubsub-js */ "./node_modules/pubsub-js/src/pubsub.js");
+/* harmony import */ var pubsub_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(pubsub_js__WEBPACK_IMPORTED_MODULE_0__);
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+
+
+var PubSub = function PubSub(id) {
+  var _this = this;
+
+  _classCallCheck(this, PubSub);
+
+  this.pub = function (name, param) {
+    pubsub_js__WEBPACK_IMPORTED_MODULE_0___default.a.publish("".concat(_this.id, "_").concat(name), param);
+  };
+
+  this.sub = function (name, callback) {
+    pubsub_js__WEBPACK_IMPORTED_MODULE_0___default.a.subscribe("".concat(_this.id, "_").concat(name), callback);
+  };
+
+  this.id = id;
+};
+
+
+
+/***/ }),
+
+/***/ "./src/common/constants.ts":
+/*!*********************************!*\
+  !*** ./src/common/constants.ts ***!
+  \*********************************/
+/*! exports provided: prefixCls, transformerStyle */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "prefixCls", function() { return prefixCls; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "transformerStyle", function() { return transformerStyle; });
+var prefixCls = 'react-img-editor';
+var transformerStyle = {
+  centeredScaling: false,
+  rotateEnabled: false,
+  anchorCornerRadius: 3,
+  anchorStrokeWidth: 1,
+  borderStrokeWidth: 1,
+  anchorStroke: '#007AFF',
+  borderStroke: '#007AFF',
+  anchorFill: '#FFF',
+  anchorSize: 6,
+  rotateAnchorOffset: 20
+};
+
+/***/ }),
+
+/***/ "./src/common/utils.ts":
+/*!*****************************!*\
+  !*** ./src/common/utils.ts ***!
+  \*****************************/
+/*! exports provided: uuid */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "uuid", function() { return uuid; });
+function uuid() {
+  return '_' + Math.random().toString(36).substr(2, 9);
+}
+
+/***/ }),
+
+/***/ "./src/common/withContext.tsx":
+/*!************************************!*\
+  !*** ./src/common/withContext.tsx ***!
+  \************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
+var __rest = undefined && undefined.__rest || function (s, e) {
+  var t = {};
+
+  for (var p in s) {
+    if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0) t[p] = s[p];
+  }
+
+  if (s != null && typeof Object.getOwnPropertySymbols === "function") for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+    if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i])) t[p[i]] = s[p[i]];
+  }
+  return t;
+};
+
+
+/* harmony default export */ __webpack_exports__["default"] = (function (Context) {
+  var shouldRender = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : function () {
+    return true;
+  };
+  return function (WrappedComponent) {
+    var InjectContext = function InjectContext(props) {
+      var forwardRef = props.forwardRef,
+          rest = __rest(props, ["forwardRef"]);
+
+      return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(Context.Consumer, null, function (context) {
+        return shouldRender(context) ? react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(WrappedComponent, _extends({
+          ref: forwardRef
+        }, rest, context)) : null;
+      });
+    };
+
+    return react__WEBPACK_IMPORTED_MODULE_0___default.a.forwardRef(function (props, ref) {
+      return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(InjectContext, _extends({
+        forwardRef: ref
+      }, props));
+    });
+  };
+});
+
+/***/ }),
+
+/***/ "./src/components/EditorContext.tsx":
+/*!******************************************!*\
+  !*** ./src/components/EditorContext.tsx ***!
+  \******************************************/
+/*! exports provided: EditorContext, withEditorContext */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "EditorContext", function() { return EditorContext; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "withEditorContext", function() { return withEditorContext; });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _common_withContext__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../common/withContext */ "./src/common/withContext.tsx");
+
+
+var EditorContext = react__WEBPACK_IMPORTED_MODULE_0___default.a.createContext({});
+var withEditorContext = Object(_common_withContext__WEBPACK_IMPORTED_MODULE_1__["default"])(EditorContext);
+
+/***/ }),
+
 /***/ "./src/components/Palette.tsx":
 /*!************************************!*\
   !*** ./src/components/Palette.tsx ***!
@@ -52431,221 +52965,358 @@ module.exports = g;
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Palette; });
 /* harmony import */ var konva__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! konva */ "./node_modules/konva/lib/index.js");
 /* harmony import */ var konva__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(konva__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../constants */ "./src/constants.ts");
-/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../utils */ "./src/utils.ts");
+/* harmony import */ var _common_PubSub__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../common/PubSub */ "./src/common/PubSub.ts");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _EditorContext__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./EditorContext */ "./src/components/EditorContext.tsx");
+/* harmony import */ var _common_constants__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../common/constants */ "./src/common/constants.ts");
+/* harmony import */ var _common_utils__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../common/utils */ "./src/common/utils.ts");
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (typeof call === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
 
 
 
-function Palette(props) {
-  var style = {
-    width: props.width,
-    height: props.height
-  };
-  var imageNatureWidth = props.imageObj.naturalWidth;
-  var imageNatureHeight = props.imageObj.naturalHeight;
-  var wRatio = props.width / imageNatureWidth;
-  var hRatio = props.height / imageNatureHeight;
-  var scaleRatio = Math.min(wRatio, hRatio, 1);
-  var canvasWidth = Math.round(imageNatureWidth * scaleRatio);
-  var canvasHeight = Math.round(imageNatureHeight * scaleRatio);
-  var containerIdRef = Object(react__WEBPACK_IMPORTED_MODULE_1__["useRef"])(_constants__WEBPACK_IMPORTED_MODULE_2__["prefixCls"] + Object(_utils__WEBPACK_IMPORTED_MODULE_3__["uuid"])());
-  var stageRef = Object(react__WEBPACK_IMPORTED_MODULE_1__["useRef"])(null);
-  var imageRef = Object(react__WEBPACK_IMPORTED_MODULE_1__["useRef"])(null);
-  var layerRef = Object(react__WEBPACK_IMPORTED_MODULE_1__["useRef"])(null);
-  var imageData = Object(react__WEBPACK_IMPORTED_MODULE_1__["useRef"])(null);
-  var historyStack = Object(react__WEBPACK_IMPORTED_MODULE_1__["useRef"])([]);
-  var pixelRatio = 1 / scaleRatio;
-  konva__WEBPACK_IMPORTED_MODULE_0___default.a.pixelRatio = pixelRatio;
-  var currentPluginRef = Object(react__WEBPACK_IMPORTED_MODULE_1__["useRef"])(props.currentPlugin);
 
-  function initPalette() {
-    stageRef.current = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Stage({
-      container: containerIdRef.current,
-      width: canvasWidth,
-      height: canvasHeight
-    });
-    stageRef.current._pixelRatio = pixelRatio;
-    props.getStage && props.getStage(stageRef.current);
-  }
 
-  function generateImageData(imgObj, width, height) {
-    var canvas = document.createElement('canvas');
-    canvas.width = width;
-    canvas.height = height;
-    var ctx = canvas.getContext('2d');
-    ctx.drawImage(imgObj, 0, 0, width, height);
-    return ctx.getImageData(0, 0, width, height);
-  }
 
-  function drawImage() {
-    var img = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Image({
-      x: 0,
-      y: 0,
-      image: props.imageObj,
-      width: canvasWidth,
-      height: canvasHeight
-    });
-    var imageLayer = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Layer();
-    stageRef.current.add(imageLayer);
-    imageLayer.setZIndex(0);
-    imageLayer.add(img);
-    imageLayer.draw();
-    imageRef.current = imageLayer;
-    imageData.current = generateImageData(props.imageObj, canvasWidth, canvasHeight);
-  }
 
-  function getDrawEventPramas(e) {
-    var drawEventPramas = {
-      stage: stageRef.current,
-      imageLayer: imageRef.current,
-      layer: layerRef.current,
-      paramValue: props.currentPluginParamValue,
-      imageData: imageData.current,
-      // eslint-disable-next-line @typescript-eslint/no-use-before-define
-      reload: reload,
-      historyStack: historyStack.current,
-      pixelRatio: pixelRatio,
-      event: e,
-      plugins: props.plugins
+var Palette =
+/*#__PURE__*/
+function (_React$Component) {
+  _inherits(Palette, _React$Component);
+
+  function Palette(props) {
+    var _this;
+
+    _classCallCheck(this, Palette);
+
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(Palette).call(this, props));
+    _this.containerId = _common_constants__WEBPACK_IMPORTED_MODULE_4__["prefixCls"] + Object(_common_utils__WEBPACK_IMPORTED_MODULE_5__["uuid"])();
+    _this.stage = null;
+    _this.imageLayer = null;
+    _this.drawLayer = null;
+    _this.imageData = null;
+    _this.historyStack = [];
+
+    _this.init = function () {
+      var _this$props = _this.props,
+          getStage = _this$props.getStage,
+          imageObj = _this$props.imageObj;
+      _this.stage = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Stage({
+        container: _this.containerId,
+        width: _this.canvasWidth,
+        height: _this.canvasHeight
+      }); // @ts-ignore
+
+      _this.stage._pixelRatio = _this.pixelRatio;
+      getStage && getStage(_this.stage);
+      var img = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Image({
+        x: 0,
+        y: 0,
+        image: imageObj,
+        width: _this.canvasWidth,
+        height: _this.canvasHeight
+      });
+      _this.imageLayer = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Layer();
+
+      _this.stage.add(_this.imageLayer);
+
+      _this.imageLayer.setZIndex(0);
+
+      _this.imageLayer.add(img);
+
+      _this.imageLayer.draw();
+
+      _this.imageData = _this.generateImageData(imageObj, _this.canvasWidth, _this.canvasHeight);
+      _this.drawLayer = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Layer();
+
+      _this.stage.add(_this.drawLayer);
+
+      _this.bindEvents();
+    }; // 裁剪等操作执行后需要重新初始化
+
+
+    _this.reload = function (imgObj, width, height) {
+      var getStage = _this.props.getStage;
+
+      _this.removeEvents();
+
+      _this.historyStack = [];
+      _this.stage = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Stage({
+        container: _this.containerId,
+        width: width,
+        height: height
+      }); // @ts-ignore
+
+      _this.stage._pixelRatio = _this.pixelRatio;
+      getStage && getStage(_this.stage);
+      var img = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Image({
+        x: 0,
+        y: 0,
+        image: imgObj,
+        width: width,
+        height: height
+      });
+      _this.imageLayer = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Layer();
+
+      _this.stage.add(_this.imageLayer);
+
+      _this.imageLayer.add(img);
+
+      _this.imageLayer.draw();
+
+      _this.imageData = _this.generateImageData(imgObj, width, height);
+      _this.drawLayer = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Layer();
+
+      _this.stage.add(_this.drawLayer);
+
+      _this.bindEvents();
     };
-    return drawEventPramas;
-  }
 
-  function bindEvents() {
-    if (!stageRef.current) return;
-    stageRef.current.add(layerRef.current);
-    layerRef.current.setZIndex(1);
-    var currentPlugin = props.currentPlugin;
-    stageRef.current.on('click tap', function (e) {
-      if (e.target.name && e.target.name()) {
-        var name = e.target.name();
+    _this.bindEvents = function () {
+      if (!_this.stage || !_this.drawLayer) return;
+      var _this$props2 = _this.props,
+          plugins = _this$props2.plugins,
+          currentPlugin = _this$props2.currentPlugin,
+          handlePluginChange = _this$props2.handlePluginChange;
 
-        var _loop = function _loop(i) {
-          // 点击具体图形，会切到对应的插件去
-          if (props.plugins[i].shapeName && props.plugins[i].shapeName === name && (!currentPlugin || !currentPlugin.shapeName || name !== currentPlugin.shapeName)) {
-            (function (event) {
-              setTimeout(function () {
-                props.plugins[i].onClick && props.plugins[i].onClick(getDrawEventPramas(event));
-              });
-            })(e);
+      _this.removeEvents();
 
-            props.handlePluginChange(props.plugins[i]);
-            return {
-              v: void 0
-            };
+      _this.stage.add(_this.drawLayer);
+
+      _this.drawLayer.setZIndex(1);
+
+      _this.stage.on('click tap', function (e) {
+        if (e.target.name && e.target.name()) {
+          var name = e.target.name();
+
+          var _loop = function _loop(i) {
+            // 点击具体图形，会切到对应的插件去
+            if (plugins[i].shapeName && plugins[i].shapeName === name && (!currentPlugin || !currentPlugin.shapeName || name !== currentPlugin.shapeName)) {
+              (function (event) {
+                setTimeout(function () {
+                  plugins[i].onClick && plugins[i].onClick(_this.getDrawEventPramas(event));
+                });
+              })(e);
+
+              handlePluginChange(plugins[i]);
+              return {
+                v: void 0
+              };
+            }
+          };
+
+          for (var i = 0; i < plugins.length; i++) {
+            var _ret = _loop(i);
+
+            if (typeof _ret === "object") return _ret.v;
           }
-        };
-
-        for (var i = 0; i < props.plugins.length; i++) {
-          var _ret = _loop(i);
-
-          if (typeof _ret === "object") return _ret.v;
         }
-      } // 修复 stage 上元素双击事件不起作用
-      // if (e.target instanceof Konva.Text) return
 
+        if (currentPlugin && currentPlugin.onClick) {
+          currentPlugin.onClick(_this.getDrawEventPramas(e));
+        }
+      });
 
-      if (currentPlugin && currentPlugin.onClick) {
-        currentPlugin.onClick(getDrawEventPramas(e));
-      }
-    });
-    stageRef.current.on('mousedown touchstart', function (e) {
-      if (currentPlugin && currentPlugin.onDrawStart) {
-        currentPlugin.onDrawStart(getDrawEventPramas(e));
-      }
-    });
-    stageRef.current.on('mousemove touchmove', function (e) {
-      if (currentPlugin && currentPlugin.onDraw) {
-        currentPlugin.onDraw(getDrawEventPramas(e));
-      }
-    });
-    stageRef.current.on('mouseup touchend', function (e) {
-      if (currentPlugin && currentPlugin.onDrawEnd) {
-        currentPlugin.onDrawEnd(getDrawEventPramas(e));
-      }
-    });
-  }
+      _this.stage.on('mousedown touchstart', function (e) {
+        if (currentPlugin && currentPlugin.onDrawStart) {
+          currentPlugin.onDrawStart(_this.getDrawEventPramas(e));
+        }
+      });
 
-  function removeEvents() {
-    if (!stageRef.current) return;
-    stageRef.current.off('click tap');
-    stageRef.current.off('mousedown touchstart');
-    stageRef.current.off('mousemove touchmove');
-    stageRef.current.off('mouseup touchend');
-  }
+      _this.stage.on('mousemove touchmove', function (e) {
+        if (currentPlugin && currentPlugin.onDraw) {
+          currentPlugin.onDraw(_this.getDrawEventPramas(e));
+        }
+      });
 
-  function reload(imgObj, width, height) {
-    removeEvents();
-    historyStack.current = [];
-    stageRef.current = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Stage({
-      container: containerIdRef.current,
-      width: width,
-      height: height
-    });
-    stageRef.current._pixelRatio = pixelRatio;
-    props.getStage && props.getStage(stageRef.current);
-    var img = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Image({
-      x: 0,
-      y: 0,
-      image: imgObj,
-      width: width,
-      height: height
-    });
-    var imageLayer = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Layer();
-    stageRef.current.add(imageLayer);
-    imageLayer.add(img);
-    imageLayer.draw();
-    imageRef.current = imageLayer;
-    imageData.current = generateImageData(imgObj, width, height);
-    layerRef.current = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Layer();
-    stageRef.current.add(layerRef.current);
-    bindEvents();
-  }
-
-  Object(react__WEBPACK_IMPORTED_MODULE_1__["useEffect"])(function () {
-    initPalette();
-    drawImage();
-    layerRef.current = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Layer();
-    stageRef.current.add(layerRef.current);
-    return function () {
-      var currentPlugin = currentPluginRef.current; // unMount 时清除插件数据
-
-      currentPlugin && currentPlugin.onLeave && currentPlugin.onLeave(getDrawEventPramas(null));
+      _this.stage.on('mouseup touchend', function (e) {
+        if (currentPlugin && currentPlugin.onDrawEnd) {
+          currentPlugin.onDrawEnd(_this.getDrawEventPramas(e));
+        }
+      });
     };
-  }, []);
-  Object(react__WEBPACK_IMPORTED_MODULE_1__["useEffect"])(function () {
-    bindEvents();
-    return function () {
-      removeEvents();
+
+    _this.removeEvents = function () {
+      if (!_this.stage) return;
+
+      _this.stage.off('click tap');
+
+      _this.stage.off('mousedown touchstart');
+
+      _this.stage.off('mousemove touchmove');
+
+      _this.stage.off('mouseup touchend');
     };
-  }, [props.imageObj, props.currentPlugin, props.currentPluginParamValue]);
-  Object(react__WEBPACK_IMPORTED_MODULE_1__["useEffect"])(function () {
-    var prevCurrentPlugin = currentPluginRef.current;
 
-    if (props.currentPlugin && prevCurrentPlugin && props.currentPlugin.name !== prevCurrentPlugin.name && props.currentPlugin.params) {
-      prevCurrentPlugin.onLeave && prevCurrentPlugin.onLeave(getDrawEventPramas(null));
+    _this.subHistoryStack = function () {
+      _this.pubSub.sub('PUSH_HISTORY', function (_, node) {
+        var _this$props3 = _this.props,
+            toolbarItemConfig = _this$props3.toolbarItemConfig,
+            updateToolbarItemConfig = _this$props3.updateToolbarItemConfig; // 撤销按钮更新为激活状态
+
+        if (_this.historyStack.length === 0) {
+          var newToolbarItemConfig = _extends({}, toolbarItemConfig);
+
+          if (newToolbarItemConfig.repeal) {
+            newToolbarItemConfig.repeal.disable = false;
+            updateToolbarItemConfig(newToolbarItemConfig);
+          }
+        }
+
+        _this.historyStack.push(node.toObject());
+      }); // 仅接收状态，不实际 pop history
+
+
+      _this.pubSub.sub('POP_HISTORY', function (_, historyStack) {
+        var _this$props4 = _this.props,
+            toolbarItemConfig = _this$props4.toolbarItemConfig,
+            updateToolbarItemConfig = _this$props4.updateToolbarItemConfig;
+
+        if (historyStack.length === 0) {
+          var newToolbarItemConfig = _extends({}, toolbarItemConfig);
+
+          if (newToolbarItemConfig.repeal) {
+            newToolbarItemConfig.repeal.disable = true;
+            updateToolbarItemConfig(newToolbarItemConfig);
+          }
+        }
+      });
+    }; // 主要用于在马赛克时，进行图片像素处理
+
+
+    _this.generateImageData = function (imgObj, width, height) {
+      var canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      var ctx = canvas.getContext('2d');
+      ctx.drawImage(imgObj, 0, 0, width, height);
+      return ctx.getImageData(0, 0, width, height);
+    }; // 生命周期的统一参数生成函数
+
+
+    _this.getDrawEventPramas = function (e) {
+      var props = _this.props;
+      var drawEventPramas = {
+        event: e,
+        stage: _this.stage,
+        imageLayer: _this.imageLayer,
+        drawLayer: _this.drawLayer,
+        imageData: _this.imageData,
+        reload: _this.reload,
+        historyStack: _this.historyStack,
+        pixelRatio: _this.pixelRatio,
+        pubSub: _this.pubSub,
+        // editor context
+        containerWidth: props.containerWidth,
+        containerHeight: props.containerHeight,
+        plugins: props.plugins,
+        toolbar: props.toolbar,
+        currentPlugin: props.currentPlugin,
+        handlePluginChange: props.handlePluginChange,
+        paramValue: props.paramValue,
+        handlePluginParamValueChange: props.handlePluginParamValueChange,
+        toolbarItemConfig: props.toolbarItemConfig,
+        updateToolbarItemConfig: props.updateToolbarItemConfig
+      };
+      return drawEventPramas;
+    };
+
+    var containerWidth = props.containerWidth,
+        imageObj = props.imageObj;
+    var imageNatureWidth = imageObj.naturalWidth;
+    var imageNatureHeight = imageObj.naturalHeight;
+    var wRatio = containerWidth / imageNatureWidth;
+    var hRatio = props.height / imageNatureHeight;
+    var scaleRatio = Math.min(wRatio, hRatio, 1);
+    _this.canvasWidth = Math.round(imageNatureWidth * scaleRatio);
+    _this.canvasHeight = Math.round(imageNatureHeight * scaleRatio);
+    _this.pixelRatio = 1 / scaleRatio;
+    konva__WEBPACK_IMPORTED_MODULE_0___default.a.pixelRatio = _this.pixelRatio;
+    _this.pubSub = new _common_PubSub__WEBPACK_IMPORTED_MODULE_1__["default"](_this.containerId);
+
+    _this.subHistoryStack();
+
+    return _this;
+  }
+
+  _createClass(Palette, [{
+    key: "componentDidMount",
+    value: function componentDidMount() {
+      this.init();
+      var currentPlugin = this.props.currentPlugin;
+
+      if (currentPlugin && currentPlugin.onEnter) {
+        currentPlugin.onEnter(this.getDrawEventPramas(null));
+      }
     }
+  }, {
+    key: "componentDidUpdate",
+    value: function componentDidUpdate(prevProps) {
+      var prevCurrentPlugin = prevProps.currentPlugin;
+      var currentPlugin = this.props.currentPlugin; // 撤销等操作，点击后会再自动清除当前插件
 
-    if (props.currentPlugin && props.currentPlugin.onEnter) {
-      props.currentPlugin.onEnter(getDrawEventPramas(null));
+      if (currentPlugin !== prevCurrentPlugin) {
+        if (currentPlugin) {
+          this.bindEvents();
+
+          if (currentPlugin.onEnter) {
+            currentPlugin.onEnter(this.getDrawEventPramas(null));
+          }
+        }
+
+        if (prevCurrentPlugin && prevCurrentPlugin.onLeave) {
+          prevCurrentPlugin.onLeave(this.getDrawEventPramas(null));
+        }
+      }
     }
+  }, {
+    key: "componentWillUnmount",
+    value: function componentWillUnmount() {
+      var currentPlugin = this.props.currentPlugin;
+      currentPlugin && currentPlugin.onLeave && currentPlugin.onLeave(this.getDrawEventPramas(null));
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      var height = this.props.height;
+      var containerWidth = this.context.containerWidth;
+      var style = {
+        width: containerWidth,
+        height: height
+      };
+      return react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement("div", {
+        className: "".concat(_common_constants__WEBPACK_IMPORTED_MODULE_4__["prefixCls"], "-palette"),
+        style: style
+      }, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement("div", {
+        id: this.containerId,
+        className: "".concat(_common_constants__WEBPACK_IMPORTED_MODULE_4__["prefixCls"], "-container")
+      }));
+    }
+  }]);
 
-    currentPluginRef.current = props.currentPlugin;
-  }, [props.currentPlugin]);
-  return react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", {
-    className: "".concat(_constants__WEBPACK_IMPORTED_MODULE_2__["prefixCls"], "-palette"),
-    style: style
-  }, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", {
-    id: containerIdRef.current,
-    className: "".concat(_constants__WEBPACK_IMPORTED_MODULE_2__["prefixCls"], "-container")
-  }));
-}
+  return Palette;
+}(react__WEBPACK_IMPORTED_MODULE_2___default.a.Component);
+
+/* harmony default export */ __webpack_exports__["default"] = (Object(_EditorContext__WEBPACK_IMPORTED_MODULE_3__["withEditorContext"])(Palette));
 
 /***/ }),
 
@@ -52661,7 +53332,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return ColorSetting; });
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../constants */ "./src/constants.ts");
+/* harmony import */ var _common_constants__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../common/constants */ "./src/common/constants.ts");
 
 
 var colors = ['#F5222D', '#FFEB00', '#00B4FF', '#52C51A ', '#19191A', '#FFFFFF'];
@@ -52674,7 +53345,7 @@ function ColorSetting(props) {
   }, colors.map(function (color) {
     return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("span", {
       key: color,
-      className: "".concat(_constants__WEBPACK_IMPORTED_MODULE_1__["prefixCls"], "-color-square ").concat(props.value === color ? _constants__WEBPACK_IMPORTED_MODULE_1__["prefixCls"] + '-color-square-activated' : ''),
+      className: "".concat(_common_constants__WEBPACK_IMPORTED_MODULE_1__["prefixCls"], "-color-square ").concat(props.value === color ? _common_constants__WEBPACK_IMPORTED_MODULE_1__["prefixCls"] + '-color-square-activated' : ''),
       style: {
         backgroundColor: color
       },
@@ -52699,7 +53370,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return FontSizeSetting; });
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../constants */ "./src/constants.ts");
+/* harmony import */ var _common_constants__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../common/constants */ "./src/common/constants.ts");
 
 
 function FontSizeSetting(props) {
@@ -52708,17 +53379,17 @@ function FontSizeSetting(props) {
       margin: '0 8px'
     }
   }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
-    className: "".concat(_constants__WEBPACK_IMPORTED_MODULE_1__["prefixCls"], "-font-size ").concat(props.value === 12 ? _constants__WEBPACK_IMPORTED_MODULE_1__["prefixCls"] + '-font-size-activated' : ''),
+    className: "".concat(_common_constants__WEBPACK_IMPORTED_MODULE_1__["prefixCls"], "-font-size ").concat(props.value === 12 ? _common_constants__WEBPACK_IMPORTED_MODULE_1__["prefixCls"] + '-font-size-activated' : ''),
     onClick: function onClick() {
       return props.onChange(12);
     }
   }, "\u5C0F"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
-    className: "".concat(_constants__WEBPACK_IMPORTED_MODULE_1__["prefixCls"], "-font-size ").concat(props.value === 16 ? _constants__WEBPACK_IMPORTED_MODULE_1__["prefixCls"] + '-font-size-activated' : ''),
+    className: "".concat(_common_constants__WEBPACK_IMPORTED_MODULE_1__["prefixCls"], "-font-size ").concat(props.value === 16 ? _common_constants__WEBPACK_IMPORTED_MODULE_1__["prefixCls"] + '-font-size-activated' : ''),
     onClick: function onClick() {
       return props.onChange(16);
     }
   }, "\u4E2D"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
-    className: "".concat(_constants__WEBPACK_IMPORTED_MODULE_1__["prefixCls"], "-font-size ").concat(props.value === 20 ? _constants__WEBPACK_IMPORTED_MODULE_1__["prefixCls"] + '-font-size-activated' : ''),
+    className: "".concat(_common_constants__WEBPACK_IMPORTED_MODULE_1__["prefixCls"], "-font-size ").concat(props.value === 20 ? _common_constants__WEBPACK_IMPORTED_MODULE_1__["prefixCls"] + '-font-size-activated' : ''),
     onClick: function onClick() {
       return props.onChange(20);
     }
@@ -52739,17 +53410,17 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return LineTypeSetting; });
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../constants */ "./src/constants.ts");
+/* harmony import */ var _common_constants__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../common/constants */ "./src/common/constants.ts");
 
 
 function LineTypeSetting(props) {
   return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_0___default.a.Fragment, null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("i", {
-    className: "iconfont icon-line2 ".concat(_constants__WEBPACK_IMPORTED_MODULE_1__["prefixCls"], "-line-type\n          ").concat(props.value === 'solid' ? _constants__WEBPACK_IMPORTED_MODULE_1__["prefixCls"] + '-line-type-activated' : ''),
+    className: "iconfont icon-line2 ".concat(_common_constants__WEBPACK_IMPORTED_MODULE_1__["prefixCls"], "-line-type\n          ").concat(props.value === 'solid' ? _common_constants__WEBPACK_IMPORTED_MODULE_1__["prefixCls"] + '-line-type-activated' : ''),
     onClick: function onClick() {
       return props.onChange('solid');
     }
   }), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("i", {
-    className: "iconfont icon-dotted-line ".concat(_constants__WEBPACK_IMPORTED_MODULE_1__["prefixCls"], "-line-type\n          ").concat(props.value === 'dash' ? _constants__WEBPACK_IMPORTED_MODULE_1__["prefixCls"] + '-line-type-activated' : ''),
+    className: "iconfont icon-dotted-line ".concat(_common_constants__WEBPACK_IMPORTED_MODULE_1__["prefixCls"], "-line-type\n          ").concat(props.value === 'dash' ? _common_constants__WEBPACK_IMPORTED_MODULE_1__["prefixCls"] + '-line-type-activated' : ''),
     onClick: function onClick() {
       return props.onChange('dash');
     }
@@ -52770,22 +53441,22 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return StrokeWidthSetting; });
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../constants */ "./src/constants.ts");
+/* harmony import */ var _common_constants__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../common/constants */ "./src/common/constants.ts");
 
 
 function StrokeWidthSetting(props) {
   return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_0___default.a.Fragment, null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("span", {
-    className: "".concat(_constants__WEBPACK_IMPORTED_MODULE_1__["prefixCls"], "-stroke-circle ").concat(_constants__WEBPACK_IMPORTED_MODULE_1__["prefixCls"], "-stroke-circle-small\n          ").concat(props.value === 2 ? _constants__WEBPACK_IMPORTED_MODULE_1__["prefixCls"] + '-stroke-circle-activated' : ''),
+    className: "".concat(_common_constants__WEBPACK_IMPORTED_MODULE_1__["prefixCls"], "-stroke-circle ").concat(_common_constants__WEBPACK_IMPORTED_MODULE_1__["prefixCls"], "-stroke-circle-small\n          ").concat(props.value === 2 ? _common_constants__WEBPACK_IMPORTED_MODULE_1__["prefixCls"] + '-stroke-circle-activated' : ''),
     onClick: function onClick() {
       return props.onChange(2);
     }
   }), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("span", {
-    className: "".concat(_constants__WEBPACK_IMPORTED_MODULE_1__["prefixCls"], "-stroke-circle ").concat(_constants__WEBPACK_IMPORTED_MODULE_1__["prefixCls"], "-stroke-circle-medium\n          ").concat(props.value === 6 ? _constants__WEBPACK_IMPORTED_MODULE_1__["prefixCls"] + '-stroke-circle-activated' : ''),
+    className: "".concat(_common_constants__WEBPACK_IMPORTED_MODULE_1__["prefixCls"], "-stroke-circle ").concat(_common_constants__WEBPACK_IMPORTED_MODULE_1__["prefixCls"], "-stroke-circle-medium\n          ").concat(props.value === 6 ? _common_constants__WEBPACK_IMPORTED_MODULE_1__["prefixCls"] + '-stroke-circle-activated' : ''),
     onClick: function onClick() {
       return props.onChange(6);
     }
   }), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("span", {
-    className: "".concat(_constants__WEBPACK_IMPORTED_MODULE_1__["prefixCls"], "-stroke-circle ").concat(_constants__WEBPACK_IMPORTED_MODULE_1__["prefixCls"], "-stroke-circle-large\n          ").concat(props.value === 8 ? _constants__WEBPACK_IMPORTED_MODULE_1__["prefixCls"] + '-stroke-circle-activated' : ''),
+    className: "".concat(_common_constants__WEBPACK_IMPORTED_MODULE_1__["prefixCls"], "-stroke-circle ").concat(_common_constants__WEBPACK_IMPORTED_MODULE_1__["prefixCls"], "-stroke-circle-large\n          ").concat(props.value === 8 ? _common_constants__WEBPACK_IMPORTED_MODULE_1__["prefixCls"] + '-stroke-circle-activated' : ''),
     onClick: function onClick() {
       return props.onChange(8);
     }
@@ -52810,7 +53481,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_3__);
 /* harmony import */ var _StrokeWidthSetting__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./StrokeWidthSetting */ "./src/components/ParamSetting/StrokeWidthSetting.tsx");
-/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../constants */ "./src/constants.ts");
+/* harmony import */ var _common_constants__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../common/constants */ "./src/common/constants.ts");
 function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
 
@@ -52880,7 +53551,7 @@ function ParamSetting(props) {
   }
 
   return react__WEBPACK_IMPORTED_MODULE_3___default.a.createElement("div", {
-    className: "".concat(_constants__WEBPACK_IMPORTED_MODULE_5__["prefixCls"], "-param-setting")
+    className: "".concat(_common_constants__WEBPACK_IMPORTED_MODULE_5__["prefixCls"], "-param-setting")
   }, props.paramNames.map(function (paramName) {
     return renderParamComponent(paramName);
   }));
@@ -52902,33 +53573,45 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var rc_tooltip__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! rc-tooltip */ "./node_modules/rc-tooltip/es/index.js");
-/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../constants */ "./src/constants.ts");
-/* harmony import */ var rc_tooltip_assets_bootstrap_white_css__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! rc-tooltip/assets/bootstrap_white.css */ "./node_modules/rc-tooltip/assets/bootstrap_white.css");
-/* harmony import */ var rc_tooltip_assets_bootstrap_white_css__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(rc_tooltip_assets_bootstrap_white_css__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var _common_constants__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../common/constants */ "./src/common/constants.ts");
+/* harmony import */ var _EditorContext__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./EditorContext */ "./src/components/EditorContext.tsx");
+/* harmony import */ var rc_tooltip_assets_bootstrap_white_css__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! rc-tooltip/assets/bootstrap_white.css */ "./node_modules/rc-tooltip/assets/bootstrap_white.css");
+/* harmony import */ var rc_tooltip_assets_bootstrap_white_css__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(rc_tooltip_assets_bootstrap_white_css__WEBPACK_IMPORTED_MODULE_5__);
 
 
 
 
 
-function Toolbar(props) {
-  var plugins = props.plugins;
+
+function Toolbar() {
+  var _useContext = Object(react__WEBPACK_IMPORTED_MODULE_1__["useContext"])(_EditorContext__WEBPACK_IMPORTED_MODULE_4__["EditorContext"]),
+      containerWidth = _useContext.containerWidth,
+      plugins = _useContext.plugins,
+      toolbar = _useContext.toolbar,
+      currentPlugin = _useContext.currentPlugin,
+      paramValue = _useContext.paramValue,
+      handlePluginChange = _useContext.handlePluginChange,
+      handlePluginParamValueChange = _useContext.handlePluginParamValueChange,
+      toolbarItemConfig = _useContext.toolbarItemConfig;
+
   var style = {
-    width: props.width
+    width: containerWidth
   };
 
   function renderPlugin(plugin) {
-    var isActivated = !!(props.currentPlugin && props.currentPlugin.name === plugin.name);
-    var paramNames = props.currentPlugin ? props.currentPlugin.params : [];
+    var isActivated = !!(currentPlugin && currentPlugin.name === plugin.name);
+    var paramNames = currentPlugin ? currentPlugin.params : [];
+    var isDisabled = toolbarItemConfig[plugin.name].disable;
 
     if (!paramNames || paramNames.length === 0) {
       return react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("span", {
         key: plugin.name,
-        className: "".concat(_constants__WEBPACK_IMPORTED_MODULE_3__["prefixCls"], "-toolbar-icon ").concat(isActivated ? 'activated' : '')
+        className: "".concat(_common_constants__WEBPACK_IMPORTED_MODULE_3__["prefixCls"], "-toolbar-icon ").concat(isActivated ? 'activated' : '', " ").concat(isDisabled ? 'disabled' : '')
       }, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("i", {
         title: plugin.title,
         className: plugin.iconfont,
         onClick: function onClick() {
-          return props.handlePluginChange(plugin);
+          return handlePluginChange(plugin);
         }
       }));
     }
@@ -52938,30 +53621,34 @@ function Toolbar(props) {
       placement: "bottom",
       overlay: react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(_ParamSetting__WEBPACK_IMPORTED_MODULE_0__["default"], {
         paramNames: paramNames,
-        paramValue: props.currentPluginParamValue,
-        onChange: props.handlePluginParamValueChange
+        paramValue: paramValue,
+        onChange: handlePluginParamValueChange
       }),
       visible: isActivated,
-      overlayClassName: "".concat(_constants__WEBPACK_IMPORTED_MODULE_3__["prefixCls"], "-tooltip"),
+      overlayClassName: "".concat(_common_constants__WEBPACK_IMPORTED_MODULE_3__["prefixCls"], "-tooltip"),
       arrowContent: react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", {
         className: "rc-tooltip-arrow-inner"
       })
     }, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("span", {
       key: plugin.name,
-      className: "".concat(_constants__WEBPACK_IMPORTED_MODULE_3__["prefixCls"], "-toolbar-icon ").concat(isActivated ? 'activated' : '')
+      className: "".concat(_common_constants__WEBPACK_IMPORTED_MODULE_3__["prefixCls"], "-toolbar-icon ").concat(isActivated ? 'activated' : '', " ").concat(isDisabled ? 'disabled' : '')
     }, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("i", {
       title: plugin.title,
       className: plugin.iconfont,
       onClick: function onClick() {
-        return props.handlePluginChange(plugin);
+        return handlePluginChange(plugin);
       }
     })));
   }
 
   return react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", {
-    className: "".concat(_constants__WEBPACK_IMPORTED_MODULE_3__["prefixCls"], "-toolbar"),
+    className: "".concat(_common_constants__WEBPACK_IMPORTED_MODULE_3__["prefixCls"], "-toolbar"),
     style: style
-  }, props.toolbar.items.map(function (item) {
+  }, toolbar.items.map(function (item) {
+    if (item === '|') return react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("span", {
+      className: "".concat(_common_constants__WEBPACK_IMPORTED_MODULE_3__["prefixCls"], "-toolbar-seperator")
+    });
+
     for (var i = 0; i < plugins.length; i++) {
       if (plugins[i].name === item) {
         return renderPlugin(plugins[i]);
@@ -52971,33 +53658,6 @@ function Toolbar(props) {
     return null;
   }));
 }
-
-/***/ }),
-
-/***/ "./src/constants.ts":
-/*!**************************!*\
-  !*** ./src/constants.ts ***!
-  \**************************/
-/*! exports provided: prefixCls, transformerStyle */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "prefixCls", function() { return prefixCls; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "transformerStyle", function() { return transformerStyle; });
-var prefixCls = 'react-img-editor';
-var transformerStyle = {
-  centeredScaling: false,
-  rotateEnabled: false,
-  anchorCornerRadius: 3,
-  anchorStrokeWidth: 1,
-  borderStrokeWidth: 1,
-  anchorStroke: '#007AFF',
-  borderStroke: '#007AFF',
-  anchorFill: '#FFF',
-  anchorSize: 6,
-  rotateAnchorOffset: 20
-};
 
 /***/ }),
 
@@ -53016,6 +53676,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_2__);
 /* harmony import */ var _components_Toolbar__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./components/Toolbar */ "./src/components/Toolbar.tsx");
+/* harmony import */ var _components_EditorContext__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./components/EditorContext */ "./src/components/EditorContext.tsx");
 function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
@@ -53038,22 +53699,13 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 
 
+
 function ReactImageEditor(props) {
   var _useState = Object(react__WEBPACK_IMPORTED_MODULE_2__["useState"])(null),
       _useState2 = _slicedToArray(_useState, 2),
       imageObj = _useState2[0],
       setImageObj = _useState2[1];
 
-  Object(react__WEBPACK_IMPORTED_MODULE_2__["useEffect"])(function () {
-    var image = new Image();
-
-    image.onload = function () {
-      setImageObj(image);
-    };
-
-    image.crossOrigin = 'anonymous';
-    image.src = props.src;
-  }, [props.src]);
   var pluginFactory = new _plugins_PluginFactory__WEBPACK_IMPORTED_MODULE_0__["default"]();
   var plugins = [].concat(_toConsumableArray(pluginFactory.plugins), _toConsumableArray(props.plugins));
   var defaultPlugin = null;
@@ -53078,12 +53730,42 @@ function ReactImageEditor(props) {
 
   var _useState5 = Object(react__WEBPACK_IMPORTED_MODULE_2__["useState"])(defalutParamValue),
       _useState6 = _slicedToArray(_useState5, 2),
-      currentPluginParamValue = _useState6[0],
-      setCurrentPluginParamValue = _useState6[1];
+      paramValue = _useState6[0],
+      setParamValue = _useState6[1]; // 生成默认 toolbarItemConfig
+
+
+  var config = {};
+  plugins.map(function (plugin) {
+    if (plugin.name === 'repeal') {
+      config[plugin.name] = {
+        disable: true
+      };
+    } else {
+      config[plugin.name] = {
+        disable: false
+      };
+    }
+  });
+
+  var _useState7 = Object(react__WEBPACK_IMPORTED_MODULE_2__["useState"])(config),
+      _useState8 = _slicedToArray(_useState7, 2),
+      toolbarItemConfig = _useState8[0],
+      setToolbarItemConfig = _useState8[1];
+
+  Object(react__WEBPACK_IMPORTED_MODULE_2__["useEffect"])(function () {
+    var image = new Image();
+
+    image.onload = function () {
+      setImageObj(image);
+    };
+
+    image.crossOrigin = 'anonymous';
+    image.src = props.src;
+  }, [props.src]);
 
   function handlePluginChange(plugin) {
     setCurrentPlugin(plugin);
-    plugin.defalutParamValue && setCurrentPluginParamValue(plugin.defalutParamValue);
+    plugin.defalutParamValue && setParamValue(plugin.defalutParamValue);
 
     if (!plugin.params) {
       setTimeout(function () {
@@ -53093,7 +53775,11 @@ function ReactImageEditor(props) {
   }
 
   function handlePluginParamValueChange(value) {
-    setCurrentPluginParamValue(value);
+    setParamValue(value);
+  }
+
+  function updateToolbarItemConfig(config) {
+    setToolbarItemConfig(config);
   }
 
   var style = _extends({
@@ -53101,27 +53787,27 @@ function ReactImageEditor(props) {
     height: props.height + 'px'
   }, props.style);
 
-  return react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement("div", {
+  return react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_components_EditorContext__WEBPACK_IMPORTED_MODULE_4__["EditorContext"].Provider, {
+    value: {
+      containerWidth: props.width,
+      containerHeight: props.height,
+      plugins: plugins,
+      toolbar: props.toolbar,
+      currentPlugin: currentPlugin,
+      paramValue: paramValue,
+      handlePluginChange: handlePluginChange,
+      handlePluginParamValueChange: handlePluginParamValueChange,
+      toolbarItemConfig: toolbarItemConfig,
+      updateToolbarItemConfig: updateToolbarItemConfig
+    }
+  }, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement("div", {
     className: "react-img-editor",
     style: style
   }, imageObj ? react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_2___default.a.Fragment, null, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_components_Palette__WEBPACK_IMPORTED_MODULE_1__["default"], {
-    width: props.width,
     height: props.height - 42,
     imageObj: imageObj,
-    plugins: plugins,
-    currentPlugin: currentPlugin,
-    currentPluginParamValue: currentPluginParamValue,
-    getStage: props.getStage,
-    handlePluginChange: handlePluginChange
-  }), react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_components_Toolbar__WEBPACK_IMPORTED_MODULE_3__["default"], {
-    width: props.width,
-    plugins: plugins,
-    toolbar: props.toolbar,
-    currentPlugin: currentPlugin,
-    currentPluginParamValue: currentPluginParamValue,
-    handlePluginChange: handlePluginChange,
-    handlePluginParamValueChange: handlePluginParamValueChange
-  })) : null);
+    getStage: props.getStage
+  }), react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_components_Toolbar__WEBPACK_IMPORTED_MODULE_3__["default"], null)) : null));
 }
 ReactImageEditor.defaultProps = {
   width: 700,
@@ -53129,7 +53815,7 @@ ReactImageEditor.defaultProps = {
   style: {},
   plugins: [],
   toolbar: {
-    items: ['pen', 'eraser', 'arrow', 'rect', 'circle', 'mosaic', 'text', 'repeal', 'download', 'crop']
+    items: ['pen', 'eraser', 'arrow', 'rect', 'circle', 'mosaic', 'text', '|', 'repeal', 'download', 'crop']
   }
 };
 
@@ -53148,8 +53834,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var konva__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! konva */ "./node_modules/konva/lib/index.js");
 /* harmony import */ var konva__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(konva__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _Plugin__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Plugin */ "./src/plugins/Plugin.ts");
-/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../constants */ "./src/constants.ts");
-/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../utils */ "./src/utils.ts");
+/* harmony import */ var _common_constants__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../common/constants */ "./src/common/constants.ts");
+/* harmony import */ var _common_utils__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../common/utils */ "./src/common/utils.ts");
 function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -53199,13 +53885,13 @@ function (_Plugin) {
 
     _this.enableTransform = function (drawEventPramas, node) {
       var stage = drawEventPramas.stage,
-          layer = drawEventPramas.layer;
+          drawLayer = drawEventPramas.drawLayer;
 
       if (!_this.transformer) {
-        _this.transformer = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Transformer(_extends(_extends({}, _constants__WEBPACK_IMPORTED_MODULE_2__["transformerStyle"]), {
+        _this.transformer = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Transformer(_extends(_extends({}, _common_constants__WEBPACK_IMPORTED_MODULE_2__["transformerStyle"]), {
           rotateEnabled: true
         }));
-        layer.add(_this.transformer);
+        drawLayer.add(_this.transformer);
 
         _this.transformer.attachTo(node);
 
@@ -53219,13 +53905,13 @@ function (_Plugin) {
       }
 
       node && node.draggable(true);
-      layer.draw();
+      drawLayer.draw();
     };
 
     _this.disableTransform = function (drawEventPramas, node, remove) {
       var stage = drawEventPramas.stage,
-          layer = drawEventPramas.layer,
-          historyStack = drawEventPramas.historyStack;
+          drawLayer = drawEventPramas.drawLayer,
+          pubSub = drawEventPramas.pubSub;
 
       if (_this.transformer) {
         _this.transformer.remove();
@@ -53242,18 +53928,18 @@ function (_Plugin) {
         if (remove) {
           node.hide(); // 使用隐藏节点占位并覆盖堆栈中已有节点
 
-          historyStack.push(node.toObject());
+          pubSub.pub('PUSH_HISTORY', node);
           node.remove();
         }
       }
 
       _this.selectedNode = null;
-      layer.draw();
+      drawLayer.draw();
     };
 
     _this.onEnter = function (drawEventPramas) {
       var stage = drawEventPramas.stage,
-          layer = drawEventPramas.layer;
+          drawLayer = drawEventPramas.drawLayer;
       var container = stage.container();
       container.tabIndex = 1; // make it focusable
 
@@ -53262,7 +53948,7 @@ function (_Plugin) {
         if (e.key === 'Backspace' && _this.selectedNode) {
           _this.disableTransform(drawEventPramas, _this.selectedNode, true);
 
-          layer.draw();
+          drawLayer.draw();
         }
       });
     };
@@ -53290,18 +53976,17 @@ function (_Plugin) {
 
     _this.onDraw = function (drawEventPramas) {
       var stage = drawEventPramas.stage,
-          layer = drawEventPramas.layer,
+          drawLayer = drawEventPramas.drawLayer,
           paramValue = drawEventPramas.paramValue,
-          historyStack = drawEventPramas.historyStack;
-      if (!_this.isPaint || _this.transformer) return;
+          pubSub = drawEventPramas.pubSub;
+      var pos = stage.getPointerPosition();
+      if (!_this.isPaint || _this.transformer || !pos) return;
 
-      if (!_this.started) {
-        var _pos = stage.getPointerPosition();
-
-        _this.startPoints = [_pos.x, _pos.y];
+      if (!_this.started && pos) {
+        _this.startPoints = [pos.x, pos.y];
         var strokeColor = paramValue && paramValue.color ? paramValue.color : _this.defalutParamValue.color;
         _this.lastArrow = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Arrow({
-          id: Object(_utils__WEBPACK_IMPORTED_MODULE_3__["uuid"])(),
+          id: Object(_common_utils__WEBPACK_IMPORTED_MODULE_3__["uuid"])(),
           name: 'arrow',
           stroke: strokeColor,
           strokeWidth: paramValue && paramValue.strokeWidth ? paramValue.strokeWidth : _this.defalutParamValue.strokeWidth,
@@ -53314,32 +53999,30 @@ function (_Plugin) {
         });
 
         _this.lastArrow.on('transformend', function () {
-          historyStack.push(this.toObject());
+          pubSub.pub('PUSH_HISTORY', this);
         });
 
         _this.lastArrow.on('dragend', function () {
-          historyStack.push(this.toObject());
+          pubSub.pub('PUSH_HISTORY', this);
         });
 
-        layer.add(_this.lastArrow);
+        drawLayer.add(_this.lastArrow);
         _this.started = true;
       }
 
-      var pos = stage.getPointerPosition();
-
       _this.lastArrow.points([_this.startPoints[0], _this.startPoints[1], pos.x, pos.y]);
 
-      layer.batchDraw();
+      drawLayer.batchDraw();
     };
 
     _this.onDrawEnd = function (drawEventPramas) {
-      var historyStack = drawEventPramas.historyStack; // mouseup event is triggered by move event but click event
+      var pubSub = drawEventPramas.pubSub; // mouseup event is triggered by move event but click event
 
       if (_this.started) {
         _this.disableTransform(drawEventPramas, _this.selectedNode);
 
         if (_this.lastArrow) {
-          historyStack.push(_this.lastArrow.toObject());
+          pubSub.pub('PUSH_HISTORY', _this.lastArrow);
         }
       }
 
@@ -53355,12 +54038,12 @@ function (_Plugin) {
     };
 
     _this.onNodeRecreate = function (drawEventPramas, node) {
-      var historyStack = drawEventPramas.historyStack;
+      var pubSub = drawEventPramas.pubSub;
       node.on('transformend', function () {
-        historyStack.push(this.toObject());
+        pubSub.pub('PUSH_HISTORY', this);
       });
       node.on('dragend', function () {
-        historyStack.push(this.toObject());
+        pubSub.pub('PUSH_HISTORY', this);
       });
     };
 
@@ -53387,8 +54070,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var konva__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! konva */ "./node_modules/konva/lib/index.js");
 /* harmony import */ var konva__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(konva__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _Plugin__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Plugin */ "./src/plugins/Plugin.ts");
-/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../constants */ "./src/constants.ts");
-/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../utils */ "./src/utils.ts");
+/* harmony import */ var _common_constants__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../common/constants */ "./src/common/constants.ts");
+/* harmony import */ var _common_utils__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../common/utils */ "./src/common/utils.ts");
 function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -53440,11 +54123,11 @@ function (_Plugin) {
 
     _this.enableTransform = function (drawEventPramas, node) {
       var stage = drawEventPramas.stage,
-          layer = drawEventPramas.layer;
+          drawLayer = drawEventPramas.drawLayer;
 
       if (!_this.transformer) {
-        _this.transformer = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Transformer(_extends({}, _constants__WEBPACK_IMPORTED_MODULE_2__["transformerStyle"]));
-        layer.add(_this.transformer);
+        _this.transformer = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Transformer(_extends({}, _common_constants__WEBPACK_IMPORTED_MODULE_2__["transformerStyle"]));
+        drawLayer.add(_this.transformer);
 
         _this.transformer.attachTo(node);
 
@@ -53458,13 +54141,13 @@ function (_Plugin) {
       }
 
       node && node.draggable(true);
-      layer.draw();
+      drawLayer.draw();
     };
 
     _this.disableTransform = function (drawEventPramas, node, remove) {
       var stage = drawEventPramas.stage,
-          layer = drawEventPramas.layer,
-          historyStack = drawEventPramas.historyStack;
+          drawLayer = drawEventPramas.drawLayer,
+          pubSub = drawEventPramas.pubSub;
 
       if (_this.transformer) {
         _this.transformer.remove();
@@ -53481,18 +54164,18 @@ function (_Plugin) {
         if (remove) {
           node.hide(); // 使用隐藏节点占位并覆盖堆栈中已有节点
 
-          historyStack.push(node.toObject());
+          pubSub.pub('PUSH_HISTORY', node);
           node.remove();
         }
       }
 
       _this.selectedNode = null;
-      layer.draw();
+      drawLayer.draw();
     };
 
     _this.onEnter = function (drawEventPramas) {
       var stage = drawEventPramas.stage,
-          layer = drawEventPramas.layer;
+          drawLayer = drawEventPramas.drawLayer;
       var container = stage.container();
       container.tabIndex = 1; // make it focusable
 
@@ -53501,7 +54184,7 @@ function (_Plugin) {
         if (e.key === 'Backspace' && _this.selectedNode) {
           _this.disableTransform(drawEventPramas, _this.selectedNode, true);
 
-          layer.draw();
+          drawLayer.draw();
         }
       });
     };
@@ -53529,17 +54212,16 @@ function (_Plugin) {
 
     _this.onDraw = function (drawEventPramas) {
       var stage = drawEventPramas.stage,
-          layer = drawEventPramas.layer,
+          drawLayer = drawEventPramas.drawLayer,
           paramValue = drawEventPramas.paramValue,
-          historyStack = drawEventPramas.historyStack;
-      if (!_this.isPaint || _this.transformer) return;
+          pubSub = drawEventPramas.pubSub;
+      var pos = stage.getPointerPosition();
+      if (!_this.isPaint || _this.transformer || !pos) return;
 
       if (!_this.started) {
-        var _pos = stage.getPointerPosition();
-
-        _this.startPoint = [_pos.x, _pos.y];
+        _this.startPoint = [pos.x, pos.y];
         _this.lastCircle = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Circle({
-          id: Object(_utils__WEBPACK_IMPORTED_MODULE_3__["uuid"])(),
+          id: Object(_common_utils__WEBPACK_IMPORTED_MODULE_3__["uuid"])(),
           name: 'circle',
           stroke: paramValue && paramValue.color ? paramValue.color : _this.defalutParamValue.color,
           strokeWidth: paramValue && paramValue.strokeWidth ? paramValue.strokeWidth : _this.defalutParamValue.strokeWidth,
@@ -53551,18 +54233,17 @@ function (_Plugin) {
         });
 
         _this.lastCircle.on('transformend', function () {
-          historyStack.push(this.toObject());
+          pubSub.pub('PUSH_HISTORY', this);
         });
 
         _this.lastCircle.on('dragend', function () {
-          historyStack.push(this.toObject());
+          pubSub.pub('PUSH_HISTORY', this);
         });
 
-        layer.add(_this.lastCircle);
+        drawLayer.add(_this.lastCircle);
         _this.started = true;
       }
 
-      var pos = stage.getPointerPosition();
       var radius = Math.sqrt(Math.pow(pos.x - _this.startPoint[0], 2) + Math.pow(pos.y - _this.startPoint[1], 2)) / 2;
 
       _this.lastCircle.x((pos.x + _this.startPoint[0]) / 2);
@@ -53571,17 +54252,17 @@ function (_Plugin) {
 
       _this.lastCircle.setAttr('radius', radius);
 
-      layer.batchDraw();
+      drawLayer.batchDraw();
     };
 
     _this.onDrawEnd = function (drawEventPramas) {
-      var historyStack = drawEventPramas.historyStack; // mouseup event is triggered by move event but click event
+      var pubSub = drawEventPramas.pubSub; // mouseup event is triggered by move event but click event
 
       if (_this.started) {
         _this.disableTransform(drawEventPramas, _this.selectedNode);
 
         if (_this.lastCircle) {
-          historyStack.push(_this.lastCircle.toObject());
+          pubSub.pub('PUSH_HISTORY', _this.lastCircle);
         }
       }
 
@@ -53597,12 +54278,12 @@ function (_Plugin) {
     };
 
     _this.onNodeRecreate = function (drawEventPramas, node) {
-      var historyStack = drawEventPramas.historyStack;
+      var pubSub = drawEventPramas.pubSub;
       node.on('transformend', function () {
-        historyStack.push(this.toObject());
+        pubSub.pub('PUSH_HISTORY', this);
       });
       node.on('dragend', function () {
-        historyStack.push(this.toObject());
+        pubSub.pub('PUSH_HISTORY', this);
       });
     };
 
@@ -53629,8 +54310,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var konva__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! konva */ "./node_modules/konva/lib/index.js");
 /* harmony import */ var konva__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(konva__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _Plugin__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Plugin */ "./src/plugins/Plugin.ts");
-/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../constants */ "./src/constants.ts");
-/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../utils */ "./src/utils.ts");
+/* harmony import */ var _common_constants__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../common/constants */ "./src/common/constants.ts");
+/* harmony import */ var _common_utils__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../common/utils */ "./src/common/utils.ts");
 function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -53671,7 +54352,7 @@ function (_Plugin) {
     _this.virtualLayer = null;
     _this.rect = null;
     _this.transformer = null;
-    _this.toolbarId = 'react-img-editor-crop-toolbar' + Object(_utils__WEBPACK_IMPORTED_MODULE_3__["uuid"])(); // 一直为正数
+    _this.toolbarId = 'react-img-editor-crop-toolbar' + Object(_common_utils__WEBPACK_IMPORTED_MODULE_3__["uuid"])(); // 一直为正数
 
     _this.getRectWidth = function () {
       return _this.rect ? _this.rect.getClientRect({
@@ -53780,9 +54461,11 @@ function (_Plugin) {
 
     _this.onDrawStart = function (drawEventPramas) {
       var stage = drawEventPramas.stage;
+      var startPos = stage.getPointerPosition(); // 当鼠标移出 stage 时，不会触发 mouseup，重新回到 stage 时，会重新触发 onDrawStart，这里就是为了防止重新触发 onDrawStart
+
+      if (_this.isPaint || !startPos) return;
       if (document.getElementById(_this.toolbarId)) return;
       _this.isPaint = true;
-      var startPos = stage.getPointerPosition();
       _this.virtualLayer = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Layer();
       stage.add(_this.virtualLayer);
 
@@ -53823,9 +54506,9 @@ function (_Plugin) {
 
     _this.onDraw = function (drawEventPramas) {
       var stage = drawEventPramas.stage;
-      if (!_this.isPaint) return;
-      if (document.getElementById(_this.toolbarId)) return;
-      var endPos = stage.getPointerPosition(); // 绘制初始裁剪区域
+      var endPos = stage.getPointerPosition();
+      if (!_this.isPaint || !endPos) return;
+      if (document.getElementById(_this.toolbarId)) return; // 绘制初始裁剪区域
 
       _this.rect.width(endPos.x - _this.getRectX());
 
@@ -53876,7 +54559,7 @@ function (_Plugin) {
 
       _this.transformer = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Transformer(_extends(_extends({
         node: _this.rect
-      }, _constants__WEBPACK_IMPORTED_MODULE_2__["transformerStyle"]), {
+      }, _common_constants__WEBPACK_IMPORTED_MODULE_2__["transformerStyle"]), {
         boundBoxFunc: function boundBoxFunc(oldBox, newBox) {
           var x = newBox.x;
           var y = newBox.y;
@@ -54067,7 +54750,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var konva__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! konva */ "./node_modules/konva/lib/index.js");
 /* harmony import */ var konva__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(konva__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _Plugin__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Plugin */ "./src/plugins/Plugin.ts");
-/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../utils */ "./src/utils.ts");
+/* harmony import */ var _common_utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../common/utils */ "./src/common/utils.ts");
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (call && (typeof call === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
@@ -54107,37 +54790,38 @@ function (_Plugin) {
 
     _this.onDrawStart = function (drawEventPramas) {
       var stage = drawEventPramas.stage,
-          layer = drawEventPramas.layer,
+          drawLayer = drawEventPramas.drawLayer,
           paramValue = drawEventPramas.paramValue;
       var pos = stage.getPointerPosition();
+      if (!pos) return;
       _this.isPaint = true;
       _this.lastLine = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Line({
-        id: Object(_utils__WEBPACK_IMPORTED_MODULE_2__["uuid"])(),
+        id: Object(_common_utils__WEBPACK_IMPORTED_MODULE_2__["uuid"])(),
         stroke: '#df4b26',
         strokeWidth: paramValue && paramValue.strokeWidth ? paramValue.strokeWidth : _this.defalutParamValue.strokeWidth,
         globalCompositeOperation: 'destination-out',
         points: [pos.x, pos.y]
       });
-      layer.add(_this.lastLine);
+      drawLayer.add(_this.lastLine);
     };
 
     _this.onDraw = function (drawEventPramas) {
-      if (!_this.isPaint) return;
       var stage = drawEventPramas.stage,
-          layer = drawEventPramas.layer;
+          drawLayer = drawEventPramas.drawLayer;
       var pos = stage.getPointerPosition();
+      if (!_this.isPaint || !pos) return;
 
       var newPoints = _this.lastLine.points().concat([pos.x, pos.y]);
 
       _this.lastLine.points(newPoints);
 
-      layer.batchDraw();
+      drawLayer.batchDraw();
     };
 
     _this.onDrawEnd = function (drawEventPramas) {
-      var historyStack = drawEventPramas.historyStack;
+      var pubSub = drawEventPramas.pubSub;
       _this.isPaint = false;
-      historyStack.push(_this.lastLine.toObject());
+      pubSub.pub('PUSH_HISTORY', _this.lastLine);
     };
 
     _this.onLeave = function () {
@@ -54167,7 +54851,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var konva__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! konva */ "./node_modules/konva/lib/index.js");
 /* harmony import */ var konva__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(konva__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _Plugin__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Plugin */ "./src/plugins/Plugin.ts");
-/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../utils */ "./src/utils.ts");
+/* harmony import */ var _common_utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../common/utils */ "./src/common/utils.ts");
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
 
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
@@ -54220,7 +54904,7 @@ function (_Plugin) {
     _this.height = 0;
     _this.rectGroup = null;
 
-    _this.drawTile = function (tiles, layer) {
+    _this.drawTile = function (tiles, drawLayer) {
       tiles = [].concat(tiles);
       tiles.forEach(function (tile) {
         if (tile.isFilled) {
@@ -54269,8 +54953,8 @@ function (_Plugin) {
 
         tile.isFilled = true;
       });
-      layer.add(_this.rectGroup);
-      layer.draw();
+      drawLayer.add(_this.rectGroup);
+      drawLayer.draw();
     };
 
     _this.getTilesByPoint = function (x, y, strokeWidth) {
@@ -54303,7 +54987,7 @@ function (_Plugin) {
       _this.tileRowSize = Math.ceil(_this.height / tileHeight);
       _this.tileColumnSize = Math.ceil(_this.width / tileWidth);
       _this.rectGroup = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Group({
-        id: Object(_utils__WEBPACK_IMPORTED_MODULE_2__["uuid"])()
+        id: Object(_common_utils__WEBPACK_IMPORTED_MODULE_2__["uuid"])()
       }); // 将图片切分成一个个大一点的贴片
 
       for (var i = 0; i < _this.tileRowSize; i++) {
@@ -54338,20 +55022,20 @@ function (_Plugin) {
     };
 
     _this.onDraw = function (drawEventPramas) {
-      if (!_this.isPaint) return;
       var stage = drawEventPramas.stage,
-          layer = drawEventPramas.layer,
+          drawLayer = drawEventPramas.drawLayer,
           paramValue = drawEventPramas.paramValue;
-      var strokeWidth = paramValue && paramValue.strokeWidth ? paramValue.strokeWidth : _this.defalutParamValue.strokeWidth;
       var pos = stage.getPointerPosition();
+      if (!_this.isPaint || !pos) return;
+      var strokeWidth = paramValue && paramValue.strokeWidth ? paramValue.strokeWidth : _this.defalutParamValue.strokeWidth;
 
-      _this.drawTile(_this.getTilesByPoint(pos.x, pos.y, strokeWidth), layer);
+      _this.drawTile(_this.getTilesByPoint(pos.x, pos.y, strokeWidth), drawLayer);
     };
 
     _this.onDrawEnd = function (drawEventPramas) {
-      var historyStack = drawEventPramas.historyStack;
+      var pubSub = drawEventPramas.pubSub;
       _this.isPaint = false;
-      historyStack.push(_this.rectGroup.toObject());
+      pubSub.pub('PUSH_HISTORY', _this.rectGroup);
     };
 
     _this.onLeave = function () {
@@ -54381,7 +55065,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var konva__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! konva */ "./node_modules/konva/lib/index.js");
 /* harmony import */ var konva__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(konva__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _Plugin__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Plugin */ "./src/plugins/Plugin.ts");
-/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../utils */ "./src/utils.ts");
+/* harmony import */ var _common_utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../common/utils */ "./src/common/utils.ts");
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (call && (typeof call === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
@@ -54423,12 +55107,13 @@ function (_Plugin) {
 
     _this.onDrawStart = function (drawEventPramas) {
       var stage = drawEventPramas.stage,
-          layer = drawEventPramas.layer,
+          drawLayer = drawEventPramas.drawLayer,
           paramValue = drawEventPramas.paramValue;
       var pos = stage.getPointerPosition();
+      if (!pos) return;
       _this.isPaint = true;
       _this.lastLine = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Line({
-        id: Object(_utils__WEBPACK_IMPORTED_MODULE_2__["uuid"])(),
+        id: Object(_common_utils__WEBPACK_IMPORTED_MODULE_2__["uuid"])(),
         stroke: paramValue && paramValue.color ? paramValue.color : _this.defalutParamValue.color,
         strokeWidth: paramValue && paramValue.strokeWidth ? paramValue.strokeWidth : _this.defalutParamValue.strokeWidth,
         globalCompositeOperation: 'source-over',
@@ -54439,26 +55124,26 @@ function (_Plugin) {
         lineCap: 'round',
         lineJoin: 'round'
       });
-      layer.add(_this.lastLine);
+      drawLayer.add(_this.lastLine);
     };
 
     _this.onDraw = function (drawEventPramas) {
-      if (!_this.isPaint) return;
       var stage = drawEventPramas.stage,
-          layer = drawEventPramas.layer;
+          drawLayer = drawEventPramas.drawLayer;
       var pos = stage.getPointerPosition();
+      if (!_this.isPaint || !pos) return;
 
       var newPoints = _this.lastLine.points().concat([pos.x, pos.y]);
 
       _this.lastLine.points(newPoints);
 
-      layer.batchDraw();
+      drawLayer.batchDraw();
     };
 
     _this.onDrawEnd = function (drawEventPramas) {
-      var historyStack = drawEventPramas.historyStack;
+      var pubSub = drawEventPramas.pubSub;
       _this.isPaint = false;
-      historyStack.push(_this.lastLine.toObject());
+      pubSub.pub('PUSH_HISTORY', _this.lastLine);
     };
 
     _this.onLeave = function () {
@@ -54551,8 +55236,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var konva__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! konva */ "./node_modules/konva/lib/index.js");
 /* harmony import */ var konva__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(konva__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _Plugin__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Plugin */ "./src/plugins/Plugin.ts");
-/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../constants */ "./src/constants.ts");
-/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../utils */ "./src/utils.ts");
+/* harmony import */ var _common_constants__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../common/constants */ "./src/common/constants.ts");
+/* harmony import */ var _common_utils__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../common/utils */ "./src/common/utils.ts");
 function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -54604,13 +55289,13 @@ function (_Plugin) {
 
     _this.enableTransform = function (drawEventPramas, node) {
       var stage = drawEventPramas.stage,
-          layer = drawEventPramas.layer;
+          drawLayer = drawEventPramas.drawLayer;
 
       if (!_this.transformer) {
-        _this.transformer = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Transformer(_extends(_extends({}, _constants__WEBPACK_IMPORTED_MODULE_2__["transformerStyle"]), {
+        _this.transformer = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Transformer(_extends(_extends({}, _common_constants__WEBPACK_IMPORTED_MODULE_2__["transformerStyle"]), {
           borderStrokeWidth: 0
         }));
-        layer.add(_this.transformer);
+        drawLayer.add(_this.transformer);
 
         _this.transformer.attachTo(node);
 
@@ -54624,13 +55309,13 @@ function (_Plugin) {
       }
 
       node && node.draggable(true);
-      layer.draw();
+      drawLayer.draw();
     };
 
     _this.disableTransform = function (drawEventPramas, node, remove) {
       var stage = drawEventPramas.stage,
-          layer = drawEventPramas.layer,
-          historyStack = drawEventPramas.historyStack;
+          drawLayer = drawEventPramas.drawLayer,
+          pubSub = drawEventPramas.pubSub;
 
       if (_this.transformer) {
         _this.transformer.remove();
@@ -54647,18 +55332,18 @@ function (_Plugin) {
         if (remove) {
           node.hide(); // 使用隐藏节点占位并覆盖堆栈中已有节点
 
-          historyStack.push(node.toObject());
+          pubSub.pub('PUSH_HISTORY', node);
           node.remove();
         }
       }
 
       _this.selectedNode = null;
-      layer.draw();
+      drawLayer.draw();
     };
 
     _this.onEnter = function (drawEventPramas) {
       var stage = drawEventPramas.stage,
-          layer = drawEventPramas.layer;
+          drawLayer = drawEventPramas.drawLayer;
       var container = stage.container();
       container.tabIndex = 1; // make it focusable
 
@@ -54667,7 +55352,7 @@ function (_Plugin) {
         if (e.key === 'Backspace' && _this.selectedNode) {
           _this.disableTransform(drawEventPramas, _this.selectedNode, true);
 
-          layer.draw();
+          drawLayer.draw();
         }
       });
     };
@@ -54695,57 +55380,54 @@ function (_Plugin) {
 
     _this.onDraw = function (drawEventPramas) {
       var stage = drawEventPramas.stage,
-          layer = drawEventPramas.layer,
+          drawLayer = drawEventPramas.drawLayer,
           paramValue = drawEventPramas.paramValue,
-          historyStack = drawEventPramas.historyStack;
-      if (!_this.isPaint || _this.transformer) return;
+          pubSub = drawEventPramas.pubSub;
+      var pos = stage.getPointerPosition();
+      if (!_this.isPaint || _this.transformer || !pos) return;
 
       if (!_this.started) {
-        var _pos = stage.getPointerPosition();
-
-        _this.startPoint = [_pos.x, _pos.y];
+        _this.startPoint = [pos.x, pos.y];
         _this.lastRect = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Rect({
-          id: Object(_utils__WEBPACK_IMPORTED_MODULE_3__["uuid"])(),
+          id: Object(_common_utils__WEBPACK_IMPORTED_MODULE_3__["uuid"])(),
           name: 'rect',
           stroke: paramValue && paramValue.color ? paramValue.color : _this.defalutParamValue.color,
           strokeWidth: paramValue && paramValue.strokeWidth ? paramValue.strokeWidth : _this.defalutParamValue.strokeWidth,
           globalCompositeOperation: 'source-over',
-          x: _pos.x,
-          y: _pos.y,
+          x: pos.x,
+          y: pos.y,
           dashEnabled: !!(paramValue && paramValue.lineType && paramValue.lineType === 'dash'),
           dash: [8],
           strokeScaleEnabled: false
         });
 
         _this.lastRect.on('transformend', function () {
-          historyStack.push(this.toObject());
+          pubSub.pub('PUSH_HISTORY', this);
         });
 
         _this.lastRect.on('dragend', function () {
-          historyStack.push(this.toObject());
+          pubSub.pub('PUSH_HISTORY', this);
         });
 
-        layer.add(_this.lastRect);
+        drawLayer.add(_this.lastRect);
         _this.started = true;
       }
-
-      var pos = stage.getPointerPosition();
 
       _this.lastRect.width(pos.x - _this.startPoint[0]);
 
       _this.lastRect.height(pos.y - _this.startPoint[1]);
 
-      layer.batchDraw();
+      drawLayer.batchDraw();
     };
 
     _this.onDrawEnd = function (drawEventPramas) {
-      var historyStack = drawEventPramas.historyStack; // mouseup event is triggered by move event but click event
+      var pubSub = drawEventPramas.pubSub; // mouseup event is triggered by move event but click event
 
       if (_this.started) {
         _this.disableTransform(drawEventPramas, _this.selectedNode);
 
         if (_this.lastRect) {
-          historyStack.push(_this.lastRect.toObject());
+          pubSub.pub('PUSH_HISTORY', _this.lastRect);
         }
       }
 
@@ -54761,12 +55443,12 @@ function (_Plugin) {
     };
 
     _this.onNodeRecreate = function (drawEventPramas, node) {
-      var historyStack = drawEventPramas.historyStack;
+      var pubSub = drawEventPramas.pubSub;
       node.on('transformend', function () {
-        historyStack.push(this.toObject());
+        pubSub.pub('PUSH_HISTORY', this);
       });
       node.on('dragend', function () {
-        historyStack.push(this.toObject());
+        pubSub.pub('PUSH_HISTORY', this);
       });
     };
 
@@ -54824,11 +55506,13 @@ function (_Plugin) {
     _this.title = '撤销';
 
     _this.onEnter = function (drawEventPramas) {
-      var layer = drawEventPramas.layer,
+      var drawLayer = drawEventPramas.drawLayer,
           historyStack = drawEventPramas.historyStack,
-          plugins = drawEventPramas.plugins;
-      layer.removeChildren();
+          plugins = drawEventPramas.plugins,
+          pubSub = drawEventPramas.pubSub;
+      drawLayer.removeChildren();
       historyStack.pop();
+      pubSub.pub('POP_HISTORY', historyStack);
       historyStack.forEach(function (node, index) {
         var flag = false;
 
@@ -54841,7 +55525,7 @@ function (_Plugin) {
 
         if (!flag) {
           var recreatedNode = konva__WEBPACK_IMPORTED_MODULE_0___default.a.Node.create(node);
-          layer.add(recreatedNode);
+          drawLayer.add(recreatedNode);
           setTimeout(function () {
             for (var _i = 0; _i < plugins.length; _i++) {
               if (plugins[_i].shapeName && plugins[_i].shapeName === recreatedNode.name()) {
@@ -54852,7 +55536,7 @@ function (_Plugin) {
           });
         }
       });
-      layer.draw();
+      drawLayer.draw();
     };
 
     return _this;
@@ -54878,8 +55562,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var konva__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! konva */ "./node_modules/konva/lib/index.js");
 /* harmony import */ var konva__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(konva__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _Plugin__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Plugin */ "./src/plugins/Plugin.ts");
-/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../constants */ "./src/constants.ts");
-/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../utils */ "./src/utils.ts");
+/* harmony import */ var _common_constants__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../common/constants */ "./src/common/constants.ts");
+/* harmony import */ var _common_utils__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../common/utils */ "./src/common/utils.ts");
 function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -54947,7 +55631,7 @@ function (_Plugin) {
       textareaBlurModal.addEventListener('click', _this.removeTextareaBlurModal);
     };
 
-    _this.createTextarea = function (stage, layer, transformer, textNode, historyStack) {
+    _this.createTextarea = function (stage, drawLayer, transformer, textNode, pubSub) {
       var textarea = document.createElement('textarea');
       textarea.value = textNode.text();
       textarea.style.position = 'absolute';
@@ -54970,7 +55654,7 @@ function (_Plugin) {
       textarea.style.boxSizing = 'content-box';
       textarea.addEventListener('keyup', function (e) {
         textNode.text(e.target.value);
-        layer.draw();
+        drawLayer.draw();
         textarea.style.width = textNode.width() + 'px';
         textarea.style.height = textNode.height() + 'px';
       });
@@ -54985,25 +55669,25 @@ function (_Plugin) {
         }
 
         textarea.parentNode.removeChild(textarea);
-        layer.draw();
+        drawLayer.draw();
 
         _this.removeTextareaBlurModal();
 
-        historyStack.push(textNode.toObject());
+        pubSub.pub('PUSH_HISTORY', textNode);
       });
       return textarea;
     };
 
     _this.enableTransform = function (drawEventPramas, node) {
       var stage = drawEventPramas.stage,
-          layer = drawEventPramas.layer;
+          drawLayer = drawEventPramas.drawLayer;
 
       if (!_this.transformer) {
-        _this.transformer = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Transformer(_extends(_extends({}, _constants__WEBPACK_IMPORTED_MODULE_2__["transformerStyle"]), {
+        _this.transformer = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Transformer(_extends(_extends({}, _common_constants__WEBPACK_IMPORTED_MODULE_2__["transformerStyle"]), {
           enabledAnchors: [],
           padding: 2
         }));
-        layer.add(_this.transformer);
+        drawLayer.add(_this.transformer);
 
         _this.transformer.attachTo(node);
 
@@ -55017,13 +55701,13 @@ function (_Plugin) {
       }
 
       node && node.draggable(true);
-      layer.draw();
+      drawLayer.draw();
     };
 
     _this.disableTransform = function (drawEventPramas, node, remove) {
       var stage = drawEventPramas.stage,
-          layer = drawEventPramas.layer,
-          historyStack = drawEventPramas.historyStack;
+          drawLayer = drawEventPramas.drawLayer,
+          pubSub = drawEventPramas.pubSub;
 
       if (_this.transformer) {
         _this.transformer.remove();
@@ -55040,19 +55724,19 @@ function (_Plugin) {
         if (remove) {
           node.hide(); // 使用隐藏节点占位并覆盖堆栈中已有节点
 
-          historyStack.push(node.toObject());
+          pubSub.pub('PUSH_HISTORY', node);
           node.remove();
           node.remove();
         }
       }
 
       _this.selectedNode = null;
-      layer.draw();
+      drawLayer.draw();
     };
 
     _this.onEnter = function (drawEventPramas) {
       var stage = drawEventPramas.stage,
-          layer = drawEventPramas.layer;
+          drawLayer = drawEventPramas.drawLayer;
       var container = stage.container();
       container.style.cursor = 'text';
       container.tabIndex = 1; // make it focusable
@@ -55062,7 +55746,7 @@ function (_Plugin) {
         if (e.key === 'Backspace' && _this.selectedNode) {
           _this.disableTransform(drawEventPramas, _this.selectedNode, true);
 
-          layer.draw();
+          drawLayer.draw();
         }
       });
     };
@@ -55070,9 +55754,9 @@ function (_Plugin) {
     _this.onClick = function (drawEventPramas) {
       var event = drawEventPramas.event,
           stage = drawEventPramas.stage,
-          layer = drawEventPramas.layer,
+          drawLayer = drawEventPramas.drawLayer,
           paramValue = drawEventPramas.paramValue,
-          historyStack = drawEventPramas.historyStack;
+          pubSub = drawEventPramas.pubSub;
 
       if (event.target.name && event.target.name() === 'text') {
         // 之前没有选中节点或者在相同节点之间切换点击
@@ -55094,8 +55778,9 @@ function (_Plugin) {
       var fontSize = paramValue && paramValue.fontSize ? paramValue.fontSize : _this.defalutParamValue.fontSize;
       var color = paramValue && paramValue.color ? paramValue.color : _this.defalutParamValue.color;
       var startPos = stage.getPointerPosition();
+      if (!startPos) return;
       var textNode = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Text({
-        id: Object(_utils__WEBPACK_IMPORTED_MODULE_3__["uuid"])(),
+        id: Object(_common_utils__WEBPACK_IMPORTED_MODULE_3__["uuid"])(),
         name: 'text',
         x: startPos.x,
         y: startPos.y - 10,
@@ -55105,7 +55790,7 @@ function (_Plugin) {
         lineHeight: 1.1
       });
       textNode.on('dragend', function () {
-        historyStack.push(this.toObject());
+        pubSub.pub('PUSH_HISTORY', this);
       }); // 由于 konvajs 的文本渲染和浏览器渲染的样式不一致，所以使用 Transformer 的边框来代替 textarea 自身的边框
 
       var textareaTransformer = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Transformer({
@@ -55114,12 +55799,12 @@ function (_Plugin) {
         rotateEnabled: false,
         borderStroke: color
       });
-      layer.add(textNode);
-      layer.add(textareaTransformer);
+      drawLayer.add(textNode);
+      drawLayer.add(textareaTransformer);
       textNode.hide();
-      layer.draw();
+      drawLayer.draw();
 
-      var textarea = _this.createTextarea(stage, layer, textareaTransformer, textNode, historyStack);
+      var textarea = _this.createTextarea(stage, drawLayer, textareaTransformer, textNode, pubSub);
 
       stage.container().appendChild(textarea);
       textarea.focus();
@@ -55132,13 +55817,13 @@ function (_Plugin) {
 
         e.cancelBubble = true;
 
-        var textarea = _this.createTextarea(stage, layer, textareaTransformer, textNode, historyStack);
+        var textarea = _this.createTextarea(stage, drawLayer, textareaTransformer, textNode, pubSub);
 
         stage.container().appendChild(textarea);
         textarea.focus();
         textNode.hide();
         textareaTransformer.show();
-        layer.draw();
+        drawLayer.draw();
 
         _this.addTextareaBlurModal(stage);
       });
@@ -55154,9 +55839,9 @@ function (_Plugin) {
     };
 
     _this.onNodeRecreate = function (drawEventPramas, node) {
-      var historyStack = drawEventPramas.historyStack;
+      var pubSub = drawEventPramas.pubSub;
       node.on('dragend', function () {
-        historyStack.push(this.toObject());
+        pubSub.pub('PUSH_HISTORY', this);
       });
     };
 
@@ -55167,22 +55852,6 @@ function (_Plugin) {
 }(_Plugin__WEBPACK_IMPORTED_MODULE_1__["default"]);
 
 
-
-/***/ }),
-
-/***/ "./src/utils.ts":
-/*!**********************!*\
-  !*** ./src/utils.ts ***!
-  \**********************/
-/*! exports provided: uuid */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "uuid", function() { return uuid; });
-function uuid() {
-  return '_' + Math.random().toString(36).substr(2, 9);
-}
 
 /***/ })
 
