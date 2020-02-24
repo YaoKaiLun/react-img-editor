@@ -65,6 +65,7 @@ export default function Toolbar() {
     <div className={`${prefixCls}-toolbar`} style={style}>
       {
         toolbar.items.map(item => {
+          if (item === '|') return <span className={`${prefixCls}-toolbar-seperator`} />
           for(let i = 0; i < plugins.length; i++) {
             if (plugins[i].name === item) {
               return renderPlugin(plugins[i])
