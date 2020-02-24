@@ -36,7 +36,7 @@ import 'react-img-editor/assets/index.css'
 | height | 画板高度 | number? | 500 |
 | style | 画板样式 | React.CSSProperties | - |
 | plugins | 自定义的插件 | Plugin[] | [] |
-| toolbar | 工具栏配置 | { items: string[] } | {items: ['pen', 'eraser', 'arrow', 'rect', 'circle', 'mosaic', 'text', 'repeal', 'download', 'crop']} |
+| toolbar | 工具栏配置 | { items: string[] } | {items: ['pen', 'eraser', 'arrow', 'rect', 'circle', 'mosaic', 'text', '|', 'repeal', 'download', 'crop']} |
 | getStage | 获取 KonvaJS 的 [Stage](https://konvajs.org/api/Konva.Stage.html) 对象，可用于下载图片等操作 | (stage: any) => void |
 | defaultPluginName | 默认选中的插件名称 | string? | - |
 
@@ -44,5 +44,4 @@ import 'react-img-editor/assets/index.css'
 ## 📝 TODO
 
 - [ ] 动态加载图片
-- [ ] 裁剪画出范围异常修复
 - [ ] 下载图片类型配置
