@@ -89,9 +89,8 @@ class Palette extends React.Component<PaletteProps> {
       width: this.canvasWidth,
       height: this.canvasHeight,
     })
-    // @ts-ignore
-    this.stage._pixelRatio = this.pixelRatio
-    getStage && getStage(this.stage)
+
+    getStage && getStage(this.resetStage(this.stage!))
 
     const img = new Konva.Image({
       x: 0,
@@ -124,9 +123,8 @@ class Palette extends React.Component<PaletteProps> {
       width: width,
       height: height,
     })
-    // @ts-ignore
-    this.stage._pixelRatio = this.pixelRatio
-    getStage && getStage(this.stage)
+
+    getStage && getStage(this.resetStage(this.stage!))
 
     const img = new Konva.Image({
       x: 0,
@@ -146,6 +144,18 @@ class Palette extends React.Component<PaletteProps> {
     this.drawLayer = new Konva.Layer()
     this.stage.add(this.drawLayer)
     this.bindEvents()
+  }
+
+  resetStage = (stage: Stage) => {
+    // @ts-ignore
+    stage._pixelRatio = this.pixelRatio
+    // @ts-ignore
+    stage.clearAndToCanvas = (config: any) => {
+      const { currentPlugin } = this.props
+      currentPlugin && currentPlugin.onLeave && currentPlugin.onLeave(this.getDrawEventPramas(null))
+      return stage.toCanvas(config)
+    }
+    return stage
   }
 
   bindEvents = () => {

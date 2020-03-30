@@ -11,7 +11,7 @@ function Example() {
   }
 
   function downloadImage() {
-    const canvas = stageRef.current.toCanvas({ pixelRatio: stageRef.current._pixelRatio })
+    const canvas = stageRef.current.clearAndToCanvas({ pixelRatio: stageRef.current._pixelRatio })
     canvas.toBlob(function(blob: any) {
       const link = document.createElement('a')
       link.download = ''

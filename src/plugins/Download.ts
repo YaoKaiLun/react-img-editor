@@ -9,12 +9,15 @@ export default class Download extends Plugin {
 
   onEnter = (drawEventPramas: DrawEventPramas) => {
     const {stage, pixelRatio} = drawEventPramas
-    const canvas = stage.toCanvas({ pixelRatio })
-    canvas.toBlob(function(blob: any) {
-      const link = document.createElement('a')
-      link.download = ''
-      link.href = URL.createObjectURL(blob)
-      link.click()
-    }, 'image/jpeg')
+    // 延迟下载，等触发 plugin 的 onLeave 生命周期，清除未完成的现场
+    setTimeout(() => {
+      const canvas = stage.toCanvas({ pixelRatio })
+      canvas.toBlob(function(blob: any) {
+        const link = document.createElement('a')
+        link.download = ''
+        link.href = URL.createObjectURL(blob)
+        link.click()
+      }, 'image/jpeg')
+    }, 100)
   }
 }
