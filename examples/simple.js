@@ -184,7 +184,7 @@ function Example() {
   }
 
   function downloadImage() {
-    var canvas = stageRef.current.toCanvas({
+    var canvas = stageRef.current.clearAndToCanvas({
       pixelRatio: stageRef.current._pixelRatio
     });
     canvas.toBlob(function (blob) {

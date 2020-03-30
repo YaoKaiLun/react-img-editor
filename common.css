@@ -40,65 +40,49 @@
 @-webkit-keyframes rcToolTipZoomIn {
   0% {
     opacity: 0;
-    -webkit-transform-origin: 50% 50%;
-            transform-origin: 50% 50%;
-    -webkit-transform: scale(0, 0);
-            transform: scale(0, 0);
+    transform-origin: 50% 50%;
+    transform: scale(0, 0);
   }
   100% {
     opacity: 1;
-    -webkit-transform-origin: 50% 50%;
-            transform-origin: 50% 50%;
-    -webkit-transform: scale(1, 1);
-            transform: scale(1, 1);
+    transform-origin: 50% 50%;
+    transform: scale(1, 1);
   }
 }
 @keyframes rcToolTipZoomIn {
   0% {
     opacity: 0;
-    -webkit-transform-origin: 50% 50%;
-            transform-origin: 50% 50%;
-    -webkit-transform: scale(0, 0);
-            transform: scale(0, 0);
+    transform-origin: 50% 50%;
+    transform: scale(0, 0);
   }
   100% {
     opacity: 1;
-    -webkit-transform-origin: 50% 50%;
-            transform-origin: 50% 50%;
-    -webkit-transform: scale(1, 1);
-            transform: scale(1, 1);
+    transform-origin: 50% 50%;
+    transform: scale(1, 1);
   }
 }
 @-webkit-keyframes rcToolTipZoomOut {
   0% {
     opacity: 1;
-    -webkit-transform-origin: 50% 50%;
-            transform-origin: 50% 50%;
-    -webkit-transform: scale(1, 1);
-            transform: scale(1, 1);
+    transform-origin: 50% 50%;
+    transform: scale(1, 1);
   }
   100% {
     opacity: 0;
-    -webkit-transform-origin: 50% 50%;
-            transform-origin: 50% 50%;
-    -webkit-transform: scale(0, 0);
-            transform: scale(0, 0);
+    transform-origin: 50% 50%;
+    transform: scale(0, 0);
   }
 }
 @keyframes rcToolTipZoomOut {
   0% {
     opacity: 1;
-    -webkit-transform-origin: 50% 50%;
-            transform-origin: 50% 50%;
-    -webkit-transform: scale(1, 1);
-            transform: scale(1, 1);
+    transform-origin: 50% 50%;
+    transform: scale(1, 1);
   }
   100% {
     opacity: 0;
-    -webkit-transform-origin: 50% 50%;
-            transform-origin: 50% 50%;
-    -webkit-transform: scale(0, 0);
-            transform: scale(0, 0);
+    transform-origin: 50% 50%;
+    transform: scale(0, 0);
   }
 }
 .rc-tooltip {
@@ -298,23 +282,17 @@
 .react-img-editor-palette {
   position: relative;
   background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAQMAAAAlPW0iAAAAA3NCSVQICAjb4U/gAAAABlBMVEXMzMz////TjRV2AAAACXBIWXMAAArrAAAK6wGCiw1aAAAAHHRFWHRTb2Z0d2FyZQBBZG9iZSBGaXJld29ya3MgQ1M26LyyjAAAABFJREFUCJlj+M/AgBVhF/0PAH6/D/HkDxOGAAAAAElFTkSuQmCC");
-  display: -webkit-box;
   display: flex;
-  -webkit-box-align: center;
-          align-items: center;
-  -webkit-box-pack: center;
-          justify-content: center;
+  align-items: center;
+  justify-content: center;
 }
 .react-img-editor-container {
   position: relative;
 }
 .react-img-editor-toolbar {
-  display: -webkit-box;
   display: flex;
-  -webkit-box-align: center;
-          align-items: center;
-  -webkit-box-pack: center;
-          justify-content: center;
+  align-items: center;
+  justify-content: center;
   height: 42px;
 }
 .react-img-editor-toolbar-seperator {
@@ -351,10 +329,8 @@
   border-bottom-color: rgba(0, 0, 0, 0.1);
 }
 .react-img-editor-tooltip .rc-tooltip-inner {
-  display: -webkit-box;
   display: flex;
-  -webkit-box-align: center;
-          align-items: center;
+  align-items: center;
   box-sizing: border-box;
   height: 40px;
   background-color: #FFF;
@@ -365,10 +341,8 @@
   border: 1px solid rgba(0, 0, 0, 0.1);
 }
 .react-img-editor-param-setting {
-  display: -webkit-box;
   display: flex;
-  -webkit-box-align: center;
-          align-items: center;
+  align-items: center;
 }
 .react-img-editor-color-square {
   display: inline-block;
