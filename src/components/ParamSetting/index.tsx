@@ -13,7 +13,7 @@ interface ParamSettingProps {
 }
 
 export default function ParamSetting(props: ParamSettingProps) {
-  function handleStrokWidthChange(strokeWidth: number) {
+  function handleStrokeWidthChange(strokeWidth: number) {
     props.onChange({ ...props.paramValue, strokeWidth })
   }
 
@@ -36,7 +36,7 @@ export default function ParamSetting(props: ParamSettingProps) {
           <StrokeWidthSetting
             key="stroke-width-setting"
             value={props.paramValue ? props.paramValue['strokeWidth'] : undefined}
-            onChange={handleStrokWidthChange}
+            onChange={handleStrokeWidthChange}
           />
         )
       case 'lineType':

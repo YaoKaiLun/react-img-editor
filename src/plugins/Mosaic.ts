@@ -1,7 +1,7 @@
 
 import Konva from 'konva'
 import Plugin from './Plugin'
-import { DrawEventPramas, PluginParamValue, PluginParamName } from '../common/type'
+import { DrawEventParams, PluginParamValue, PluginParamName } from '../common/type'
 import { uuid } from '../common/utils'
 
 const tileHeight = 5
@@ -12,7 +12,7 @@ export default class Mosaic extends Plugin {
   iconfont = 'iconfont icon-mosaic'
   title = '马赛克'
   params = ['strokeWidth'] as PluginParamName[]
-  defalutParamValue = {
+  defaultParamValue = {
     strokeWidth: 2,
   } as PluginParamValue
 
@@ -93,8 +93,8 @@ export default class Mosaic extends Plugin {
     return ts
   }
 
-  onDrawStart = (drawEventPramas: DrawEventPramas) => {
-    const {stage, imageData} = drawEventPramas
+  onDrawStart = (drawEventParams: DrawEventParams) => {
+    const {stage, imageData} = drawEventParams
     this.tiles = []
     this.width = stage.width()
     this.height = stage.height()
@@ -134,17 +134,17 @@ export default class Mosaic extends Plugin {
     this.isPaint = true
   }
 
-  onDraw = (drawEventPramas: DrawEventPramas) => {
-    const {stage, drawLayer, paramValue} = drawEventPramas
+  onDraw = (drawEventParams: DrawEventParams) => {
+    const {stage, drawLayer, paramValue} = drawEventParams
     const pos = stage.getPointerPosition()
     if (!this.isPaint || !pos) return
 
-    const strokeWidth = (paramValue && paramValue.strokeWidth) ? paramValue.strokeWidth : this.defalutParamValue.strokeWidth
+    const strokeWidth = (paramValue && paramValue.strokeWidth) ? paramValue.strokeWidth : this.defaultParamValue.strokeWidth
     this.drawTile(this.getTilesByPoint(pos.x, pos.y, strokeWidth!), drawLayer)
   }
 
-  onDrawEnd = (drawEventPramas: DrawEventPramas) => {
-    const {pubSub} = drawEventPramas
+  onDrawEnd = (drawEventParams: DrawEventParams) => {
+    const {pubSub} = drawEventParams
     this.isPaint = false
     pubSub.pub('PUSH_HISTORY', this.rectGroup)
   }

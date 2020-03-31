@@ -1,6 +1,6 @@
 import Konva from 'konva'
 import Plugin from './Plugin'
-import { DrawEventPramas, PluginParamName, PluginParamValue } from '../common/type'
+import { DrawEventParams, PluginParamName, PluginParamValue } from '../common/type'
 import { uuid } from '../common/utils'
 
 export default class Eraser extends Plugin {
@@ -8,15 +8,15 @@ export default class Eraser extends Plugin {
   iconfont = 'iconfont icon-eraser'
   title = '擦除'
   params = ['strokeWidth'] as PluginParamName[]
-  defalutParamValue = {
+  defaultParamValue = {
     strokeWidth: 2,
   } as PluginParamValue
 
   lastLine: any = null
   isPaint = false
 
-  onDrawStart = (drawEventPramas: DrawEventPramas) => {
-    const {stage, drawLayer, paramValue} = drawEventPramas
+  onDrawStart = (drawEventParams: DrawEventParams) => {
+    const {stage, drawLayer, paramValue} = drawEventParams
     const pos = stage.getPointerPosition()
 
     if (!pos) return
@@ -25,15 +25,15 @@ export default class Eraser extends Plugin {
     this.lastLine = new Konva.Line({
       id: uuid(),
       stroke: '#df4b26',
-      strokeWidth: (paramValue && paramValue.strokeWidth) ? paramValue.strokeWidth : this.defalutParamValue.strokeWidth,
+      strokeWidth: (paramValue && paramValue.strokeWidth) ? paramValue.strokeWidth : this.defaultParamValue.strokeWidth,
       globalCompositeOperation: 'destination-out',
       points: [pos.x, pos.y],
     })
     drawLayer.add(this.lastLine)
   }
 
-  onDraw = (drawEventPramas: DrawEventPramas) => {
-    const {stage, drawLayer} = drawEventPramas
+  onDraw = (drawEventParams: DrawEventParams) => {
+    const {stage, drawLayer} = drawEventParams
     const pos = stage.getPointerPosition()
 
     if (!this.isPaint || !pos) return
@@ -43,8 +43,8 @@ export default class Eraser extends Plugin {
     drawLayer.batchDraw()
   }
 
-  onDrawEnd = (drawEventPramas: DrawEventPramas) => {
-    const {pubSub} = drawEventPramas
+  onDrawEnd = (drawEventParams: DrawEventParams) => {
+    const {pubSub} = drawEventParams
     this.isPaint = false
     pubSub.pub('PUSH_HISTORY', this.lastLine)
   }

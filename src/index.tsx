@@ -26,13 +26,13 @@ export default function ReactImageEditor(props: ReactImageEditorProps) {
   const pluginFactory = new PluginFactory()
   const plugins = [...pluginFactory.plugins, ...props.plugins!]
   let defaultPlugin = null
-  let defalutParamValue = {}
+  let defaultParamValue = {}
   for(let i = 0; i < plugins.length; i++) {
     if (props.defaultPluginName && props.toolbar && plugins[i].name === props.defaultPluginName) {
       defaultPlugin = plugins[i]
 
-      if (defaultPlugin.defalutParamValue) {
-        defalutParamValue = defaultPlugin.defalutParamValue
+      if (defaultPlugin.defaultParamValue) {
+        defaultParamValue = defaultPlugin.defaultParamValue
       }
 
       break
@@ -40,7 +40,7 @@ export default function ReactImageEditor(props: ReactImageEditorProps) {
   }
 
   const [currentPlugin, setCurrentPlugin] = useState<Plugin | null>(defaultPlugin)
-  const [paramValue, setParamValue] = useState<PluginParamValue>(defalutParamValue)
+  const [paramValue, setParamValue] = useState<PluginParamValue>(defaultParamValue)
 
   // 生成默认 toolbarItemConfig
   const config: any = {}
@@ -65,7 +65,7 @@ export default function ReactImageEditor(props: ReactImageEditorProps) {
 
   function handlePluginChange(plugin: Plugin) {
     setCurrentPlugin(plugin)
-    plugin.defalutParamValue && setParamValue(plugin.defalutParamValue)
+    plugin.defaultParamValue && setParamValue(plugin.defaultParamValue)
     if (!plugin.params) {
       setTimeout(() => {
         setCurrentPlugin(null)

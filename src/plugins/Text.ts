@@ -1,7 +1,7 @@
 import Konva from 'konva'
 import Plugin from './Plugin'
 import PubSub from '../common/PubSub'
-import { DrawEventPramas, PluginParamValue, PluginParamName } from '../common/type'
+import { DrawEventParams, PluginParamValue, PluginParamName } from '../common/type'
 import { transformerStyle } from '../common/constants'
 import { uuid } from '../common/utils'
 
@@ -10,7 +10,7 @@ export default class Text extends Plugin {
   iconfont = 'iconfont icon-text'
   title = '插入文字'
   params = ['fontSize', 'color'] as PluginParamName[]
-  defalutParamValue = {
+  defaultParamValue = {
     fontSize: 12,
     color: '#F5222D',
   } as PluginParamValue
@@ -94,8 +94,8 @@ export default class Text extends Plugin {
     return textarea
   }
 
-  enableTransform = (drawEventPramas: DrawEventPramas, node: any) => {
-    const {stage, drawLayer} = drawEventPramas
+  enableTransform = (drawEventParams: DrawEventParams, node: any) => {
+    const {stage, drawLayer} = drawEventParams
 
     if (!this.transformer) {
       this.transformer = new Konva.Transformer({ ...transformerStyle, enabledAnchors: [], padding: 2 })
@@ -114,8 +114,8 @@ export default class Text extends Plugin {
     drawLayer.draw()
   }
 
-  disableTransform = (drawEventPramas: DrawEventPramas, node: any, remove?: boolean) => {
-    const {stage, drawLayer, pubSub} = drawEventPramas
+  disableTransform = (drawEventParams: DrawEventParams, node: any, remove?: boolean) => {
+    const {stage, drawLayer, pubSub} = drawEventParams
 
     if (this.transformer) {
       this.transformer.remove()
@@ -141,38 +141,38 @@ export default class Text extends Plugin {
     drawLayer.draw()
   }
 
-  onEnter = (drawEventPramas: DrawEventPramas) => {
-    const {stage, drawLayer} = drawEventPramas
+  onEnter = (drawEventParams: DrawEventParams) => {
+    const {stage, drawLayer} = drawEventParams
     const container = stage.container()
     container.style.cursor = 'text'
     container.tabIndex = 1 // make it focusable
     container.focus()
     container.addEventListener('keyup', (e: any) => {
       if (e.key === 'Backspace' && this.selectedNode) {
-        this.disableTransform(drawEventPramas, this.selectedNode, true)
+        this.disableTransform(drawEventParams, this.selectedNode, true)
         drawLayer.draw()
       }
     })
   }
 
-  onClick = (drawEventPramas: DrawEventPramas) => {
-    const {event, stage, drawLayer, paramValue, pubSub} = drawEventPramas
+  onClick = (drawEventParams: DrawEventParams) => {
+    const {event, stage, drawLayer, paramValue, pubSub} = drawEventParams
 
     if (event.target.name && event.target.name() === 'text') {
       // 之前没有选中节点或者在相同节点之间切换点击
       if (!this.selectedNode || this.selectedNode._id !== event.target._id) {
-        this.selectedNode && this.disableTransform(drawEventPramas, this.selectedNode)
-        this.enableTransform(drawEventPramas, event.target)
+        this.selectedNode && this.disableTransform(drawEventParams, this.selectedNode)
+        this.enableTransform(drawEventParams, event.target)
         this.selectedNode = event.target
       }
       return
     } else if (this.selectedNode) {
-      this.disableTransform(drawEventPramas, this.selectedNode)
+      this.disableTransform(drawEventParams, this.selectedNode)
       return
     }
 
-    const fontSize = (paramValue && paramValue.fontSize) ? paramValue.fontSize : this.defalutParamValue.fontSize
-    const color = (paramValue && paramValue.color) ? paramValue.color : this.defalutParamValue.color
+    const fontSize = (paramValue && paramValue.fontSize) ? paramValue.fontSize : this.defaultParamValue.fontSize
+    const color = (paramValue && paramValue.color) ? paramValue.color : this.defaultParamValue.color
     const startPos = stage.getPointerPosition()
 
     if (!startPos) return
@@ -211,7 +211,7 @@ export default class Text extends Plugin {
 
     textNode.on('dblclick dbltap', (e) => {
       // dblclick 前会触发两次 onClick 事件，因此要清楚 onClick 事件里的状态
-      this.disableTransform(drawEventPramas, this.selectedNode)
+      this.disableTransform(drawEventParams, this.selectedNode)
 
       e.cancelBubble = true
       const textarea = this.createTextarea(stage, drawLayer, textareaTransformer, textNode, pubSub)
@@ -224,15 +224,15 @@ export default class Text extends Plugin {
     })
   }
 
-  onLeave = (drawEventPramas: DrawEventPramas) => {
-    const {stage} = drawEventPramas
+  onLeave = (drawEventParams: DrawEventParams) => {
+    const {stage} = drawEventParams
     stage.container().style.cursor = 'default'
     this.removeTextareaBlurModal()
-    this.disableTransform(drawEventPramas, this.selectedNode)
+    this.disableTransform(drawEventParams, this.selectedNode)
   }
 
-  onNodeRecreate = (drawEventPramas: DrawEventPramas, node: any) => {
-    const {pubSub} = drawEventPramas
+  onNodeRecreate = (drawEventParams: DrawEventParams, node: any) => {
+    const {pubSub} = drawEventParams
     node.on('dragend', function() {
       pubSub.pub('PUSH_HISTORY', this)
     })
