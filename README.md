@@ -47,3 +47,6 @@ import 'react-img-editor/assets/index.css'
 
 - [ ] 动态加载图片
 - [ ] 下载图片类型配置
+- [ ] 提供插件配置项配置
+- [ ] 优化自由画笔书写体验
+- [ ] 国际化支持
