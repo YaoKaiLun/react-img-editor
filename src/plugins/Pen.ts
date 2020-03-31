@@ -1,6 +1,6 @@
 import Konva from 'konva'
 import Plugin from './Plugin'
-import { DrawEventPramas, PluginParamName, PluginParamValue } from '../common/type'
+import { DrawEventParams, PluginParamName, PluginParamValue } from '../common/type'
 import { uuid } from '../common/utils'
 
 export default class Pen extends Plugin {
@@ -8,7 +8,7 @@ export default class Pen extends Plugin {
   iconfont = 'iconfont icon-pen'
   title = '画笔'
   params = ['strokeWidth', 'lineType', 'color'] as PluginParamName[]
-  defalutParamValue = {
+  defaultParamValue = {
     strokeWidth: 2,
     lineType: 'solid',
     color: '#F5222D',
@@ -17,8 +17,8 @@ export default class Pen extends Plugin {
   lastLine: any = null
   isPaint = false
 
-  onDrawStart = (drawEventPramas: DrawEventPramas) => {
-    const {stage, drawLayer, paramValue} = drawEventPramas
+  onDrawStart = (drawEventParams: DrawEventParams) => {
+    const {stage, drawLayer, paramValue} = drawEventParams
     const pos = stage.getPointerPosition()
 
     if (!pos) return
@@ -26,8 +26,8 @@ export default class Pen extends Plugin {
     this.isPaint = true
     this.lastLine = new Konva.Line({
       id: uuid(),
-      stroke: (paramValue && paramValue.color) ? paramValue.color : this.defalutParamValue.color,
-      strokeWidth: (paramValue && paramValue.strokeWidth) ? paramValue.strokeWidth : this.defalutParamValue.strokeWidth,
+      stroke: (paramValue && paramValue.color) ? paramValue.color : this.defaultParamValue.color,
+      strokeWidth: (paramValue && paramValue.strokeWidth) ? paramValue.strokeWidth : this.defaultParamValue.strokeWidth,
       globalCompositeOperation: 'source-over',
       points: [pos.x, pos.y],
       dashEnabled: !!(paramValue && paramValue.lineType && paramValue.lineType === 'dash'),
@@ -39,8 +39,8 @@ export default class Pen extends Plugin {
     drawLayer.add(this.lastLine)
   }
 
-  onDraw = (drawEventPramas: DrawEventPramas) => {
-    const {stage, drawLayer} = drawEventPramas
+  onDraw = (drawEventParams: DrawEventParams) => {
+    const {stage, drawLayer} = drawEventParams
     const pos = stage.getPointerPosition()
 
     if (!this.isPaint || !pos) return
@@ -50,8 +50,8 @@ export default class Pen extends Plugin {
     drawLayer.batchDraw()
   }
 
-  onDrawEnd = (drawEventPramas: DrawEventPramas) => {
-    const {pubSub} = drawEventPramas
+  onDrawEnd = (drawEventParams: DrawEventParams) => {
+    const {pubSub} = drawEventParams
     this.isPaint = false
     pubSub.pub('PUSH_HISTORY', this.lastLine)
   }

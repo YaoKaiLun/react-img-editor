@@ -3,7 +3,7 @@ import { EditorContextProps } from '../components/EditorContext'
 import { Stage } from 'konva/types/Stage'
 import { Layer } from 'konva/types/Layer'
 
-export interface DrawEventPramas extends EditorContextProps {
+export interface DrawEventParams extends EditorContextProps {
   event?: any;
   stage: Stage;
   imageLayer: Layer;

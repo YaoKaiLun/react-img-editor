@@ -1,6 +1,6 @@
 import Konva from 'konva'
 import Plugin from './Plugin'
-import { DrawEventPramas, PluginParamName, PluginParamValue } from '../common/type'
+import { DrawEventParams, PluginParamName, PluginParamValue } from '../common/type'
 import { transformerStyle } from '../common/constants'
 import { uuid } from '../common/utils'
 
@@ -9,7 +9,7 @@ export default class Circle extends Plugin {
   iconfont = 'iconfont icon-circle'
   title = '插入圆圈'
   params = ['strokeWidth', 'lineType', 'color'] as PluginParamName[]
-  defalutParamValue = {
+  defaultParamValue = {
     strokeWidth: 2,
     lineType: 'solid',
     color: '#F5222D',
@@ -23,8 +23,8 @@ export default class Circle extends Plugin {
   started = false // start draw 的标志
   startPoint = [0, 0]
 
-  enableTransform = (drawEventPramas: DrawEventPramas, node: any) => {
-    const {stage, drawLayer} = drawEventPramas
+  enableTransform = (drawEventParams: DrawEventParams, node: any) => {
+    const {stage, drawLayer} = drawEventParams
 
     if (!this.transformer) {
       this.transformer = new Konva.Transformer({ ...transformerStyle })
@@ -43,8 +43,8 @@ export default class Circle extends Plugin {
     drawLayer.draw()
   }
 
-  disableTransform = (drawEventPramas: DrawEventPramas, node: any, remove?: boolean) => {
-    const {stage, drawLayer, pubSub} = drawEventPramas
+  disableTransform = (drawEventParams: DrawEventParams, node: any, remove?: boolean) => {
+    const {stage, drawLayer, pubSub} = drawEventParams
 
     if (this.transformer) {
       this.transformer.remove()
@@ -69,31 +69,31 @@ export default class Circle extends Plugin {
     drawLayer.draw()
   }
 
-  onEnter = (drawEventPramas: DrawEventPramas) => {
-    const {stage, drawLayer} = drawEventPramas
+  onEnter = (drawEventParams: DrawEventParams) => {
+    const {stage, drawLayer} = drawEventParams
     const container = stage.container()
     container.tabIndex = 1 // make it focusable
     container.focus()
     container.addEventListener('keyup', (e: any) => {
       if (e.key === 'Backspace' && this.selectedNode) {
-        this.disableTransform(drawEventPramas, this.selectedNode, true)
+        this.disableTransform(drawEventParams, this.selectedNode, true)
         drawLayer.draw()
       }
     })
   }
 
-  onClick = (drawEventPramas: DrawEventPramas) => {
-    const {event} = drawEventPramas
+  onClick = (drawEventParams: DrawEventParams) => {
+    const {event} = drawEventParams
 
     if (event.target.name && event.target.name() === 'circle') {
       // 之前没有选中节点或者在相同节点之间切换点击
       if (!this.selectedNode || this.selectedNode._id !== event.target._id) {
-        this.selectedNode && this.disableTransform(drawEventPramas, this.selectedNode)
-        this.enableTransform(drawEventPramas, event.target)
+        this.selectedNode && this.disableTransform(drawEventParams, this.selectedNode)
+        this.enableTransform(drawEventParams, event.target)
         this.selectedNode = event.target
       }
     } else {
-      this.disableTransform(drawEventPramas, this.selectedNode)
+      this.disableTransform(drawEventParams, this.selectedNode)
     }
   }
 
@@ -101,8 +101,8 @@ export default class Circle extends Plugin {
     this.isPaint = true
   }
 
-  onDraw = (drawEventPramas: DrawEventPramas) => {
-    const {stage, drawLayer, paramValue, pubSub} = drawEventPramas
+  onDraw = (drawEventParams: DrawEventParams) => {
+    const {stage, drawLayer, paramValue, pubSub} = drawEventParams
     const pos = stage.getPointerPosition()
 
     if (!this.isPaint || this.transformer || !pos) return
@@ -112,8 +112,8 @@ export default class Circle extends Plugin {
       this.lastCircle = new Konva.Circle({
         id: uuid(),
         name: 'circle',
-        stroke: (paramValue && paramValue.color) ? paramValue.color : this.defalutParamValue.color,
-        strokeWidth: (paramValue && paramValue.strokeWidth) ? paramValue.strokeWidth : this.defalutParamValue.strokeWidth,
+        stroke: (paramValue && paramValue.color) ? paramValue.color : this.defaultParamValue.color,
+        strokeWidth: (paramValue && paramValue.strokeWidth) ? paramValue.strokeWidth : this.defaultParamValue.strokeWidth,
         globalCompositeOperation: 'source-over',
         radius: 0,
         dashEnabled: !!(paramValue && paramValue.lineType && paramValue.lineType === 'dash'),
@@ -137,11 +137,11 @@ export default class Circle extends Plugin {
     drawLayer.batchDraw()
   }
 
-  onDrawEnd = (drawEventPramas: DrawEventPramas) => {
-    const {pubSub} = drawEventPramas
+  onDrawEnd = (drawEventParams: DrawEventParams) => {
+    const {pubSub} = drawEventParams
     // mouseup event is triggered by move event but click event
     if (this.started) {
-      this.disableTransform(drawEventPramas, this.selectedNode)
+      this.disableTransform(drawEventParams, this.selectedNode)
       if (this.lastCircle) {
         pubSub.pub('PUSH_HISTORY', this.lastCircle)
       }
@@ -150,14 +150,14 @@ export default class Circle extends Plugin {
     this.started = false
   }
 
-  onLeave = (drawEventPramas: DrawEventPramas) => {
+  onLeave = (drawEventParams: DrawEventParams) => {
     this.isPaint = false
     this.started = false
-    this.disableTransform(drawEventPramas, this.selectedNode)
+    this.disableTransform(drawEventParams, this.selectedNode)
   }
 
-  onNodeRecreate = (drawEventPramas: DrawEventPramas, node: any) => {
-    const {pubSub} = drawEventPramas
+  onNodeRecreate = (drawEventParams: DrawEventParams, node: any) => {
+    const {pubSub} = drawEventParams
     node.on('transformend', function() {
       pubSub.pub('PUSH_HISTORY', this)
     })

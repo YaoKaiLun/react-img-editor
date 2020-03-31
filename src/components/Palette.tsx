@@ -2,7 +2,7 @@ import Konva from 'konva'
 import PubSub from '../common/PubSub'
 import React from 'react'
 import { EditorContextProps,  withEditorContext } from './EditorContext'
-import { DrawEventPramas } from '../common/type'
+import { DrawEventParams } from '../common/type'
 import { prefixCls } from '../common/constants'
 import { uuid } from '../common/utils'
 import { Stage } from 'konva/types/Stage'
@@ -52,7 +52,7 @@ class Palette extends React.Component<PaletteProps> {
 
     const { currentPlugin } = this.props
     if (currentPlugin && currentPlugin.onEnter) {
-      currentPlugin.onEnter(this.getDrawEventPramas(null))
+      currentPlugin.onEnter(this.getDrawEventParams(null))
     }
   }
 
@@ -66,19 +66,19 @@ class Palette extends React.Component<PaletteProps> {
         this.bindEvents()
 
         if (currentPlugin.onEnter) {
-          currentPlugin.onEnter(this.getDrawEventPramas(null))
+          currentPlugin.onEnter(this.getDrawEventParams(null))
         }
       }
 
       if (prevCurrentPlugin && prevCurrentPlugin.onLeave) {
-        prevCurrentPlugin.onLeave(this.getDrawEventPramas(null))
+        prevCurrentPlugin.onLeave(this.getDrawEventParams(null))
       }
     }
   }
 
   componentWillUnmount() {
     const { currentPlugin } = this.props
-    currentPlugin && currentPlugin.onLeave && currentPlugin.onLeave(this.getDrawEventPramas(null))
+    currentPlugin && currentPlugin.onLeave && currentPlugin.onLeave(this.getDrawEventParams(null))
   }
 
   init = () => {
@@ -152,7 +152,7 @@ class Palette extends React.Component<PaletteProps> {
     // @ts-ignore
     stage.clearAndToCanvas = (config: any) => {
       const { currentPlugin } = this.props
-      currentPlugin && currentPlugin.onLeave && currentPlugin.onLeave(this.getDrawEventPramas(null))
+      currentPlugin && currentPlugin.onLeave && currentPlugin.onLeave(this.getDrawEventParams(null))
       return stage.toCanvas(config)
     }
     return stage
@@ -175,7 +175,7 @@ class Palette extends React.Component<PaletteProps> {
             && (!currentPlugin || !currentPlugin.shapeName || name !== currentPlugin.shapeName)) {
             ((event: any) => {
               setTimeout(() => {
-                plugins[i].onClick && plugins[i].onClick!(this.getDrawEventPramas(event))
+                plugins[i].onClick && plugins[i].onClick!(this.getDrawEventParams(event))
               })
             })(e)
             handlePluginChange(plugins[i])
@@ -185,25 +185,25 @@ class Palette extends React.Component<PaletteProps> {
       }
 
       if (currentPlugin && currentPlugin.onClick) {
-        currentPlugin.onClick(this.getDrawEventPramas(e))
+        currentPlugin.onClick(this.getDrawEventParams(e))
       }
     })
 
     this.stage.on('mousedown touchstart', (e: any) => {
       if (currentPlugin && currentPlugin.onDrawStart) {
-        currentPlugin.onDrawStart(this.getDrawEventPramas(e))
+        currentPlugin.onDrawStart(this.getDrawEventParams(e))
       }
     })
 
     this.stage.on('mousemove touchmove', (e: any) => {
       if (currentPlugin && currentPlugin.onDraw) {
-        currentPlugin.onDraw(this.getDrawEventPramas(e))
+        currentPlugin.onDraw(this.getDrawEventParams(e))
       }
     })
 
     this.stage.on('mouseup touchend', (e: any) => {
       if (currentPlugin && currentPlugin.onDrawEnd) {
-        currentPlugin.onDrawEnd(this.getDrawEventPramas(e))
+        currentPlugin.onDrawEnd(this.getDrawEventParams(e))
       }
     })
   }
@@ -255,9 +255,9 @@ class Palette extends React.Component<PaletteProps> {
   }
 
   // 生命周期的统一参数生成函数
-  getDrawEventPramas = (e: any) => {
+  getDrawEventParams = (e: any) => {
     const props = this.props
-    const drawEventPramas: DrawEventPramas = {
+    const drawEventParams: DrawEventParams = {
       event: e,
       stage: this.stage!,
       imageLayer: this.imageLayer!,
@@ -280,7 +280,7 @@ class Palette extends React.Component<PaletteProps> {
       updateToolbarItemConfig: props.updateToolbarItemConfig,
     }
 
-    return drawEventPramas
+    return drawEventParams
   }
 
   render() {

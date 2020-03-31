@@ -1,6 +1,6 @@
 import Konva from 'konva'
 import Plugin from './Plugin'
-import { DrawEventPramas } from '../common/type'
+import { DrawEventParams } from '../common/type'
 import { transformerStyle } from '../common/constants'
 import { uuid } from '../common/utils'
 
@@ -124,13 +124,13 @@ export default class Crop extends Plugin {
     }
   }
 
-  onEnter = (drawEventPramas: DrawEventPramas) => {
-    const {stage} = drawEventPramas
+  onEnter = (drawEventParams: DrawEventParams) => {
+    const {stage} = drawEventParams
     stage.container().style.cursor = 'crosshair'
   }
 
-  onDrawStart = (drawEventPramas: DrawEventPramas) => {
-    const {stage} = drawEventPramas
+  onDrawStart = (drawEventParams: DrawEventParams) => {
+    const {stage} = drawEventParams
     const startPos = stage.getPointerPosition()
     // 当鼠标移出 stage 时，不会触发 mouseup，重新回到 stage 时，会重新触发 onDrawStart，这里就是为了防止重新触发 onDrawStart
     if (this.isPaint || !startPos) return
@@ -173,8 +173,8 @@ export default class Crop extends Plugin {
     this.virtualLayer.draw()
   }
 
-  onDraw = (drawEventPramas: DrawEventPramas) => {
-    const {stage} = drawEventPramas
+  onDraw = (drawEventParams: DrawEventParams) => {
+    const {stage} = drawEventParams
     const endPos = stage.getPointerPosition()
 
     if (!this.isPaint || !endPos) return
@@ -210,8 +210,8 @@ export default class Crop extends Plugin {
     this.virtualLayer.draw()
   }
 
-  onDrawEnd = (drawEventPramas: DrawEventPramas) => {
-    const {stage, pixelRatio, reload} = drawEventPramas
+  onDrawEnd = (drawEventParams: DrawEventParams) => {
+    const {stage, pixelRatio, reload} = drawEventParams
 
     if (!this.isPaint) {
       this.isPaint = false
@@ -306,8 +306,8 @@ export default class Crop extends Plugin {
     this.adjustToolbarPosition(stage)
   }
 
-  onLeave = (drawEventPramas: DrawEventPramas) => {
-    const {stage} = drawEventPramas
+  onLeave = (drawEventParams: DrawEventParams) => {
+    const {stage} = drawEventParams
     this.reset(stage)
     stage.container().style.cursor = 'default'
     this.isPaint = false
