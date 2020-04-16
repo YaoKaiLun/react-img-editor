@@ -49786,7 +49786,7 @@ var Palette = /*#__PURE__*/function (_React$Component) {
 
       stage.clearAndToCanvas = function (config) {
         var currentPlugin = _this.props.currentPlugin;
-        currentPlugin && currentPlugin.onLeave && currentPlugin.onLeave(_this.getDrawEventPramas(null));
+        currentPlugin && currentPlugin.onLeave && currentPlugin.onLeave(_this.getDrawEventParams(null));
         return stage.toCanvas(config);
       };
 
@@ -49815,7 +49815,7 @@ var Palette = /*#__PURE__*/function (_React$Component) {
             if (plugins[i].shapeName && plugins[i].shapeName === name && (!currentPlugin || !currentPlugin.shapeName || name !== currentPlugin.shapeName)) {
               (function (event) {
                 setTimeout(function () {
-                  plugins[i].onClick && plugins[i].onClick(_this.getDrawEventPramas(event));
+                  plugins[i].onClick && plugins[i].onClick(_this.getDrawEventParams(event));
                 });
               })(e);
 
@@ -49834,25 +49834,25 @@ var Palette = /*#__PURE__*/function (_React$Component) {
         }
 
         if (currentPlugin && currentPlugin.onClick) {
-          currentPlugin.onClick(_this.getDrawEventPramas(e));
+          currentPlugin.onClick(_this.getDrawEventParams(e));
         }
       });
 
       _this.stage.on('mousedown touchstart', function (e) {
         if (currentPlugin && currentPlugin.onDrawStart) {
-          currentPlugin.onDrawStart(_this.getDrawEventPramas(e));
+          currentPlugin.onDrawStart(_this.getDrawEventParams(e));
         }
       });
 
       _this.stage.on('mousemove touchmove', function (e) {
         if (currentPlugin && currentPlugin.onDraw) {
-          currentPlugin.onDraw(_this.getDrawEventPramas(e));
+          currentPlugin.onDraw(_this.getDrawEventParams(e));
         }
       });
 
       _this.stage.on('mouseup touchend', function (e) {
         if (currentPlugin && currentPlugin.onDrawEnd) {
-          currentPlugin.onDrawEnd(_this.getDrawEventPramas(e));
+          currentPlugin.onDrawEnd(_this.getDrawEventParams(e));
         }
       });
     };
@@ -49915,9 +49915,9 @@ var Palette = /*#__PURE__*/function (_React$Component) {
     }; // 生命周期的统一参数生成函数
 
 
-    _this.getDrawEventPramas = function (e) {
+    _this.getDrawEventParams = function (e) {
       var props = _this.props;
-      var drawEventPramas = {
+      var drawEventParams = {
         event: e,
         stage: _this.stage,
         imageLayer: _this.imageLayer,
@@ -49939,7 +49939,7 @@ var Palette = /*#__PURE__*/function (_React$Component) {
         toolbarItemConfig: props.toolbarItemConfig,
         updateToolbarItemConfig: props.updateToolbarItemConfig
       };
-      return drawEventPramas;
+      return drawEventParams;
     };
 
     var containerWidth = props.containerWidth,
@@ -49967,7 +49967,7 @@ var Palette = /*#__PURE__*/function (_React$Component) {
       var currentPlugin = this.props.currentPlugin;
 
       if (currentPlugin && currentPlugin.onEnter) {
-        currentPlugin.onEnter(this.getDrawEventPramas(null));
+        currentPlugin.onEnter(this.getDrawEventParams(null));
       }
     }
   }, {
@@ -49981,12 +49981,12 @@ var Palette = /*#__PURE__*/function (_React$Component) {
           this.bindEvents();
 
           if (currentPlugin.onEnter) {
-            currentPlugin.onEnter(this.getDrawEventPramas(null));
+            currentPlugin.onEnter(this.getDrawEventParams(null));
           }
         }
 
         if (prevCurrentPlugin && prevCurrentPlugin.onLeave) {
-          prevCurrentPlugin.onLeave(this.getDrawEventPramas(null));
+          prevCurrentPlugin.onLeave(this.getDrawEventParams(null));
         }
       }
     }
@@ -49994,7 +49994,7 @@ var Palette = /*#__PURE__*/function (_React$Component) {
     key: "componentWillUnmount",
     value: function componentWillUnmount() {
       var currentPlugin = this.props.currentPlugin;
-      currentPlugin && currentPlugin.onLeave && currentPlugin.onLeave(this.getDrawEventPramas(null));
+      currentPlugin && currentPlugin.onLeave && currentPlugin.onLeave(this.getDrawEventParams(null));
     }
   }, {
     key: "render",
@@ -50193,7 +50193,7 @@ function _extends() { _extends = Object.assign || function (target) { for (var i
 
 
 function ParamSetting(props) {
-  function handleStrokWidthChange(strokeWidth) {
+  function handleStrokeWidthChange(strokeWidth) {
     props.onChange(_extends(_extends({}, props.paramValue), {
       strokeWidth: strokeWidth
     }));
@@ -50223,7 +50223,7 @@ function ParamSetting(props) {
         return react__WEBPACK_IMPORTED_MODULE_3___default.a.createElement(_StrokeWidthSetting__WEBPACK_IMPORTED_MODULE_4__["default"], {
           key: "stroke-width-setting",
           value: props.paramValue ? props.paramValue['strokeWidth'] : undefined,
-          onChange: handleStrokWidthChange
+          onChange: handleStrokeWidthChange
         });
 
       case 'lineType':
@@ -50348,7 +50348,7 @@ function Toolbar() {
     style: style
   }, toolbar.items.map(function (item) {
     if (item === '|') return react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("span", {
-      className: "".concat(_common_constants__WEBPACK_IMPORTED_MODULE_3__["prefixCls"], "-toolbar-seperator")
+      className: "".concat(_common_constants__WEBPACK_IMPORTED_MODULE_3__["prefixCls"], "-toolbar-separator")
     });
 
     for (var i = 0; i < plugins.length; i++) {
@@ -50415,14 +50415,14 @@ function ReactImageEditor(props) {
   var pluginFactory = new _plugins_PluginFactory__WEBPACK_IMPORTED_MODULE_0__["default"]();
   var plugins = [].concat(_toConsumableArray(pluginFactory.plugins), _toConsumableArray(props.plugins));
   var defaultPlugin = null;
-  var defalutParamValue = {};
+  var defaultParamValue = {};
 
   for (var i = 0; i < plugins.length; i++) {
     if (props.defaultPluginName && props.toolbar && plugins[i].name === props.defaultPluginName) {
       defaultPlugin = plugins[i];
 
-      if (defaultPlugin.defalutParamValue) {
-        defalutParamValue = defaultPlugin.defalutParamValue;
+      if (defaultPlugin.defaultParamValue) {
+        defaultParamValue = defaultPlugin.defaultParamValue;
       }
 
       break;
@@ -50434,7 +50434,7 @@ function ReactImageEditor(props) {
       currentPlugin = _useState4[0],
       setCurrentPlugin = _useState4[1];
 
-  var _useState5 = Object(react__WEBPACK_IMPORTED_MODULE_2__["useState"])(defalutParamValue),
+  var _useState5 = Object(react__WEBPACK_IMPORTED_MODULE_2__["useState"])(defaultParamValue),
       _useState6 = _slicedToArray(_useState5, 2),
       paramValue = _useState6[0],
       setParamValue = _useState6[1]; // 生成默认 toolbarItemConfig
@@ -50465,13 +50465,16 @@ function ReactImageEditor(props) {
       setImageObj(image);
     };
 
-    image.crossOrigin = 'anonymous';
+    if (props.crossOrigin !== undefined) {
+      image.crossOrigin = props.crossOrigin;
+    }
+
     image.src = props.src;
-  }, [props.src]);
+  }, [props.src, props.crossOrigin]);
 
   function handlePluginChange(plugin) {
     setCurrentPlugin(plugin);
-    plugin.defalutParamValue && setParamValue(plugin.defalutParamValue);
+    plugin.defaultParamValue && setParamValue(plugin.defaultParamValue);
 
     if (!plugin.params) {
       setTimeout(function () {
@@ -50580,7 +50583,7 @@ var Arrow = /*#__PURE__*/function (_Plugin) {
     _this.iconfont = 'iconfont icon-arrow';
     _this.title = '插入箭头';
     _this.params = ['strokeWidth', 'color'];
-    _this.defalutParamValue = {
+    _this.defaultParamValue = {
       strokeWidth: 2,
       lineType: 'solid',
       color: '#F5222D'
@@ -50593,9 +50596,9 @@ var Arrow = /*#__PURE__*/function (_Plugin) {
     _this.started = false;
     _this.startPoints = [0, 0];
 
-    _this.enableTransform = function (drawEventPramas, node) {
-      var stage = drawEventPramas.stage,
-          drawLayer = drawEventPramas.drawLayer;
+    _this.enableTransform = function (drawEventParams, node) {
+      var stage = drawEventParams.stage,
+          drawLayer = drawEventParams.drawLayer;
 
       if (!_this.transformer) {
         _this.transformer = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Transformer(_extends(_extends({}, _common_constants__WEBPACK_IMPORTED_MODULE_2__["transformerStyle"]), {
@@ -50618,10 +50621,10 @@ var Arrow = /*#__PURE__*/function (_Plugin) {
       drawLayer.draw();
     };
 
-    _this.disableTransform = function (drawEventPramas, node, remove) {
-      var stage = drawEventPramas.stage,
-          drawLayer = drawEventPramas.drawLayer,
-          pubSub = drawEventPramas.pubSub;
+    _this.disableTransform = function (drawEventParams, node, remove) {
+      var stage = drawEventParams.stage,
+          drawLayer = drawEventParams.drawLayer,
+          pubSub = drawEventParams.pubSub;
 
       if (_this.transformer) {
         _this.transformer.remove();
@@ -50647,36 +50650,36 @@ var Arrow = /*#__PURE__*/function (_Plugin) {
       drawLayer.draw();
     };
 
-    _this.onEnter = function (drawEventPramas) {
-      var stage = drawEventPramas.stage,
-          drawLayer = drawEventPramas.drawLayer;
+    _this.onEnter = function (drawEventParams) {
+      var stage = drawEventParams.stage,
+          drawLayer = drawEventParams.drawLayer;
       var container = stage.container();
       container.tabIndex = 1; // make it focusable
 
       container.focus();
       container.addEventListener('keyup', function (e) {
         if (e.key === 'Backspace' && _this.selectedNode) {
-          _this.disableTransform(drawEventPramas, _this.selectedNode, true);
+          _this.disableTransform(drawEventParams, _this.selectedNode, true);
 
           drawLayer.draw();
         }
       });
     };
 
-    _this.onClick = function (drawEventPramas) {
-      var event = drawEventPramas.event;
+    _this.onClick = function (drawEventParams) {
+      var event = drawEventParams.event;
 
       if (event.target.name && event.target.name() === 'arrow') {
         // 之前没有选中节点或者在相同节点之间切换点击
         if (!_this.selectedNode || _this.selectedNode._id !== event.target._id) {
-          _this.selectedNode && _this.disableTransform(drawEventPramas, _this.selectedNode);
+          _this.selectedNode && _this.disableTransform(drawEventParams, _this.selectedNode);
 
-          _this.enableTransform(drawEventPramas, event.target);
+          _this.enableTransform(drawEventParams, event.target);
 
           _this.selectedNode = event.target;
         }
       } else {
-        _this.disableTransform(drawEventPramas, _this.selectedNode);
+        _this.disableTransform(drawEventParams, _this.selectedNode);
       }
     };
 
@@ -50684,22 +50687,22 @@ var Arrow = /*#__PURE__*/function (_Plugin) {
       _this.isPaint = true;
     };
 
-    _this.onDraw = function (drawEventPramas) {
-      var stage = drawEventPramas.stage,
-          drawLayer = drawEventPramas.drawLayer,
-          paramValue = drawEventPramas.paramValue,
-          pubSub = drawEventPramas.pubSub;
+    _this.onDraw = function (drawEventParams) {
+      var stage = drawEventParams.stage,
+          drawLayer = drawEventParams.drawLayer,
+          paramValue = drawEventParams.paramValue,
+          pubSub = drawEventParams.pubSub;
       var pos = stage.getPointerPosition();
       if (!_this.isPaint || _this.transformer || !pos) return;
 
       if (!_this.started && pos) {
         _this.startPoints = [pos.x, pos.y];
-        var strokeColor = paramValue && paramValue.color ? paramValue.color : _this.defalutParamValue.color;
+        var strokeColor = paramValue && paramValue.color ? paramValue.color : _this.defaultParamValue.color;
         _this.lastArrow = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Arrow({
           id: Object(_common_utils__WEBPACK_IMPORTED_MODULE_3__["uuid"])(),
           name: 'arrow',
           stroke: strokeColor,
-          strokeWidth: paramValue && paramValue.strokeWidth ? paramValue.strokeWidth : _this.defalutParamValue.strokeWidth,
+          strokeWidth: paramValue && paramValue.strokeWidth ? paramValue.strokeWidth : _this.defaultParamValue.strokeWidth,
           globalCompositeOperation: 'source-over',
           points: _this.startPoints,
           dashEnabled: !!(paramValue && paramValue.lineType && paramValue.lineType === 'dash'),
@@ -50725,11 +50728,11 @@ var Arrow = /*#__PURE__*/function (_Plugin) {
       drawLayer.batchDraw();
     };
 
-    _this.onDrawEnd = function (drawEventPramas) {
-      var pubSub = drawEventPramas.pubSub; // mouseup event is triggered by move event but click event
+    _this.onDrawEnd = function (drawEventParams) {
+      var pubSub = drawEventParams.pubSub; // mouseup event is triggered by move event but click event
 
       if (_this.started) {
-        _this.disableTransform(drawEventPramas, _this.selectedNode);
+        _this.disableTransform(drawEventParams, _this.selectedNode);
 
         if (_this.lastArrow) {
           pubSub.pub('PUSH_HISTORY', _this.lastArrow);
@@ -50740,15 +50743,15 @@ var Arrow = /*#__PURE__*/function (_Plugin) {
       _this.started = false;
     };
 
-    _this.onLeave = function (drawEventPramas) {
+    _this.onLeave = function (drawEventParams) {
       _this.isPaint = false;
       _this.started = false;
 
-      _this.disableTransform(drawEventPramas, _this.selectedNode);
+      _this.disableTransform(drawEventParams, _this.selectedNode);
     };
 
-    _this.onNodeRecreate = function (drawEventPramas, node) {
-      var pubSub = drawEventPramas.pubSub;
+    _this.onNodeRecreate = function (drawEventParams, node) {
+      var pubSub = drawEventParams.pubSub;
       node.on('transformend', function () {
         pubSub.pub('PUSH_HISTORY', this);
       });
@@ -50820,7 +50823,7 @@ var Circle = /*#__PURE__*/function (_Plugin) {
     _this.iconfont = 'iconfont icon-circle';
     _this.title = '插入圆圈';
     _this.params = ['strokeWidth', 'lineType', 'color'];
-    _this.defalutParamValue = {
+    _this.defaultParamValue = {
       strokeWidth: 2,
       lineType: 'solid',
       color: '#F5222D'
@@ -50835,9 +50838,9 @@ var Circle = /*#__PURE__*/function (_Plugin) {
 
     _this.startPoint = [0, 0];
 
-    _this.enableTransform = function (drawEventPramas, node) {
-      var stage = drawEventPramas.stage,
-          drawLayer = drawEventPramas.drawLayer;
+    _this.enableTransform = function (drawEventParams, node) {
+      var stage = drawEventParams.stage,
+          drawLayer = drawEventParams.drawLayer;
 
       if (!_this.transformer) {
         _this.transformer = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Transformer(_extends({}, _common_constants__WEBPACK_IMPORTED_MODULE_2__["transformerStyle"]));
@@ -50858,10 +50861,10 @@ var Circle = /*#__PURE__*/function (_Plugin) {
       drawLayer.draw();
     };
 
-    _this.disableTransform = function (drawEventPramas, node, remove) {
-      var stage = drawEventPramas.stage,
-          drawLayer = drawEventPramas.drawLayer,
-          pubSub = drawEventPramas.pubSub;
+    _this.disableTransform = function (drawEventParams, node, remove) {
+      var stage = drawEventParams.stage,
+          drawLayer = drawEventParams.drawLayer,
+          pubSub = drawEventParams.pubSub;
 
       if (_this.transformer) {
         _this.transformer.remove();
@@ -50887,36 +50890,36 @@ var Circle = /*#__PURE__*/function (_Plugin) {
       drawLayer.draw();
     };
 
-    _this.onEnter = function (drawEventPramas) {
-      var stage = drawEventPramas.stage,
-          drawLayer = drawEventPramas.drawLayer;
+    _this.onEnter = function (drawEventParams) {
+      var stage = drawEventParams.stage,
+          drawLayer = drawEventParams.drawLayer;
       var container = stage.container();
       container.tabIndex = 1; // make it focusable
 
       container.focus();
       container.addEventListener('keyup', function (e) {
         if (e.key === 'Backspace' && _this.selectedNode) {
-          _this.disableTransform(drawEventPramas, _this.selectedNode, true);
+          _this.disableTransform(drawEventParams, _this.selectedNode, true);
 
           drawLayer.draw();
         }
       });
     };
 
-    _this.onClick = function (drawEventPramas) {
-      var event = drawEventPramas.event;
+    _this.onClick = function (drawEventParams) {
+      var event = drawEventParams.event;
 
       if (event.target.name && event.target.name() === 'circle') {
         // 之前没有选中节点或者在相同节点之间切换点击
         if (!_this.selectedNode || _this.selectedNode._id !== event.target._id) {
-          _this.selectedNode && _this.disableTransform(drawEventPramas, _this.selectedNode);
+          _this.selectedNode && _this.disableTransform(drawEventParams, _this.selectedNode);
 
-          _this.enableTransform(drawEventPramas, event.target);
+          _this.enableTransform(drawEventParams, event.target);
 
           _this.selectedNode = event.target;
         }
       } else {
-        _this.disableTransform(drawEventPramas, _this.selectedNode);
+        _this.disableTransform(drawEventParams, _this.selectedNode);
       }
     };
 
@@ -50924,11 +50927,11 @@ var Circle = /*#__PURE__*/function (_Plugin) {
       _this.isPaint = true;
     };
 
-    _this.onDraw = function (drawEventPramas) {
-      var stage = drawEventPramas.stage,
-          drawLayer = drawEventPramas.drawLayer,
-          paramValue = drawEventPramas.paramValue,
-          pubSub = drawEventPramas.pubSub;
+    _this.onDraw = function (drawEventParams) {
+      var stage = drawEventParams.stage,
+          drawLayer = drawEventParams.drawLayer,
+          paramValue = drawEventParams.paramValue,
+          pubSub = drawEventParams.pubSub;
       var pos = stage.getPointerPosition();
       if (!_this.isPaint || _this.transformer || !pos) return;
 
@@ -50937,8 +50940,8 @@ var Circle = /*#__PURE__*/function (_Plugin) {
         _this.lastCircle = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Circle({
           id: Object(_common_utils__WEBPACK_IMPORTED_MODULE_3__["uuid"])(),
           name: 'circle',
-          stroke: paramValue && paramValue.color ? paramValue.color : _this.defalutParamValue.color,
-          strokeWidth: paramValue && paramValue.strokeWidth ? paramValue.strokeWidth : _this.defalutParamValue.strokeWidth,
+          stroke: paramValue && paramValue.color ? paramValue.color : _this.defaultParamValue.color,
+          strokeWidth: paramValue && paramValue.strokeWidth ? paramValue.strokeWidth : _this.defaultParamValue.strokeWidth,
           globalCompositeOperation: 'source-over',
           radius: 0,
           dashEnabled: !!(paramValue && paramValue.lineType && paramValue.lineType === 'dash'),
@@ -50969,11 +50972,11 @@ var Circle = /*#__PURE__*/function (_Plugin) {
       drawLayer.batchDraw();
     };
 
-    _this.onDrawEnd = function (drawEventPramas) {
-      var pubSub = drawEventPramas.pubSub; // mouseup event is triggered by move event but click event
+    _this.onDrawEnd = function (drawEventParams) {
+      var pubSub = drawEventParams.pubSub; // mouseup event is triggered by move event but click event
 
       if (_this.started) {
-        _this.disableTransform(drawEventPramas, _this.selectedNode);
+        _this.disableTransform(drawEventParams, _this.selectedNode);
 
         if (_this.lastCircle) {
           pubSub.pub('PUSH_HISTORY', _this.lastCircle);
@@ -50984,15 +50987,15 @@ var Circle = /*#__PURE__*/function (_Plugin) {
       _this.started = false;
     };
 
-    _this.onLeave = function (drawEventPramas) {
+    _this.onLeave = function (drawEventParams) {
       _this.isPaint = false;
       _this.started = false;
 
-      _this.disableTransform(drawEventPramas, _this.selectedNode);
+      _this.disableTransform(drawEventParams, _this.selectedNode);
     };
 
-    _this.onNodeRecreate = function (drawEventPramas, node) {
-      var pubSub = drawEventPramas.pubSub;
+    _this.onNodeRecreate = function (drawEventParams, node) {
+      var pubSub = drawEventParams.pubSub;
       node.on('transformend', function () {
         pubSub.pub('PUSH_HISTORY', this);
       });
@@ -51172,13 +51175,13 @@ var Crop = /*#__PURE__*/function (_Plugin) {
       }
     };
 
-    _this.onEnter = function (drawEventPramas) {
-      var stage = drawEventPramas.stage;
+    _this.onEnter = function (drawEventParams) {
+      var stage = drawEventParams.stage;
       stage.container().style.cursor = 'crosshair';
     };
 
-    _this.onDrawStart = function (drawEventPramas) {
-      var stage = drawEventPramas.stage;
+    _this.onDrawStart = function (drawEventParams) {
+      var stage = drawEventParams.stage;
       var startPos = stage.getPointerPosition(); // 当鼠标移出 stage 时，不会触发 mouseup，重新回到 stage 时，会重新触发 onDrawStart，这里就是为了防止重新触发 onDrawStart
 
       if (_this.isPaint || !startPos) return;
@@ -51222,8 +51225,8 @@ var Crop = /*#__PURE__*/function (_Plugin) {
       _this.virtualLayer.draw();
     };
 
-    _this.onDraw = function (drawEventPramas) {
-      var stage = drawEventPramas.stage;
+    _this.onDraw = function (drawEventParams) {
+      var stage = drawEventParams.stage;
       var endPos = stage.getPointerPosition();
       if (!_this.isPaint || !endPos) return;
       if (document.getElementById(_this.toolbarId)) return; // 绘制初始裁剪区域
@@ -51263,10 +51266,10 @@ var Crop = /*#__PURE__*/function (_Plugin) {
       _this.virtualLayer.draw();
     };
 
-    _this.onDrawEnd = function (drawEventPramas) {
-      var stage = drawEventPramas.stage,
-          pixelRatio = drawEventPramas.pixelRatio,
-          reload = drawEventPramas.reload;
+    _this.onDrawEnd = function (drawEventParams) {
+      var stage = drawEventParams.stage,
+          pixelRatio = drawEventParams.pixelRatio,
+          reload = drawEventParams.reload;
 
       if (!_this.isPaint) {
         _this.isPaint = false;
@@ -51372,8 +51375,8 @@ var Crop = /*#__PURE__*/function (_Plugin) {
       _this.adjustToolbarPosition(stage);
     };
 
-    _this.onLeave = function (drawEventPramas) {
-      var stage = drawEventPramas.stage;
+    _this.onLeave = function (drawEventParams) {
+      var stage = drawEventParams.stage;
 
       _this.reset(stage);
 
@@ -51435,9 +51438,9 @@ var Download = /*#__PURE__*/function (_Plugin) {
     _this.iconfont = 'iconfont icon-download';
     _this.title = '下载图片';
 
-    _this.onEnter = function (drawEventPramas) {
-      var stage = drawEventPramas.stage,
-          pixelRatio = drawEventPramas.pixelRatio; // 延迟下载，等触发 plugin 的 onLeave 生命周期，清除未完成的现场
+    _this.onEnter = function (drawEventParams) {
+      var stage = drawEventParams.stage,
+          pixelRatio = drawEventParams.pixelRatio; // 延迟下载，等触发 plugin 的 onLeave 生命周期，清除未完成的现场
 
       setTimeout(function () {
         var canvas = stage.toCanvas({
@@ -51511,32 +51514,32 @@ var Eraser = /*#__PURE__*/function (_Plugin) {
     _this.iconfont = 'iconfont icon-eraser';
     _this.title = '擦除';
     _this.params = ['strokeWidth'];
-    _this.defalutParamValue = {
+    _this.defaultParamValue = {
       strokeWidth: 2
     };
     _this.lastLine = null;
     _this.isPaint = false;
 
-    _this.onDrawStart = function (drawEventPramas) {
-      var stage = drawEventPramas.stage,
-          drawLayer = drawEventPramas.drawLayer,
-          paramValue = drawEventPramas.paramValue;
+    _this.onDrawStart = function (drawEventParams) {
+      var stage = drawEventParams.stage,
+          drawLayer = drawEventParams.drawLayer,
+          paramValue = drawEventParams.paramValue;
       var pos = stage.getPointerPosition();
       if (!pos) return;
       _this.isPaint = true;
       _this.lastLine = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Line({
         id: Object(_common_utils__WEBPACK_IMPORTED_MODULE_2__["uuid"])(),
         stroke: '#df4b26',
-        strokeWidth: paramValue && paramValue.strokeWidth ? paramValue.strokeWidth : _this.defalutParamValue.strokeWidth,
+        strokeWidth: paramValue && paramValue.strokeWidth ? paramValue.strokeWidth : _this.defaultParamValue.strokeWidth,
         globalCompositeOperation: 'destination-out',
         points: [pos.x, pos.y]
       });
       drawLayer.add(_this.lastLine);
     };
 
-    _this.onDraw = function (drawEventPramas) {
-      var stage = drawEventPramas.stage,
-          drawLayer = drawEventPramas.drawLayer;
+    _this.onDraw = function (drawEventParams) {
+      var stage = drawEventParams.stage,
+          drawLayer = drawEventParams.drawLayer;
       var pos = stage.getPointerPosition();
       if (!_this.isPaint || !pos) return;
 
@@ -51547,8 +51550,8 @@ var Eraser = /*#__PURE__*/function (_Plugin) {
       drawLayer.batchDraw();
     };
 
-    _this.onDrawEnd = function (drawEventPramas) {
-      var pubSub = drawEventPramas.pubSub;
+    _this.onDrawEnd = function (drawEventParams) {
+      var pubSub = drawEventParams.pubSub;
       _this.isPaint = false;
       pubSub.pub('PUSH_HISTORY', _this.lastLine);
     };
@@ -51630,7 +51633,7 @@ var Mosaic = /*#__PURE__*/function (_Plugin) {
     _this.iconfont = 'iconfont icon-mosaic';
     _this.title = '马赛克';
     _this.params = ['strokeWidth'];
-    _this.defalutParamValue = {
+    _this.defaultParamValue = {
       strokeWidth: 2
     };
     _this.isPaint = false;
@@ -51715,9 +51718,9 @@ var Mosaic = /*#__PURE__*/function (_Plugin) {
       return ts;
     };
 
-    _this.onDrawStart = function (drawEventPramas) {
-      var stage = drawEventPramas.stage,
-          imageData = drawEventPramas.imageData;
+    _this.onDrawStart = function (drawEventParams) {
+      var stage = drawEventParams.stage,
+          imageData = drawEventParams.imageData;
       _this.tiles = [];
       _this.width = stage.width();
       _this.height = stage.height();
@@ -51758,19 +51761,19 @@ var Mosaic = /*#__PURE__*/function (_Plugin) {
       _this.isPaint = true;
     };
 
-    _this.onDraw = function (drawEventPramas) {
-      var stage = drawEventPramas.stage,
-          drawLayer = drawEventPramas.drawLayer,
-          paramValue = drawEventPramas.paramValue;
+    _this.onDraw = function (drawEventParams) {
+      var stage = drawEventParams.stage,
+          drawLayer = drawEventParams.drawLayer,
+          paramValue = drawEventParams.paramValue;
       var pos = stage.getPointerPosition();
       if (!_this.isPaint || !pos) return;
-      var strokeWidth = paramValue && paramValue.strokeWidth ? paramValue.strokeWidth : _this.defalutParamValue.strokeWidth;
+      var strokeWidth = paramValue && paramValue.strokeWidth ? paramValue.strokeWidth : _this.defaultParamValue.strokeWidth;
 
       _this.drawTile(_this.getTilesByPoint(pos.x, pos.y, strokeWidth), drawLayer);
     };
 
-    _this.onDrawEnd = function (drawEventPramas) {
-      var pubSub = drawEventPramas.pubSub;
+    _this.onDrawEnd = function (drawEventParams) {
+      var pubSub = drawEventParams.pubSub;
       _this.isPaint = false;
       pubSub.pub('PUSH_HISTORY', _this.rectGroup);
     };
@@ -51838,7 +51841,7 @@ var Pen = /*#__PURE__*/function (_Plugin) {
     _this.iconfont = 'iconfont icon-pen';
     _this.title = '画笔';
     _this.params = ['strokeWidth', 'lineType', 'color'];
-    _this.defalutParamValue = {
+    _this.defaultParamValue = {
       strokeWidth: 2,
       lineType: 'solid',
       color: '#F5222D'
@@ -51846,17 +51849,17 @@ var Pen = /*#__PURE__*/function (_Plugin) {
     _this.lastLine = null;
     _this.isPaint = false;
 
-    _this.onDrawStart = function (drawEventPramas) {
-      var stage = drawEventPramas.stage,
-          drawLayer = drawEventPramas.drawLayer,
-          paramValue = drawEventPramas.paramValue;
+    _this.onDrawStart = function (drawEventParams) {
+      var stage = drawEventParams.stage,
+          drawLayer = drawEventParams.drawLayer,
+          paramValue = drawEventParams.paramValue;
       var pos = stage.getPointerPosition();
       if (!pos) return;
       _this.isPaint = true;
       _this.lastLine = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Line({
         id: Object(_common_utils__WEBPACK_IMPORTED_MODULE_2__["uuid"])(),
-        stroke: paramValue && paramValue.color ? paramValue.color : _this.defalutParamValue.color,
-        strokeWidth: paramValue && paramValue.strokeWidth ? paramValue.strokeWidth : _this.defalutParamValue.strokeWidth,
+        stroke: paramValue && paramValue.color ? paramValue.color : _this.defaultParamValue.color,
+        strokeWidth: paramValue && paramValue.strokeWidth ? paramValue.strokeWidth : _this.defaultParamValue.strokeWidth,
         globalCompositeOperation: 'source-over',
         points: [pos.x, pos.y],
         dashEnabled: !!(paramValue && paramValue.lineType && paramValue.lineType === 'dash'),
@@ -51868,9 +51871,9 @@ var Pen = /*#__PURE__*/function (_Plugin) {
       drawLayer.add(_this.lastLine);
     };
 
-    _this.onDraw = function (drawEventPramas) {
-      var stage = drawEventPramas.stage,
-          drawLayer = drawEventPramas.drawLayer;
+    _this.onDraw = function (drawEventParams) {
+      var stage = drawEventParams.stage,
+          drawLayer = drawEventParams.drawLayer;
       var pos = stage.getPointerPosition();
       if (!_this.isPaint || !pos) return;
 
@@ -51881,8 +51884,8 @@ var Pen = /*#__PURE__*/function (_Plugin) {
       drawLayer.batchDraw();
     };
 
-    _this.onDrawEnd = function (drawEventPramas) {
-      var pubSub = drawEventPramas.pubSub;
+    _this.onDrawEnd = function (drawEventParams) {
+      var pubSub = drawEventParams.pubSub;
       _this.isPaint = false;
       pubSub.pub('PUSH_HISTORY', _this.lastLine);
     };
@@ -52017,7 +52020,7 @@ var Rect = /*#__PURE__*/function (_Plugin) {
     _this.iconfont = 'iconfont icon-square';
     _this.title = '插入矩形';
     _this.params = ['strokeWidth', 'lineType', 'color'];
-    _this.defalutParamValue = {
+    _this.defaultParamValue = {
       strokeWidth: 2,
       lineType: 'solid',
       color: '#F5222D'
@@ -52032,9 +52035,9 @@ var Rect = /*#__PURE__*/function (_Plugin) {
 
     _this.startPoint = [0, 0];
 
-    _this.enableTransform = function (drawEventPramas, node) {
-      var stage = drawEventPramas.stage,
-          drawLayer = drawEventPramas.drawLayer;
+    _this.enableTransform = function (drawEventParams, node) {
+      var stage = drawEventParams.stage,
+          drawLayer = drawEventParams.drawLayer;
 
       if (!_this.transformer) {
         _this.transformer = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Transformer(_extends(_extends({}, _common_constants__WEBPACK_IMPORTED_MODULE_2__["transformerStyle"]), {
@@ -52057,10 +52060,10 @@ var Rect = /*#__PURE__*/function (_Plugin) {
       drawLayer.draw();
     };
 
-    _this.disableTransform = function (drawEventPramas, node, remove) {
-      var stage = drawEventPramas.stage,
-          drawLayer = drawEventPramas.drawLayer,
-          pubSub = drawEventPramas.pubSub;
+    _this.disableTransform = function (drawEventParams, node, remove) {
+      var stage = drawEventParams.stage,
+          drawLayer = drawEventParams.drawLayer,
+          pubSub = drawEventParams.pubSub;
 
       if (_this.transformer) {
         _this.transformer.remove();
@@ -52086,36 +52089,36 @@ var Rect = /*#__PURE__*/function (_Plugin) {
       drawLayer.draw();
     };
 
-    _this.onEnter = function (drawEventPramas) {
-      var stage = drawEventPramas.stage,
-          drawLayer = drawEventPramas.drawLayer;
+    _this.onEnter = function (drawEventParams) {
+      var stage = drawEventParams.stage,
+          drawLayer = drawEventParams.drawLayer;
       var container = stage.container();
       container.tabIndex = 1; // make it focusable
 
       container.focus();
       container.addEventListener('keyup', function (e) {
         if (e.key === 'Backspace' && _this.selectedNode) {
-          _this.disableTransform(drawEventPramas, _this.selectedNode, true);
+          _this.disableTransform(drawEventParams, _this.selectedNode, true);
 
           drawLayer.draw();
         }
       });
     };
 
-    _this.onClick = function (drawEventPramas) {
-      var event = drawEventPramas.event;
+    _this.onClick = function (drawEventParams) {
+      var event = drawEventParams.event;
 
       if (event.target.name && event.target.name() === 'rect') {
         // 之前没有选中节点或者在相同节点之间切换点击
         if (!_this.selectedNode || _this.selectedNode._id !== event.target._id) {
-          _this.selectedNode && _this.disableTransform(drawEventPramas, _this.selectedNode);
+          _this.selectedNode && _this.disableTransform(drawEventParams, _this.selectedNode);
 
-          _this.enableTransform(drawEventPramas, event.target);
+          _this.enableTransform(drawEventParams, event.target);
 
           _this.selectedNode = event.target;
         }
       } else {
-        _this.disableTransform(drawEventPramas, _this.selectedNode);
+        _this.disableTransform(drawEventParams, _this.selectedNode);
       }
     };
 
@@ -52123,11 +52126,11 @@ var Rect = /*#__PURE__*/function (_Plugin) {
       _this.isPaint = true;
     };
 
-    _this.onDraw = function (drawEventPramas) {
-      var stage = drawEventPramas.stage,
-          drawLayer = drawEventPramas.drawLayer,
-          paramValue = drawEventPramas.paramValue,
-          pubSub = drawEventPramas.pubSub;
+    _this.onDraw = function (drawEventParams) {
+      var stage = drawEventParams.stage,
+          drawLayer = drawEventParams.drawLayer,
+          paramValue = drawEventParams.paramValue,
+          pubSub = drawEventParams.pubSub;
       var pos = stage.getPointerPosition();
       if (!_this.isPaint || _this.transformer || !pos) return;
 
@@ -52136,8 +52139,8 @@ var Rect = /*#__PURE__*/function (_Plugin) {
         _this.lastRect = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Rect({
           id: Object(_common_utils__WEBPACK_IMPORTED_MODULE_3__["uuid"])(),
           name: 'rect',
-          stroke: paramValue && paramValue.color ? paramValue.color : _this.defalutParamValue.color,
-          strokeWidth: paramValue && paramValue.strokeWidth ? paramValue.strokeWidth : _this.defalutParamValue.strokeWidth,
+          stroke: paramValue && paramValue.color ? paramValue.color : _this.defaultParamValue.color,
+          strokeWidth: paramValue && paramValue.strokeWidth ? paramValue.strokeWidth : _this.defaultParamValue.strokeWidth,
           globalCompositeOperation: 'source-over',
           x: pos.x,
           y: pos.y,
@@ -52165,11 +52168,11 @@ var Rect = /*#__PURE__*/function (_Plugin) {
       drawLayer.batchDraw();
     };
 
-    _this.onDrawEnd = function (drawEventPramas) {
-      var pubSub = drawEventPramas.pubSub; // mouseup event is triggered by move event but click event
+    _this.onDrawEnd = function (drawEventParams) {
+      var pubSub = drawEventParams.pubSub; // mouseup event is triggered by move event but click event
 
       if (_this.started) {
-        _this.disableTransform(drawEventPramas, _this.selectedNode);
+        _this.disableTransform(drawEventParams, _this.selectedNode);
 
         if (_this.lastRect) {
           pubSub.pub('PUSH_HISTORY', _this.lastRect);
@@ -52180,15 +52183,15 @@ var Rect = /*#__PURE__*/function (_Plugin) {
       _this.started = false;
     };
 
-    _this.onLeave = function (drawEventPramas) {
+    _this.onLeave = function (drawEventParams) {
       _this.isPaint = false;
       _this.started = false;
 
-      _this.disableTransform(drawEventPramas, _this.selectedNode);
+      _this.disableTransform(drawEventParams, _this.selectedNode);
     };
 
-    _this.onNodeRecreate = function (drawEventPramas, node) {
-      var pubSub = drawEventPramas.pubSub;
+    _this.onNodeRecreate = function (drawEventParams, node) {
+      var pubSub = drawEventParams.pubSub;
       node.on('transformend', function () {
         pubSub.pub('PUSH_HISTORY', this);
       });
@@ -52254,11 +52257,11 @@ var Repeal = /*#__PURE__*/function (_Plugin) {
     _this.iconfont = 'iconfont icon-repeal';
     _this.title = '撤销';
 
-    _this.onEnter = function (drawEventPramas) {
-      var drawLayer = drawEventPramas.drawLayer,
-          historyStack = drawEventPramas.historyStack,
-          plugins = drawEventPramas.plugins,
-          pubSub = drawEventPramas.pubSub;
+    _this.onEnter = function (drawEventParams) {
+      var drawLayer = drawEventParams.drawLayer,
+          historyStack = drawEventParams.historyStack,
+          plugins = drawEventParams.plugins,
+          pubSub = drawEventParams.pubSub;
       drawLayer.removeChildren();
       historyStack.pop();
       pubSub.pub('POP_HISTORY', historyStack);
@@ -52278,7 +52281,7 @@ var Repeal = /*#__PURE__*/function (_Plugin) {
           setTimeout(function () {
             for (var _i = 0; _i < plugins.length; _i++) {
               if (plugins[_i].shapeName && plugins[_i].shapeName === recreatedNode.name()) {
-                plugins[_i].onNodeRecreate && plugins[_i].onNodeRecreate(drawEventPramas, recreatedNode);
+                plugins[_i].onNodeRecreate && plugins[_i].onNodeRecreate(drawEventParams, recreatedNode);
                 break;
               }
             }
@@ -52351,7 +52354,7 @@ var Text = /*#__PURE__*/function (_Plugin) {
     _this.iconfont = 'iconfont icon-text';
     _this.title = '插入文字';
     _this.params = ['fontSize', 'color'];
-    _this.defalutParamValue = {
+    _this.defaultParamValue = {
       fontSize: 12,
       color: '#F5222D'
     };
@@ -52431,9 +52434,9 @@ var Text = /*#__PURE__*/function (_Plugin) {
       return textarea;
     };
 
-    _this.enableTransform = function (drawEventPramas, node) {
-      var stage = drawEventPramas.stage,
-          drawLayer = drawEventPramas.drawLayer;
+    _this.enableTransform = function (drawEventParams, node) {
+      var stage = drawEventParams.stage,
+          drawLayer = drawEventParams.drawLayer;
 
       if (!_this.transformer) {
         _this.transformer = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Transformer(_extends(_extends({}, _common_constants__WEBPACK_IMPORTED_MODULE_2__["transformerStyle"]), {
@@ -52457,10 +52460,10 @@ var Text = /*#__PURE__*/function (_Plugin) {
       drawLayer.draw();
     };
 
-    _this.disableTransform = function (drawEventPramas, node, remove) {
-      var stage = drawEventPramas.stage,
-          drawLayer = drawEventPramas.drawLayer,
-          pubSub = drawEventPramas.pubSub;
+    _this.disableTransform = function (drawEventParams, node, remove) {
+      var stage = drawEventParams.stage,
+          drawLayer = drawEventParams.drawLayer,
+          pubSub = drawEventParams.pubSub;
 
       if (_this.transformer) {
         _this.transformer.remove();
@@ -52487,9 +52490,9 @@ var Text = /*#__PURE__*/function (_Plugin) {
       drawLayer.draw();
     };
 
-    _this.onEnter = function (drawEventPramas) {
-      var stage = drawEventPramas.stage,
-          drawLayer = drawEventPramas.drawLayer;
+    _this.onEnter = function (drawEventParams) {
+      var stage = drawEventParams.stage,
+          drawLayer = drawEventParams.drawLayer;
       var container = stage.container();
       container.style.cursor = 'text';
       container.tabIndex = 1; // make it focusable
@@ -52497,39 +52500,39 @@ var Text = /*#__PURE__*/function (_Plugin) {
       container.focus();
       container.addEventListener('keyup', function (e) {
         if (e.key === 'Backspace' && _this.selectedNode) {
-          _this.disableTransform(drawEventPramas, _this.selectedNode, true);
+          _this.disableTransform(drawEventParams, _this.selectedNode, true);
 
           drawLayer.draw();
         }
       });
     };
 
-    _this.onClick = function (drawEventPramas) {
-      var event = drawEventPramas.event,
-          stage = drawEventPramas.stage,
-          drawLayer = drawEventPramas.drawLayer,
-          paramValue = drawEventPramas.paramValue,
-          pubSub = drawEventPramas.pubSub;
+    _this.onClick = function (drawEventParams) {
+      var event = drawEventParams.event,
+          stage = drawEventParams.stage,
+          drawLayer = drawEventParams.drawLayer,
+          paramValue = drawEventParams.paramValue,
+          pubSub = drawEventParams.pubSub;
 
       if (event.target.name && event.target.name() === 'text') {
         // 之前没有选中节点或者在相同节点之间切换点击
         if (!_this.selectedNode || _this.selectedNode._id !== event.target._id) {
-          _this.selectedNode && _this.disableTransform(drawEventPramas, _this.selectedNode);
+          _this.selectedNode && _this.disableTransform(drawEventParams, _this.selectedNode);
 
-          _this.enableTransform(drawEventPramas, event.target);
+          _this.enableTransform(drawEventParams, event.target);
 
           _this.selectedNode = event.target;
         }
 
         return;
       } else if (_this.selectedNode) {
-        _this.disableTransform(drawEventPramas, _this.selectedNode);
+        _this.disableTransform(drawEventParams, _this.selectedNode);
 
         return;
       }
 
-      var fontSize = paramValue && paramValue.fontSize ? paramValue.fontSize : _this.defalutParamValue.fontSize;
-      var color = paramValue && paramValue.color ? paramValue.color : _this.defalutParamValue.color;
+      var fontSize = paramValue && paramValue.fontSize ? paramValue.fontSize : _this.defaultParamValue.fontSize;
+      var color = paramValue && paramValue.color ? paramValue.color : _this.defaultParamValue.color;
       var startPos = stage.getPointerPosition();
       if (!startPos) return;
       var textNode = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Text({
@@ -52566,7 +52569,7 @@ var Text = /*#__PURE__*/function (_Plugin) {
 
       textNode.on('dblclick dbltap', function (e) {
         // dblclick 前会触发两次 onClick 事件，因此要清楚 onClick 事件里的状态
-        _this.disableTransform(drawEventPramas, _this.selectedNode);
+        _this.disableTransform(drawEventParams, _this.selectedNode);
 
         e.cancelBubble = true;
 
@@ -52582,17 +52585,17 @@ var Text = /*#__PURE__*/function (_Plugin) {
       });
     };
 
-    _this.onLeave = function (drawEventPramas) {
-      var stage = drawEventPramas.stage;
+    _this.onLeave = function (drawEventParams) {
+      var stage = drawEventParams.stage;
       stage.container().style.cursor = 'default';
 
       _this.removeTextareaBlurModal();
 
-      _this.disableTransform(drawEventPramas, _this.selectedNode);
+      _this.disableTransform(drawEventParams, _this.selectedNode);
     };
 
-    _this.onNodeRecreate = function (drawEventPramas, node) {
-      var pubSub = drawEventPramas.pubSub;
+    _this.onNodeRecreate = function (drawEventParams, node) {
+      var pubSub = drawEventParams.pubSub;
       node.on('dragend', function () {
         pubSub.pub('PUSH_HISTORY', this);
       });

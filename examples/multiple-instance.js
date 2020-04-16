@@ -188,7 +188,8 @@ function MultipleInstance() {
     width: 500,
     height: 414,
     plugins: [],
-    defaultPluginName: "text"
+    defaultPluginName: "text",
+    crossOrigin: "anonymous"
   }), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
     style: {
       width: '10px'
@@ -198,7 +199,8 @@ function MultipleInstance() {
     width: 500,
     height: 414,
     plugins: [],
-    defaultPluginName: "rect"
+    defaultPluginName: "rect",
+    crossOrigin: "anonymous"
   }));
 }
 

@@ -205,7 +205,8 @@ function Example() {
     height: 414,
     plugins: [],
     getStage: setStage,
-    defaultPluginName: "text"
+    defaultPluginName: "text",
+    crossOrigin: "anonymous"
   }), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
     style: {
       marginTop: '50px'
