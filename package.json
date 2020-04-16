@@ -1,6 +1,6 @@
 {
   "name": "react-img-editor",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "description": "图片编辑器（微信截图编辑 PRO 版）",
   "keywords": [
     "react-img-editor",
@@ -40,7 +40,7 @@
     "eslint-plugin-import": "^2.20.0",
     "eslint-plugin-react": "^7.18.0",
     "eslint-plugin-react-hooks": "^2.4.0",
-    "rc-tools": "^9.5.3"
+    "rc-tools": "^9.6.1"
   },
   "dependencies": {
     "konva": "^4.1.2",

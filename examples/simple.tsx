@@ -34,6 +34,7 @@ function Example() {
         plugins={[]}
         getStage={setStage}
         defaultPluginName="text"
+        crossOrigin="anonymous"
       />
       <div style={{ marginTop: '50px' }}>
         <button onClick={downloadImage}>download</button>

@@ -17,6 +17,7 @@ interface ReactImageEditorProps {
   src: string;
   getStage?: (stage: any) => void;
   defaultPluginName?: string;
+  crossOrigin?: string;
 }
 
 export default function ReactImageEditor(props: ReactImageEditorProps) {
@@ -59,9 +60,11 @@ export default function ReactImageEditor(props: ReactImageEditorProps) {
     image.onload = () => {
       setImageObj(image)
     }
-    image.crossOrigin = 'anonymous'
+    if (props.crossOrigin !== undefined) {
+      image.crossOrigin = props.crossOrigin
+    }
     image.src = props.src
-  }, [props.src])
+  }, [props.src, props.crossOrigin])
 
   function handlePluginChange(plugin: Plugin) {
     setCurrentPlugin(plugin)

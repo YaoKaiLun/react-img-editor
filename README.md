@@ -41,6 +41,7 @@ import 'react-img-editor/assets/index.css'
 | toolbar | 工具栏配置 | { items: string[] } | {items: ['pen', 'eraser', 'arrow', 'rect', 'circle', 'mosaic', 'text', '|', 'repeal', 'download', 'crop']} |
 | getStage | 获取 KonvaJS 的 [Stage](https://konvajs.org/api/Konva.Stage.html) 对象，可用于下载图片等操作 | (stage: any) => void |
 | defaultPluginName | 默认选中的插件名称 | string? | - |
+| crossOrigin | 处理跨域图片 | string? | - |
 
 
 ## 📝 TODO

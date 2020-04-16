@@ -15,6 +15,7 @@ function MultipleInstance() {
         height={414}
         plugins={[]}
         defaultPluginName="text"
+        crossOrigin="anonymous"
       />
       <div style={{ width: '10px' }}></div>
       <ReactImgEditor
@@ -23,6 +24,7 @@ function MultipleInstance() {
         height={414}
         plugins={[]}
         defaultPluginName="rect"
+        crossOrigin="anonymous"
       />
     </div>
   )
