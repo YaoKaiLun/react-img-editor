@@ -64,7 +64,5 @@ http://localhost:8888/examples/simple.html
 发布
 ```
 npm run lint
-npm run build
-npm run gh-pages
 npm run pub
 ```
