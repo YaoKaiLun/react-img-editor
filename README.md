@@ -51,3 +51,20 @@ import 'react-img-editor/assets/index.css'
 - [ ] 提供插件配置项配置
 - [ ] 优化自由画笔书写体验
 - [ ] 国际化支持
+
+## 🤝 贡献
+
+开发
+```
+npm run start
+```
+
+http://localhost:8888/examples/simple.html
+
+发布
+```
+npm run lint
+npm run build
+npm run gh-pages
+npm run pub
+```
