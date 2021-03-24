@@ -1,5 +1,7 @@
 # react-img-editor · 图像编辑器
 
+![](https://img.shields.io/npm/v/react-img-editor.svg) ![](https://img.shields.io/npm/dw/react-img-editor.svg)
+
 react-img-editor 是一个图像编辑器 react 组件，支持对图片进行裁剪、涂鸦、文字编辑、马赛克处理等操作，同时支持自定义插件和灵活的样式配置。
 
 ![示例](https://s2.ax1x.com/2020/02/16/39gZcD.png)
