@@ -1,6 +1,6 @@
 {
   "name": "react-img-editor",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "图片编辑器（微信截图编辑 PRO 版）",
   "keywords": [
     "react-img-editor",
@@ -9,7 +9,7 @@
   "main": "lib/index",
   "module": "es/index",
   "scripts": {
-    "start": "npm_package_config_port=8888 rc-tools run server",
+    "start": "rc-tools run server",
     "build": "rc-tools run build",
     "gh-pages": "rc-tools run gh-pages",
     "pub": "rc-tools run update-self && rc-tools run pub",
@@ -31,6 +31,9 @@
     "url": "https://github.com/YaoKaiLun/react-img-editor/issues"
   },
   "homepage": "https://github.com/YaoKaiLun/react-img-editor#readme",
+  "config": {
+    "port": 8012
+  },
   "devDependencies": {
     "@types/pubsub-js": "^1.5.18",
     "@types/react-dom": "^16.9.5",
@@ -40,11 +43,12 @@
     "eslint-plugin-import": "^2.20.0",
     "eslint-plugin-react": "^7.18.0",
     "eslint-plugin-react-hooks": "^2.4.0",
-    "rc-tools": "^9.6.1"
+    "typescript": "^4.9.5"
   },
   "dependencies": {
     "konva": "^4.1.2",
     "pubsub-js": "^1.8.0",
+    "rc-tools": "^9.6.1-alpha.1",
     "rc-tooltip": "^4.0.0-alpha.3"
   }
 }

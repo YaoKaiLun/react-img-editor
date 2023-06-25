@@ -6,6 +6,7 @@ export default class Repeal extends Plugin {
   name = 'repeal'
   iconfont = 'iconfont icon-repeal'
   title = '撤销'
+  disappearImmediately = true
 
   onEnter = (drawEventParams: DrawEventParams) => {
     const {drawLayer, historyStack, plugins, pubSub} = drawEventParams

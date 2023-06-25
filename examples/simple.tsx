@@ -20,7 +20,7 @@ function Example() {
     }, 'image/jpeg')
   }
 
-  const image1 = 'https://cstore-public.seewo.com/faq-service/4e3f2924f1d4432f82e760468bf680f0'
+  const image1 = 'https://pro-cos-public.seewo.com/seewo-school/7614707e9bfe42f1bfa3bf7fb9d71844'
   // const image2 = 'https://cvte-dev-public.seewo.com/faq-service-test/4db524ec93324794b983bf7cd78b2ae1'
   // const image3 = 'https://cvte-dev-public.seewo.com/faq-service-test/bfdcc5337dfb43ce823a4c9743aba99c'
   // const image4 = 'https://cvte-dev-public.seewo.com/faq-service-test/bc87ceeb7b1a473da41e025e656af966'
@@ -31,10 +31,13 @@ function Example() {
         src={image1}
         width={736}
         height={414}
-        plugins={[]}
         getStage={setStage}
         defaultPluginName="text"
         crossOrigin="anonymous"
+        toolbar={{
+          items: ['pen', 'eraser', 'arrow', 'rect', 'circle', 'mosaic', 'text', '|', 'repeal', 'download', 'crop',
+            '|', 'zoomIn', 'zoomOut'],
+        }}
       />
       <div style={{ marginTop: '50px' }}>
         <button onClick={downloadImage}>download</button>

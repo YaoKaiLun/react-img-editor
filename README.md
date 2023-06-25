@@ -61,7 +61,7 @@ import 'react-img-editor/assets/index.css'
 npm run start
 ```
 
-http://localhost:8888/examples/simple.html
+http://127.0.0.1:8012/examples/simple.html
 
 发布
 ```

@@ -4,8 +4,8 @@ import ReactImgEditor from '../src/index'
 import '../assets/index.less'
 
 function MultipleInstance() {
-  const image1 = 'https://cstore-public.seewo.com/faq-service/4e3f2924f1d4432f82e760468bf680f0'
-  const image2 = 'https://cvte-dev-public.seewo.com/faq-service-test/4db524ec93324794b983bf7cd78b2ae1'
+  const image1 = 'https://pro-cos-public.seewo.com/seewo-school/7614707e9bfe42f1bfa3bf7fb9d71844'
+  const image2 = 'https://pro-cos-public.seewo.com/seewo-school/1a18f6b98c2e4220a07592c83dc2d070'
 
   return (
     <div style={{display: 'flex'}}>
