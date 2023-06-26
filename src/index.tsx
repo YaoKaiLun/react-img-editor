@@ -69,7 +69,7 @@ export default function ReactImageEditor(props: ReactImageEditorProps) {
   function handlePluginChange(plugin: Plugin) {
     setCurrentPlugin(plugin)
     plugin.defaultParamValue && setParamValue(plugin.defaultParamValue)
-    if (!plugin.params) {
+    if (plugin.disappearImmediately === true) {
       setTimeout(() => {
         setCurrentPlugin(null)
       })

@@ -5,8 +5,6 @@ import { EditorContextProps,  withEditorContext } from './EditorContext'
 import { DrawEventParams } from '../common/type'
 import { prefixCls } from '../common/constants'
 import { uuid } from '../common/utils'
-import { Stage } from 'konva/types/Stage'
-import { Layer } from 'konva/types/Layer'
 
 interface PaletteProps extends EditorContextProps {
   height: number;
@@ -19,9 +17,10 @@ class Palette extends React.Component<PaletteProps> {
   canvasWidth: number
   canvasHeight: number
   pixelRatio: number
-  stage: Stage | null = null
-  imageLayer: Layer | null = null
-  drawLayer: Layer | null = null
+  stage: Konva.Stage | null = null
+  imageLayer: Konva.Layer | null = null
+  drawLayer: Konva.Layer | null = null
+  imageElement: Konva.Image | null = null
   imageData: ImageData | null = null
   historyStack: any[] = []
   pubSub: InstanceType<typeof PubSub>
@@ -62,16 +61,18 @@ class Palette extends React.Component<PaletteProps> {
 
     // 撤销等操作，点击后会再自动清除当前插件
     if (currentPlugin !== prevCurrentPlugin) {
+      if (prevCurrentPlugin && prevCurrentPlugin.onLeave) {
+        if (prevCurrentPlugin.name !== currentPlugin?.name) {
+          prevCurrentPlugin.onLeave(this.getDrawEventParams(null))
+        }
+      }
+
       if (currentPlugin) {
         this.bindEvents()
 
         if (currentPlugin.onEnter) {
           currentPlugin.onEnter(this.getDrawEventParams(null))
         }
-      }
-
-      if (prevCurrentPlugin && prevCurrentPlugin.onLeave) {
-        prevCurrentPlugin.onLeave(this.getDrawEventParams(null))
       }
     }
   }
@@ -99,6 +100,7 @@ class Palette extends React.Component<PaletteProps> {
       width: this.canvasWidth,
       height: this.canvasHeight,
     })
+    this.imageElement = img
     this.imageLayer = new Konva.Layer()
     this.stage.add(this.imageLayer)
     this.imageLayer.setZIndex(0)
@@ -134,6 +136,7 @@ class Palette extends React.Component<PaletteProps> {
       height: height,
     })
 
+    this.imageElement = img
     this.imageLayer = new Konva.Layer()
     this.stage.add(this.imageLayer)
     this.imageLayer.add(img)
@@ -146,7 +149,7 @@ class Palette extends React.Component<PaletteProps> {
     this.bindEvents()
   }
 
-  resetStage = (stage: Stage) => {
+  resetStage = (stage: Konva.Stage) => {
     // @ts-ignore
     stage._pixelRatio = this.pixelRatio
     // @ts-ignore
@@ -262,6 +265,7 @@ class Palette extends React.Component<PaletteProps> {
       stage: this.stage!,
       imageLayer: this.imageLayer!,
       drawLayer: this.drawLayer!,
+      imageElement: this.imageElement!,
       imageData: this.imageData!,
       reload: this.reload,
       historyStack: this.historyStack,

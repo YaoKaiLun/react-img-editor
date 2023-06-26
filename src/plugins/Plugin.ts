@@ -7,6 +7,7 @@ export default abstract class Plugin {
   params?: PluginParamName[];
   defaultParamValue?: PluginParamValue;
   shapeName?: string;
+  disappearImmediately?: boolean;
 
   onEnter?: (params: DrawEventParams) => void;
   onDrawStart?: (params: DrawEventParams) => void;
