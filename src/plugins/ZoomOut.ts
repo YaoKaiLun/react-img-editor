@@ -15,15 +15,15 @@ export default class ZoomOut extends Plugin {
 
     const zoomRatio = (paramValue && paramValue.zoomRatio) ? paramValue.zoomRatio : this.defaultParamValue.zoomRatio || 0
 
-    imageLayer.scale({
-      x: imageLayer.scaleX() * (1 - zoomRatio),
-      y: imageLayer.scaleY() * (1 - zoomRatio),
+    imageElement.scale({
+      x: imageElement.scaleX() * (1 - zoomRatio),
+      y: imageElement.scaleY() * (1 - zoomRatio),
     })
 
-    imageLayer.x(imageLayer.width() / 2)
-    imageLayer.y(imageLayer.height() / 2)
-    imageLayer.offsetX(imageLayer.width() / 2)
-    imageLayer.offsetY(imageLayer.height() / 2)
+    imageElement.x(imageElement.width() / 2)
+    imageElement.y(imageElement.height() / 2)
+    imageElement.offsetX(imageElement.width() / 2)
+    imageElement.offsetY(imageElement.height() / 2)
     imageElement.draggable(true)
     imageLayer.draw()
   }
