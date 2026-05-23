@@ -1,6 +1,7 @@
 import Konva from 'konva'
 import Plugin from './Plugin'
 import { DrawEventParams } from '../common/type'
+import { LocaleKey } from '../common/i18n'
 import { transformerStyle } from '../common/constants'
 import { uuid } from '../common/utils'
 
@@ -11,6 +12,7 @@ export default class Crop extends Plugin {
   name = 'crop'
   iconfont = 'iconfont icon-cut'
   title = '图片裁剪'
+  titleKey = 'crop' as LocaleKey
   params = []
 
   isPaint = false
@@ -66,7 +68,7 @@ export default class Crop extends Plugin {
     $toolbar.style.top = `${top}px`
   }
 
-  createCropToolbar = (stage: any, sureBtnEvent: () => void, cancelBtnEvent: () => void) => {
+  createCropToolbar = (stage: any, sureBtnEvent: () => void, cancelBtnEvent: () => void, hintText: string) => {
     if (document.getElementById(this.toolbarId)) return
 
     const fragment = new DocumentFragment()
@@ -81,7 +83,7 @@ export default class Crop extends Plugin {
     fragment.appendChild($cropToolbar)
 
     // 创建文本
-    const $textNode = document.createTextNode('拖动边框调整图片显示范围')
+    const $textNode = document.createTextNode(hintText)
     $cropToolbar.appendChild($textNode)
 
     const btnStyle = 'display: inline-block; width: 32px; height: 24px; border: 1px solid #C9C9D0;' +
@@ -302,7 +304,7 @@ export default class Crop extends Plugin {
     }, () => {
       this.reset(stage)
       stage.container().style.cursor = 'crosshair'
-    })
+    }, drawEventParams.t('cropHint'))
     this.adjustToolbarPosition(stage)
   }
 

@@ -1,11 +1,13 @@
 
 import { DrawEventParams, PluginParamValue } from '../common/type'
+import { LocaleKey } from '../common/i18n'
 import Plugin from './Plugin'
 
 export default class ZoomIn extends Plugin {
   name = 'zoomIn'
   iconfont = 'iconfont icon-zoomIn'
   title = '放大'
+  titleKey = 'zoomIn' as LocaleKey
   defaultParamValue = {
     zoomRatio: 0.2,
   } as PluginParamValue

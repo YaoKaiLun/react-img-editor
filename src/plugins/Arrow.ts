@@ -1,6 +1,7 @@
 import Konva from 'konva'
 import Plugin from './Plugin'
 import { DrawEventParams, PluginParamName, PluginParamValue } from '../common/type'
+import { LocaleKey } from '../common/i18n'
 import { transformerStyle } from '../common/constants'
 import { uuid } from '../common/utils'
 
@@ -8,6 +9,7 @@ export default class Arrow extends Plugin {
   name = 'arrow'
   iconfont = 'iconfont icon-arrow'
   title = '插入箭头'
+  titleKey = 'arrow' as LocaleKey
   params = ['strokeWidth', 'color'] as PluginParamName[]
   defaultParamValue = {
     strokeWidth: 2,

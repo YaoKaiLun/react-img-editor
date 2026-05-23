@@ -1,6 +1,7 @@
 import Konva from 'konva'
 import Plugin from './Plugin'
 import { DrawEventParams, PluginParamName, PluginParamValue } from '../common/type'
+import { LocaleKey } from '../common/i18n'
 import { transformerStyle } from '../common/constants'
 import { uuid } from '../common/utils'
 
@@ -8,6 +9,7 @@ export default class Circle extends Plugin {
   name = 'circle'
   iconfont = 'iconfont icon-circle'
   title = '插入圆圈'
+  titleKey = 'circle' as LocaleKey
   params = ['strokeWidth', 'lineType', 'color'] as PluginParamName[]
   defaultParamValue = {
     strokeWidth: 2,

@@ -1,11 +1,13 @@
 
 import { DrawEventParams, PluginParamValue } from '../common/type'
+import { LocaleKey } from '../common/i18n'
 import Plugin from './Plugin'
 
 export default class ZoomOut extends Plugin {
   name = 'zoomOut'
   iconfont = 'iconfont icon-zoomOut'
   title = '缩小'
+  titleKey = 'zoomOut' as LocaleKey
   defaultParamValue = {
     zoomRatio: 0.2,
   } as PluginParamValue

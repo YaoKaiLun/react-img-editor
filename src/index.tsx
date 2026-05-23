@@ -3,7 +3,8 @@ import PluginFactory from './plugins/PluginFactory'
 import Palette from './components/Palette'
 import React, { useEffect, useState } from 'react'
 import Toolbar from './components/Toolbar'
-import { PluginParamValue } from './common/type'
+import { PluginConfig, PluginParamValue } from './common/type'
+import { createTranslator, Locale } from './common/i18n'
 import { EditorContext } from './components/EditorContext'
 
 interface ReactImageEditorProps {
@@ -18,13 +19,16 @@ interface ReactImageEditorProps {
   getStage?: (stage: any) => void;
   defaultPluginName?: string;
   crossOrigin?: string;
+  pluginConfig?: PluginConfig;
+  locale?: Locale;
 }
 
 export default function ReactImageEditor(props: ReactImageEditorProps) {
   const [imageObj, setImageObj] = useState<HTMLImageElement | null>(null)
+  const currentLocale = props.locale || 'zh-CN'
+  const t = createTranslator(currentLocale)
 
-
-  const pluginFactory = new PluginFactory()
+  const pluginFactory = new PluginFactory(props.pluginConfig)
   const plugins = [...pluginFactory.plugins, ...props.plugins!]
   let defaultPlugin = null
   let defaultParamValue = {}
@@ -43,7 +47,6 @@ export default function ReactImageEditor(props: ReactImageEditorProps) {
   const [currentPlugin, setCurrentPlugin] = useState<Plugin | null>(defaultPlugin)
   const [paramValue, setParamValue] = useState<PluginParamValue>(defaultParamValue)
 
-  // 生成默认 toolbarItemConfig
   const config: any = {}
   plugins.map(plugin => {
     if (plugin.name === 'repeal') {
@@ -103,6 +106,8 @@ export default function ReactImageEditor(props: ReactImageEditorProps) {
         handlePluginParamValueChange,
         toolbarItemConfig,
         updateToolbarItemConfig,
+        locale: currentLocale,
+        t,
       }}
     >
       <div className="react-img-editor" style={style}>
@@ -131,4 +136,6 @@ ReactImageEditor.defaultProps = {
   toolbar: {
     items: ['pen', 'eraser', 'arrow', 'rect', 'circle', 'mosaic', 'text', '|', 'repeal', 'download', 'crop'],
   },
+  pluginConfig: {},
+  locale: 'zh-CN',
 } as Partial<ReactImageEditorProps>

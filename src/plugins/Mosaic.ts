@@ -2,6 +2,7 @@
 import Konva from 'konva'
 import Plugin from './Plugin'
 import { DrawEventParams, PluginParamValue, PluginParamName } from '../common/type'
+import { LocaleKey } from '../common/i18n'
 import { uuid } from '../common/utils'
 
 const tileHeight = 5
@@ -11,6 +12,7 @@ export default class Mosaic extends Plugin {
   name = 'mosaic'
   iconfont = 'iconfont icon-mosaic'
   title = '马赛克'
+  titleKey = 'mosaic' as LocaleKey
   params = ['strokeWidth'] as PluginParamName[]
   defaultParamValue = {
     strokeWidth: 2,

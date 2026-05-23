@@ -1,10 +1,26 @@
-import React, { useRef } from 'react'
+import React, { useRef, useState } from 'react'
 import ReactDOM from 'react-dom'
 import ReactImgEditor from '../src/index'
+import { Locale } from '../src/common/i18n'
 import '../assets/index.less'
+
+const images = [
+  'https://picsum.photos/id/237/800/500',
+  'https://picsum.photos/id/0/800/500',
+  'https://picsum.photos/id/10/800/500',
+  'https://picsum.photos/id/292/800/500',
+]
+
+const locales: Locale[] = ['zh-CN', 'en']
+const localeLabels: Record<Locale, string> = {
+  'zh-CN': '中文',
+  'en': 'English',
+}
 
 function Example() {
   const stageRef = useRef<any>(null)
+  const [imageIndex, setImageIndex] = useState(0)
+  const [locale, setLocale] = useState<Locale>('zh-CN')
 
   function setStage(stage) {
     stageRef.current = stage
@@ -20,20 +36,29 @@ function Example() {
     }, 'image/jpeg')
   }
 
-  const image1 = 'https://pro-cos-public.seewo.com/seewo-school/7614707e9bfe42f1bfa3bf7fb9d71844'
-  // const image2 = 'https://cvte-dev-public.seewo.com/faq-service-test/4db524ec93324794b983bf7cd78b2ae1'
-  // const image3 = 'https://cvte-dev-public.seewo.com/faq-service-test/bfdcc5337dfb43ce823a4c9743aba99c'
-  // const image4 = 'https://cvte-dev-public.seewo.com/faq-service-test/bc87ceeb7b1a473da41e025e656af966'
+  function switchImage() {
+    setImageIndex((imageIndex + 1) % images.length)
+  }
+
+  function switchLocale() {
+    const currentIndex = locales.indexOf(locale)
+    setLocale(locales[(currentIndex + 1) % locales.length])
+  }
 
   return (
     <>
       <ReactImgEditor
-        src={image1}
+        src={images[imageIndex]}
         width={736}
         height={414}
         getStage={setStage}
         defaultPluginName="text"
         crossOrigin="anonymous"
+        locale={locale}
+        pluginConfig={{
+          download: { mimeType: 'image/png', quality: 1, fileName: 'edited-image.png' },
+          pen: { defaultParamValue: { color: '#F5222D', strokeWidth: 2 } },
+        }}
         toolbar={{
           items: ['pen', 'eraser', 'arrow', 'rect', 'circle', 'mosaic', 'text', '|', 'repeal', 'download', 'crop',
             '|', 'zoomIn', 'zoomOut'],
@@ -41,6 +66,8 @@ function Example() {
       />
       <div style={{ marginTop: '50px' }}>
         <button onClick={downloadImage}>download</button>
+        <button onClick={switchImage} style={{ marginLeft: '10px' }}>切换图片 ({imageIndex + 1}/{images.length})</button>
+        <button onClick={switchLocale} style={{ marginLeft: '10px' }}>语言: {localeLabels[locale]}</button>
       </div>
     </>
   )

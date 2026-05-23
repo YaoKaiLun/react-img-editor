@@ -16,9 +16,17 @@ export default function Toolbar() {
     handlePluginChange,
     handlePluginParamValueChange,
     toolbarItemConfig,
+    t,
   } = useContext(EditorContext)
 
   const style = { width: containerWidth }
+
+  function getPluginTitle(plugin: Plugin): string {
+    if (plugin.titleKey) {
+      return t(plugin.titleKey)
+    }
+    return plugin.title
+  }
 
   function renderPlugin(plugin: Plugin) {
     const isActivated = !!(currentPlugin && currentPlugin.name === plugin.name)
@@ -31,7 +39,7 @@ export default function Toolbar() {
           key={plugin.name}
           className={`${prefixCls}-toolbar-icon ${isActivated ? 'activated' : ''} ${isDisabled ? 'disabled' : ''}`}
         >
-          <i title={plugin.title} className={plugin.iconfont} onClick={() => handlePluginChange(plugin)} />
+          <i title={getPluginTitle(plugin)} className={plugin.iconfont} onClick={() => handlePluginChange(plugin)} />
         </span>
       )
     }
@@ -55,7 +63,7 @@ export default function Toolbar() {
           key={plugin.name}
           className={`${prefixCls}-toolbar-icon ${isActivated ? 'activated' : ''} ${isDisabled ? 'disabled' : ''}`}
         >
-          <i title={plugin.title} className={plugin.iconfont} onClick={() => handlePluginChange(plugin)} />
+          <i title={getPluginTitle(plugin)} className={plugin.iconfont} onClick={() => handlePluginChange(plugin)} />
         </span>
       </Tooltip>
     )
@@ -64,8 +72,8 @@ export default function Toolbar() {
   return (
     <div className={`${prefixCls}-toolbar`} style={style}>
       {
-        toolbar.items.map(item => {
-          if (item === '|') return <span className={`${prefixCls}-toolbar-separator`} />
+        toolbar.items.map((item, index) => {
+          if (item === '|') return <span key={`separator-${index}`} className={`${prefixCls}-toolbar-separator`} />
           for(let i = 0; i < plugins.length; i++) {
             if (plugins[i].name === item) {
               return renderPlugin(plugins[i])

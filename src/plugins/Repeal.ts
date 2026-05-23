@@ -1,11 +1,13 @@
 import Konva from 'konva'
 import Plugin from './Plugin'
 import { DrawEventParams } from '../common/type'
+import { LocaleKey } from '../common/i18n'
 
 export default class Repeal extends Plugin {
   name = 'repeal'
   iconfont = 'iconfont icon-repeal'
   title = '撤销'
+  titleKey = 'repeal' as LocaleKey
   disappearImmediately = true
 
   onEnter = (drawEventParams: DrawEventParams) => {

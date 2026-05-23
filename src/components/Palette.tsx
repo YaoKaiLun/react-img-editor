@@ -59,7 +59,24 @@ class Palette extends React.Component<PaletteProps> {
     const prevCurrentPlugin = prevProps.currentPlugin
     const { currentPlugin } = this.props
 
-    // 撤销等操作，点击后会再自动清除当前插件
+    if (this.props.imageObj !== prevProps.imageObj) {
+      const { containerWidth } = this.props
+      const imageObj = this.props.imageObj
+      const imageNatureWidth = imageObj.naturalWidth
+      const imageNatureHeight = imageObj.naturalHeight
+      const wRatio = containerWidth / imageNatureWidth
+      const hRatio = this.props.height / imageNatureHeight
+      const scaleRatio = Math.min(wRatio, hRatio, 1)
+
+      this.canvasWidth = Math.round(imageNatureWidth * scaleRatio)
+      this.canvasHeight = Math.round(imageNatureHeight * scaleRatio)
+      this.pixelRatio = 1 / scaleRatio
+      Konva.pixelRatio = this.pixelRatio
+
+      this.reload(imageObj, this.canvasWidth, this.canvasHeight)
+      return
+    }
+
     if (currentPlugin !== prevCurrentPlugin) {
       if (prevCurrentPlugin && prevCurrentPlugin.onLeave) {
         if (prevCurrentPlugin.name !== currentPlugin?.name) {
@@ -114,16 +131,18 @@ class Palette extends React.Component<PaletteProps> {
     this.bindEvents()
   }
 
-  // 裁剪等操作执行后需要重新初始化
   reload = (imgObj: any, width: number, height: number) => {
     const { getStage } = this.props
+
+    this.canvasWidth = width
+    this.canvasHeight = height
 
     this.removeEvents()
     this.historyStack = []
     this.stage = new Konva.Stage({
       container: this.containerId,
-      width: width,
-      height: height,
+      width: this.canvasWidth,
+      height: this.canvasHeight,
     })
 
     getStage && getStage(this.resetStage(this.stage!))
@@ -132,8 +151,8 @@ class Palette extends React.Component<PaletteProps> {
       x: 0,
       y: 0,
       image: imgObj,
-      width: width,
-      height: height,
+      width: this.canvasWidth,
+      height: this.canvasHeight,
     })
 
     this.imageElement = img
@@ -142,7 +161,7 @@ class Palette extends React.Component<PaletteProps> {
     this.imageLayer.add(img)
     this.imageLayer.draw()
 
-    this.imageData = this.generateImageData(imgObj, width, height)
+    this.imageData = this.generateImageData(imgObj, this.canvasWidth, this.canvasHeight)
 
     this.drawLayer = new Konva.Layer()
     this.stage.add(this.drawLayer)
@@ -282,6 +301,8 @@ class Palette extends React.Component<PaletteProps> {
       handlePluginParamValueChange: props.handlePluginParamValueChange,
       toolbarItemConfig: props.toolbarItemConfig,
       updateToolbarItemConfig: props.updateToolbarItemConfig,
+      locale: props.locale,
+      t: props.t,
     }
 
     return drawEventParams

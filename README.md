@@ -44,15 +44,17 @@ import 'react-img-editor/assets/index.css'
 | getStage | 获取 KonvaJS 的 [Stage](https://konvajs.org/api/Konva.Stage.html) 对象，可用于下载图片等操作 | (stage: any) => void |
 | defaultPluginName | 默认选中的插件名称 | string? | - |
 | crossOrigin | 处理跨域图片 | string? | - |
+| pluginConfig | 插件配置项，可覆盖各插件的默认参数 | PluginConfig? | {} |
+| locale | 国际化语言设置，支持 `'zh-CN'` 和 `'en'` | string? | 'zh-CN' |
 
 
 ## 📝 TODO
 
-- [ ] 动态加载图片
-- [ ] 下载图片类型配置
-- [ ] 提供插件配置项配置
-- [ ] 优化自由画笔书写体验
-- [ ] 国际化支持
+- [x] 动态加载图片
+- [x] 下载图片类型配置
+- [x] 提供插件配置项配置
+- [x] 优化自由画笔书写体验
+- [x] 国际化支持
 
 ## 🤝 贡献
 

@@ -1,12 +1,14 @@
 import Konva from 'konva'
 import Plugin from './Plugin'
 import { DrawEventParams, PluginParamName, PluginParamValue } from '../common/type'
+import { LocaleKey } from '../common/i18n'
 import { uuid } from '../common/utils'
 
 export default class Eraser extends Plugin {
   name = 'eraser'
   iconfont = 'iconfont icon-eraser'
   title = '擦除'
+  titleKey = 'eraser' as LocaleKey
   params = ['strokeWidth'] as PluginParamName[]
   defaultParamValue = {
     strokeWidth: 2,

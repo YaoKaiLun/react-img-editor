@@ -22,3 +22,9 @@ export interface PluginParamValue {
   lineType?: 'solid' | 'dash';
   zoomRatio?: number;
 }
+export interface PluginConfig {
+  [pluginName: string]: {
+    defaultParamValue?: PluginParamValue;
+    [key: string]: any;
+  };
+}

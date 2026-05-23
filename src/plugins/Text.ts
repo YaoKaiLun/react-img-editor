@@ -2,6 +2,7 @@ import Konva from 'konva'
 import Plugin from './Plugin'
 import PubSub from '../common/PubSub'
 import { DrawEventParams, PluginParamValue, PluginParamName } from '../common/type'
+import { LocaleKey } from '../common/i18n'
 import { transformerStyle } from '../common/constants'
 import { uuid } from '../common/utils'
 
@@ -9,6 +10,7 @@ export default class Text extends Plugin {
   name = 'text'
   iconfont = 'iconfont icon-text'
   title = '插入文字'
+  titleKey = 'text' as LocaleKey
   params = ['fontSize', 'color'] as PluginParamName[]
   defaultParamValue = {
     fontSize: 12,

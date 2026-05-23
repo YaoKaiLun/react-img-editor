@@ -10,20 +10,33 @@ import Repeal from './Repeal'
 import Text from './Text'
 import ZoomIn from './ZoomIn'
 import ZoomOut from './ZoomOut'
+import { PluginConfig } from '../common/type'
 
 export default class PluginFactory {
-  plugins = [
-    new Arrow(),
-    new Circle(),
-    new Crop(),
-    new Download(),
-    new Eraser(),
-    new Mosaic(),
-    new Pen(),
-    new Rect(),
-    new Repeal(),
-    new Text(),
-    new ZoomIn(),
-    new ZoomOut(),
-  ]
+  plugins: import('./Plugin').default[]
+
+  constructor(pluginConfig?: PluginConfig) {
+    this.plugins = [
+      new Arrow(),
+      new Circle(),
+      new Crop(),
+      new Download(),
+      new Eraser(),
+      new Mosaic(),
+      new Pen(),
+      new Rect(),
+      new Repeal(),
+      new Text(),
+      new ZoomIn(),
+      new ZoomOut(),
+    ]
+
+    if (pluginConfig) {
+      this.plugins.forEach(plugin => {
+        if (pluginConfig[plugin.name]) {
+          plugin.applyConfig(pluginConfig[plugin.name])
+        }
+      })
+    }
+  }
 }
