@@ -1,0 +1,31 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+
+      - run: npm ci
+
+      - name: Create entry shim for webpack
+        run: echo 'export { default } from "./src/index";' > index.js
+
+      - name: Build examples and deploy
+        run: npx rc-tools run gh-pages
+        env:
+          NODE_OPTIONS: --openssl-legacy-provider
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
