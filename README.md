@@ -66,7 +66,11 @@ npm run start
 http://127.0.0.1:8012/examples/simple.html
 
 发布
+
+`prepublishOnly` 钩子会自动执行 guard 检查（lint）和构建，只需一条命令即可发布：
+
 ```
-npm run lint
-npm run pub
+npm publish --otp=<你的6位验证码>
 ```
+
+> 验证码来自你绑定的身份验证器应用（如 Google Authenticator、Authy 等）。

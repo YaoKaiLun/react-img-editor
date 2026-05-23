@@ -1,6 +1,6 @@
 {
   "name": "react-img-editor",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "图片编辑器（微信截图编辑 PRO 版）",
   "keywords": [
     "react-img-editor",
@@ -12,9 +12,8 @@
     "start": "rc-tools run server",
     "build": "rc-tools run build",
     "gh-pages": "rc-tools run gh-pages",
-    "pub": "rc-tools run update-self && rc-tools run pub",
     "lint": "eslint . --ext .js,jsx,.ts,.tsx",
-    "prepublish": "rc-tools run guard"
+    "prepublishOnly": "rc-tools run guard && rc-tools run build"
   },
   "files": [
     "es",
@@ -31,6 +30,9 @@
     "url": "https://github.com/YaoKaiLun/react-img-editor/issues"
   },
   "homepage": "https://github.com/YaoKaiLun/react-img-editor#readme",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org"
+  },
   "config": {
     "port": 8012
   },
