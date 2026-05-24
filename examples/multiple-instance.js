@@ -176,8 +176,8 @@ __webpack_require__.r(__webpack_exports__);
 
 
 function MultipleInstance() {
-  var image1 = 'https://pro-cos-public.seewo.com/seewo-school/7614707e9bfe42f1bfa3bf7fb9d71844';
-  var image2 = 'https://pro-cos-public.seewo.com/seewo-school/1a18f6b98c2e4220a07592c83dc2d070';
+  var image1 = 'https://picsum.photos/id/237/800/500';
+  var image2 = 'https://picsum.photos/id/0/800/500';
   return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
     style: {
       display: 'flex'

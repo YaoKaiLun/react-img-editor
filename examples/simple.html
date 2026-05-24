@@ -2,7 +2,7 @@
 <html>
 
 <head>
-  <title>simple.js - example - react-img-editor@0.2.2</title>
+  <title>simple.js - example - react-img-editor@0.2.3</title>
   <meta name="viewport"
         content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
   <meta charset="utf-8"/>
@@ -263,19 +263,35 @@ Monokai Sublime style. Derived from Monokai by noformnocontent http://nn.mit-lic
 <body>
   <div class="container">
     <div class="header">
-      <h1>react-img-editor@0.2.2</h1>
+      <h1>react-img-editor@0.2.3</h1>
 
       <p>图片编辑器（微信截图编辑 PRO 版）</p>
     </div>
     <div class="example" id="__react-content"></div>
 
-    <div class="highlight"><pre><code language="js"><span class="hljs-keyword">import</span> React, { useRef } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
+    <div class="highlight"><pre><code language="js"><span class="hljs-keyword">import</span> React, { useRef, useState } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
 <span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>
 <span class="hljs-keyword">import</span> ReactImgEditor <span class="hljs-keyword">from</span> <span class="hljs-string">'../src/index'</span>
+<span class="hljs-keyword">import</span> { Locale } <span class="hljs-keyword">from</span> <span class="hljs-string">'../src/common/i18n'</span>
 <span class="hljs-keyword">import</span> <span class="hljs-string">'../assets/index.less'</span>
+
+const images = [
+  <span class="hljs-string">'https://picsum.photos/id/237/800/500'</span>,
+  <span class="hljs-string">'https://picsum.photos/id/0/800/500'</span>,
+  <span class="hljs-string">'https://picsum.photos/id/10/800/500'</span>,
+  <span class="hljs-string">'https://picsum.photos/id/292/800/500'</span>,
+]
+
+const locales: Locale[] = [<span class="hljs-string">'zh-CN'</span>, <span class="hljs-string">'en'</span>]
+const localeLabels: Record&lt;Locale, string&gt; = {
+  <span class="hljs-string">'zh-CN'</span>: <span class="hljs-string">'中文'</span>,
+  <span class="hljs-string">'en'</span>: <span class="hljs-string">'English'</span>,
+}
 
 function Example() {
   const stageRef = useRef&lt;any&gt;(null)
+  const [imageIndex, setImageIndex] = useState(0)
+  const [locale, setLocale] = useState&lt;Locale&gt;(<span class="hljs-string">'zh-CN'</span>)
 
   function setStage(stage) {
     stageRef.current = stage
@@ -291,20 +307,29 @@ function Example() {
     }, <span class="hljs-string">'image/jpeg'</span>)
   }
 
-  const image1 = <span class="hljs-string">'https://pro-cos-public.seewo.com/seewo-school/7614707e9bfe42f1bfa3bf7fb9d71844'</span>
-  // const image2 = <span class="hljs-string">'https://cvte-dev-public.seewo.com/faq-service-test/4db524ec93324794b983bf7cd78b2ae1'</span>
-  // const image3 = <span class="hljs-string">'https://cvte-dev-public.seewo.com/faq-service-test/bfdcc5337dfb43ce823a4c9743aba99c'</span>
-  // const image4 = <span class="hljs-string">'https://cvte-dev-public.seewo.com/faq-service-test/bc87ceeb7b1a473da41e025e656af966'</span>
+  function switchImage() {
+    setImageIndex((imageIndex + 1) % images.length)
+  }
+
+  function switchLocale() {
+    const currentIndex = locales.indexOf(locale)
+    setLocale(locales[(currentIndex + 1) % locales.length])
+  }
 
   return (
     &lt;&gt;
       &lt;ReactImgEditor
-        src={image1}
+        src={images[imageIndex]}
         width={736}
         height={414}
         getStage={setStage}
         defaultPluginName=<span class="hljs-string">"text"</span>
         crossOrigin=<span class="hljs-string">"anonymous"</span>
+        locale={locale}
+        pluginConfig={{
+          download: { mimeType: <span class="hljs-string">'image/png'</span>, quality: 1, fileName: <span class="hljs-string">'edited-image.png'</span> },
+          pen: { defaultParamValue: { color: <span class="hljs-string">'#F5222D'</span>, strokeWidth: 2 } },
+        }}
         toolbar={{
           items: [<span class="hljs-string">'pen'</span>, <span class="hljs-string">'eraser'</span>, <span class="hljs-string">'arrow'</span>, <span class="hljs-string">'rect'</span>, <span class="hljs-string">'circle'</span>, <span class="hljs-string">'mosaic'</span>, <span class="hljs-string">'text'</span>, <span class="hljs-string">'|'</span>, <span class="hljs-string">'repeal'</span>, <span class="hljs-string">'download'</span>, <span class="hljs-string">'crop'</span>,
             <span class="hljs-string">'|'</span>, <span class="hljs-string">'zoomIn'</span>, <span class="hljs-string">'zoomOut'</span>],
@@ -312,12 +337,15 @@ function Example() {
       /&gt;
       &lt;div style={{ marginTop: <span class="hljs-string">'50px'</span> }}&gt;
         &lt;button onClick={downloadImage}&gt;download&lt;/button&gt;
+        &lt;button onClick={switchImage} style={{ marginLeft: <span class="hljs-string">'10px'</span> }}&gt;切换图片 ({imageIndex + 1}/{images.length})&lt;/button&gt;
+        &lt;button onClick={switchLocale} style={{ marginLeft: <span class="hljs-string">'10px'</span> }}&gt;语言: {localeLabels[locale]}&lt;/button&gt;
       &lt;/div&gt;
     &lt;/&gt;
   )
 }
 
-ReactDOM.render(&lt;Example /&gt;, document.getElementById(<span class="hljs-string">'__react-content'</span>))</code></pre></div>
+ReactDOM.render(&lt;Example /&gt;, document.getElementById(<span class="hljs-string">'__react-content'</span>))
+</code></pre></div>
   </div>
   <a href="https://github.com/YaoKaiLun/react-img-editor#readme">
     <img style="position: absolute; top: 0; right: 0; border: 0;"

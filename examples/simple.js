@@ -171,12 +171,32 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _src_index__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../src/index */ "./src/index.tsx");
 /* harmony import */ var _assets_index_less__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../assets/index.less */ "./assets/index.less");
 /* harmony import */ var _assets_index_less__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_assets_index_less__WEBPACK_IMPORTED_MODULE_3__);
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i]; return arr2; }
+function _iterableToArrayLimit(arr, i) { var _i = null == arr ? null : "undefined" != typeof Symbol && arr[Symbol.iterator] || arr["@@iterator"]; if (null != _i) { var _s, _e, _x, _r, _arr = [], _n = !0, _d = !1; try { if (_x = (_i = _i.call(arr)).next, 0 === i) { if (Object(_i) !== _i) return; _n = !1; } else for (; !(_n = (_s = _x.call(_i)).done) && (_arr.push(_s.value), _arr.length !== i); _n = !0); } catch (err) { _d = !0, _e = err; } finally { try { if (!_n && null != _i["return"] && (_r = _i["return"](), Object(_r) !== _r)) return; } finally { if (_d) throw _e; } } return _arr; } }
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 
 
 
+var images = ['https://picsum.photos/id/237/800/500', 'https://picsum.photos/id/0/800/500', 'https://picsum.photos/id/10/800/500', 'https://picsum.photos/id/292/800/500'];
+var locales = ['zh-CN', 'en'];
+var localeLabels = {
+  'zh-CN': '中文',
+  'en': 'English'
+};
 function Example() {
   var stageRef = Object(react__WEBPACK_IMPORTED_MODULE_0__["useRef"])(null);
+  var _useState = Object(react__WEBPACK_IMPORTED_MODULE_0__["useState"])(0),
+    _useState2 = _slicedToArray(_useState, 2),
+    imageIndex = _useState2[0],
+    setImageIndex = _useState2[1];
+  var _useState3 = Object(react__WEBPACK_IMPORTED_MODULE_0__["useState"])('zh-CN'),
+    _useState4 = _slicedToArray(_useState3, 2),
+    locale = _useState4[0],
+    setLocale = _useState4[1];
   function setStage(stage) {
     stageRef.current = stage;
   }
@@ -191,17 +211,34 @@ function Example() {
       link.click();
     }, 'image/jpeg');
   }
-  var image1 = 'https://pro-cos-public.seewo.com/seewo-school/7614707e9bfe42f1bfa3bf7fb9d71844';
-  // const image2 = 'https://cvte-dev-public.seewo.com/faq-service-test/4db524ec93324794b983bf7cd78b2ae1'
-  // const image3 = 'https://cvte-dev-public.seewo.com/faq-service-test/bfdcc5337dfb43ce823a4c9743aba99c'
-  // const image4 = 'https://cvte-dev-public.seewo.com/faq-service-test/bc87ceeb7b1a473da41e025e656af966'
+  function switchImage() {
+    setImageIndex((imageIndex + 1) % images.length);
+  }
+  function switchLocale() {
+    var currentIndex = locales.indexOf(locale);
+    setLocale(locales[(currentIndex + 1) % locales.length]);
+  }
   return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_0___default.a.Fragment, null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_src_index__WEBPACK_IMPORTED_MODULE_2__["default"], {
-    src: image1,
+    src: images[imageIndex],
     width: 736,
     height: 414,
     getStage: setStage,
     defaultPluginName: "text",
     crossOrigin: "anonymous",
+    locale: locale,
+    pluginConfig: {
+      download: {
+        mimeType: 'image/png',
+        quality: 1,
+        fileName: 'edited-image.png'
+      },
+      pen: {
+        defaultParamValue: {
+          color: '#F5222D',
+          strokeWidth: 2
+        }
+      }
+    },
     toolbar: {
       items: ['pen', 'eraser', 'arrow', 'rect', 'circle', 'mosaic', 'text', '|', 'repeal', 'download', 'crop', '|', 'zoomIn', 'zoomOut']
     }
@@ -211,7 +248,17 @@ function Example() {
     }
   }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
     onClick: downloadImage
-  }, "download")));
+  }, "download"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
+    onClick: switchImage,
+    style: {
+      marginLeft: '10px'
+    }
+  }, "\u5207\u6362\u56FE\u7247 (", imageIndex + 1, "/", images.length, ")"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
+    onClick: switchLocale,
+    style: {
+      marginLeft: '10px'
+    }
+  }, "\u8BED\u8A00: ", localeLabels[locale])));
 }
 react_dom__WEBPACK_IMPORTED_MODULE_1___default.a.render(react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(Example, null), document.getElementById('__react-content'));
 

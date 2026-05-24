@@ -47237,6 +47237,100 @@ var transformerStyle = {
 
 /***/ }),
 
+/***/ "./src/common/i18n.ts":
+/*!****************************!*\
+  !*** ./src/common/i18n.ts ***!
+  \****************************/
+/*! exports provided: createTranslator, zhCN, en */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "createTranslator", function() { return createTranslator; });
+/* harmony import */ var _locales_zh_CN__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./locales/zh-CN */ "./src/common/locales/zh-CN.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "zhCN", function() { return _locales_zh_CN__WEBPACK_IMPORTED_MODULE_0__["default"]; });
+
+/* harmony import */ var _locales_en__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./locales/en */ "./src/common/locales/en.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "en", function() { return _locales_en__WEBPACK_IMPORTED_MODULE_1__["default"]; });
+
+
+
+var locales = {
+  'zh-CN': _locales_zh_CN__WEBPACK_IMPORTED_MODULE_0__["default"],
+  'en': _locales_en__WEBPACK_IMPORTED_MODULE_1__["default"]
+};
+function createTranslator(locale) {
+  var messages = locales[locale] || locales['zh-CN'];
+  return function t(key) {
+    return messages[key] || key;
+  };
+}
+
+
+/***/ }),
+
+/***/ "./src/common/locales/en.ts":
+/*!**********************************!*\
+  !*** ./src/common/locales/en.ts ***!
+  \**********************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+var en = {
+  pen: 'Pen',
+  eraser: 'Eraser',
+  arrow: 'Arrow',
+  rect: 'Rectangle',
+  circle: 'Circle',
+  mosaic: 'Mosaic',
+  text: 'Text',
+  repeal: 'Undo',
+  download: 'Download',
+  crop: 'Crop',
+  zoomIn: 'Zoom In',
+  zoomOut: 'Zoom Out',
+  fontSizeSmall: 'S',
+  fontSizeMedium: 'M',
+  fontSizeLarge: 'L',
+  cropHint: 'Drag the border to adjust the display range'
+};
+/* harmony default export */ __webpack_exports__["default"] = (en);
+
+/***/ }),
+
+/***/ "./src/common/locales/zh-CN.ts":
+/*!*************************************!*\
+  !*** ./src/common/locales/zh-CN.ts ***!
+  \*************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+var zhCN = {
+  pen: '画笔',
+  eraser: '擦除',
+  arrow: '插入箭头',
+  rect: '插入矩形',
+  circle: '插入圆圈',
+  mosaic: '马赛克',
+  text: '插入文字',
+  repeal: '撤销',
+  download: '下载图片',
+  crop: '图片裁剪',
+  zoomIn: '放大',
+  zoomOut: '缩小',
+  fontSizeSmall: '小',
+  fontSizeMedium: '中',
+  fontSizeLarge: '大',
+  cropHint: '拖动边框调整图片显示范围'
+};
+/* harmony default export */ __webpack_exports__["default"] = (zhCN);
+
+/***/ }),
+
 /***/ "./src/common/utils.ts":
 /*!*****************************!*\
   !*** ./src/common/utils.ts ***!
@@ -47397,30 +47491,31 @@ var Palette = /*#__PURE__*/function (_React$Component) {
       _this.stage.add(_this.drawLayer);
       _this.bindEvents();
     };
-    // 裁剪等操作执行后需要重新初始化
     _this.reload = function (imgObj, width, height) {
       var getStage = _this.props.getStage;
+      _this.canvasWidth = width;
+      _this.canvasHeight = height;
       _this.removeEvents();
       _this.historyStack = [];
       _this.stage = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Stage({
         container: _this.containerId,
-        width: width,
-        height: height
+        width: _this.canvasWidth,
+        height: _this.canvasHeight
       });
       getStage && getStage(_this.resetStage(_this.stage));
       var img = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Image({
         x: 0,
         y: 0,
         image: imgObj,
-        width: width,
-        height: height
+        width: _this.canvasWidth,
+        height: _this.canvasHeight
       });
       _this.imageElement = img;
       _this.imageLayer = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Layer();
       _this.stage.add(_this.imageLayer);
       _this.imageLayer.add(img);
       _this.imageLayer.draw();
-      _this.imageData = _this.generateImageData(imgObj, width, height);
+      _this.imageData = _this.generateImageData(imgObj, _this.canvasWidth, _this.canvasHeight);
       _this.drawLayer = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Layer();
       _this.stage.add(_this.drawLayer);
       _this.bindEvents();
@@ -47556,7 +47651,9 @@ var Palette = /*#__PURE__*/function (_React$Component) {
         paramValue: props.paramValue,
         handlePluginParamValueChange: props.handlePluginParamValueChange,
         toolbarItemConfig: props.toolbarItemConfig,
-        updateToolbarItemConfig: props.updateToolbarItemConfig
+        updateToolbarItemConfig: props.updateToolbarItemConfig,
+        locale: props.locale,
+        t: props.t
       };
       return drawEventParams;
     };
@@ -47589,7 +47686,21 @@ var Palette = /*#__PURE__*/function (_React$Component) {
     value: function componentDidUpdate(prevProps) {
       var prevCurrentPlugin = prevProps.currentPlugin;
       var currentPlugin = this.props.currentPlugin;
-      // 撤销等操作，点击后会再自动清除当前插件
+      if (this.props.imageObj !== prevProps.imageObj) {
+        var containerWidth = this.props.containerWidth;
+        var imageObj = this.props.imageObj;
+        var imageNatureWidth = imageObj.naturalWidth;
+        var imageNatureHeight = imageObj.naturalHeight;
+        var wRatio = containerWidth / imageNatureWidth;
+        var hRatio = this.props.height / imageNatureHeight;
+        var scaleRatio = Math.min(wRatio, hRatio, 1);
+        this.canvasWidth = Math.round(imageNatureWidth * scaleRatio);
+        this.canvasHeight = Math.round(imageNatureHeight * scaleRatio);
+        this.pixelRatio = 1 / scaleRatio;
+        konva__WEBPACK_IMPORTED_MODULE_0___default.a.pixelRatio = this.pixelRatio;
+        this.reload(imageObj, this.canvasWidth, this.canvasHeight);
+        return;
+      }
       if (currentPlugin !== prevCurrentPlugin) {
         if (prevCurrentPlugin && prevCurrentPlugin.onLeave) {
           if (prevCurrentPlugin.name !== (currentPlugin === null || currentPlugin === void 0 ? void 0 : currentPlugin.name)) {
@@ -47686,9 +47797,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _common_constants__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../common/constants */ "./src/common/constants.ts");
+/* harmony import */ var _EditorContext__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../EditorContext */ "./src/components/EditorContext.tsx");
+
 
 
 function FontSizeSetting(props) {
+  var _useContext = Object(react__WEBPACK_IMPORTED_MODULE_0__["useContext"])(_EditorContext__WEBPACK_IMPORTED_MODULE_2__["EditorContext"]),
+    t = _useContext.t;
   return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("span", {
     style: {
       margin: '0 8px'
@@ -47698,17 +47813,17 @@ function FontSizeSetting(props) {
     onClick: function onClick() {
       return props.onChange(12);
     }
-  }, "\u5C0F"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
+  }, t('fontSizeSmall')), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
     className: "".concat(_common_constants__WEBPACK_IMPORTED_MODULE_1__["prefixCls"], "-font-size ").concat(props.value === 16 ? _common_constants__WEBPACK_IMPORTED_MODULE_1__["prefixCls"] + '-font-size-activated' : ''),
     onClick: function onClick() {
       return props.onChange(16);
     }
-  }, "\u4E2D"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
+  }, t('fontSizeMedium')), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
     className: "".concat(_common_constants__WEBPACK_IMPORTED_MODULE_1__["prefixCls"], "-font-size ").concat(props.value === 20 ? _common_constants__WEBPACK_IMPORTED_MODULE_1__["prefixCls"] + '-font-size-activated' : ''),
     onClick: function onClick() {
       return props.onChange(20);
     }
-  }, "\u5927"));
+  }, t('fontSizeLarge')));
 }
 
 /***/ }),
@@ -47897,10 +48012,17 @@ function Toolbar() {
     paramValue = _useContext.paramValue,
     handlePluginChange = _useContext.handlePluginChange,
     handlePluginParamValueChange = _useContext.handlePluginParamValueChange,
-    toolbarItemConfig = _useContext.toolbarItemConfig;
+    toolbarItemConfig = _useContext.toolbarItemConfig,
+    t = _useContext.t;
   var style = {
     width: containerWidth
   };
+  function getPluginTitle(plugin) {
+    if (plugin.titleKey) {
+      return t(plugin.titleKey);
+    }
+    return plugin.title;
+  }
   function renderPlugin(plugin) {
     var isActivated = !!(currentPlugin && currentPlugin.name === plugin.name);
     var paramNames = currentPlugin ? currentPlugin.params : [];
@@ -47910,7 +48032,7 @@ function Toolbar() {
         key: plugin.name,
         className: "".concat(_common_constants__WEBPACK_IMPORTED_MODULE_3__["prefixCls"], "-toolbar-icon ").concat(isActivated ? 'activated' : '', " ").concat(isDisabled ? 'disabled' : '')
       }, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("i", {
-        title: plugin.title,
+        title: getPluginTitle(plugin),
         className: plugin.iconfont,
         onClick: function onClick() {
           return handlePluginChange(plugin);
@@ -47934,7 +48056,7 @@ function Toolbar() {
       key: plugin.name,
       className: "".concat(_common_constants__WEBPACK_IMPORTED_MODULE_3__["prefixCls"], "-toolbar-icon ").concat(isActivated ? 'activated' : '', " ").concat(isDisabled ? 'disabled' : '')
     }, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("i", {
-      title: plugin.title,
+      title: getPluginTitle(plugin),
       className: plugin.iconfont,
       onClick: function onClick() {
         return handlePluginChange(plugin);
@@ -47944,8 +48066,9 @@ function Toolbar() {
   return react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", {
     className: "".concat(_common_constants__WEBPACK_IMPORTED_MODULE_3__["prefixCls"], "-toolbar"),
     style: style
-  }, toolbar.items.map(function (item) {
+  }, toolbar.items.map(function (item, index) {
     if (item === '|') return react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("span", {
+      key: "separator-".concat(index),
       className: "".concat(_common_constants__WEBPACK_IMPORTED_MODULE_3__["prefixCls"], "-toolbar-separator")
     });
     for (var i = 0; i < plugins.length; i++) {
@@ -47974,7 +48097,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_2__);
 /* harmony import */ var _components_Toolbar__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./components/Toolbar */ "./src/components/Toolbar.tsx");
-/* harmony import */ var _components_EditorContext__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./components/EditorContext */ "./src/components/EditorContext.tsx");
+/* harmony import */ var _common_i18n__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./common/i18n */ "./src/common/i18n.ts");
+/* harmony import */ var _components_EditorContext__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./components/EditorContext */ "./src/components/EditorContext.tsx");
 function _extends() { _extends = Object.assign ? Object.assign.bind() : function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
@@ -47991,12 +48115,15 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 
 
+
 function ReactImageEditor(props) {
   var _useState = Object(react__WEBPACK_IMPORTED_MODULE_2__["useState"])(null),
     _useState2 = _slicedToArray(_useState, 2),
     imageObj = _useState2[0],
     setImageObj = _useState2[1];
-  var pluginFactory = new _plugins_PluginFactory__WEBPACK_IMPORTED_MODULE_0__["default"]();
+  var currentLocale = props.locale || 'zh-CN';
+  var t = Object(_common_i18n__WEBPACK_IMPORTED_MODULE_4__["createTranslator"])(currentLocale);
+  var pluginFactory = new _plugins_PluginFactory__WEBPACK_IMPORTED_MODULE_0__["default"](props.pluginConfig);
   var plugins = [].concat(_toConsumableArray(pluginFactory.plugins), _toConsumableArray(props.plugins));
   var defaultPlugin = null;
   var defaultParamValue = {};
@@ -48017,7 +48144,6 @@ function ReactImageEditor(props) {
     _useState6 = _slicedToArray(_useState5, 2),
     paramValue = _useState6[0],
     setParamValue = _useState6[1];
-  // 生成默认 toolbarItemConfig
   var config = {};
   plugins.map(function (plugin) {
     if (plugin.name === 'repeal') {
@@ -48063,7 +48189,7 @@ function ReactImageEditor(props) {
     width: props.width + 'px',
     height: props.height + 'px'
   }, props.style);
-  return react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_components_EditorContext__WEBPACK_IMPORTED_MODULE_4__["EditorContext"].Provider, {
+  return react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_components_EditorContext__WEBPACK_IMPORTED_MODULE_5__["EditorContext"].Provider, {
     value: {
       containerWidth: props.width,
       containerHeight: props.height,
@@ -48074,7 +48200,9 @@ function ReactImageEditor(props) {
       handlePluginChange: handlePluginChange,
       handlePluginParamValueChange: handlePluginParamValueChange,
       toolbarItemConfig: toolbarItemConfig,
-      updateToolbarItemConfig: updateToolbarItemConfig
+      updateToolbarItemConfig: updateToolbarItemConfig,
+      locale: currentLocale,
+      t: t
     }
   }, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement("div", {
     className: "react-img-editor",
@@ -48092,7 +48220,9 @@ ReactImageEditor.defaultProps = {
   plugins: [],
   toolbar: {
     items: ['pen', 'eraser', 'arrow', 'rect', 'circle', 'mosaic', 'text', '|', 'repeal', 'download', 'crop']
-  }
+  },
+  pluginConfig: {},
+  locale: 'zh-CN'
 };
 
 /***/ }),
@@ -48139,6 +48269,7 @@ var Arrow = /*#__PURE__*/function (_Plugin) {
     _this.name = 'arrow';
     _this.iconfont = 'iconfont icon-arrow';
     _this.title = '插入箭头';
+    _this.titleKey = 'arrow';
     _this.params = ['strokeWidth', 'color'];
     _this.defaultParamValue = {
       strokeWidth: 2,
@@ -48334,6 +48465,7 @@ var Circle = /*#__PURE__*/function (_Plugin) {
     _this.name = 'circle';
     _this.iconfont = 'iconfont icon-circle';
     _this.title = '插入圆圈';
+    _this.titleKey = 'circle';
     _this.params = ['strokeWidth', 'lineType', 'color'];
     _this.defaultParamValue = {
       strokeWidth: 2,
@@ -48530,6 +48662,7 @@ var Crop = /*#__PURE__*/function (_Plugin) {
     _this.name = 'crop';
     _this.iconfont = 'iconfont icon-cut';
     _this.title = '图片裁剪';
+    _this.titleKey = 'crop';
     _this.params = [];
     _this.isPaint = false;
     _this.virtualLayer = null;
@@ -48581,7 +48714,7 @@ var Crop = /*#__PURE__*/function (_Plugin) {
       $toolbar.style.left = "".concat(left, "px");
       $toolbar.style.top = "".concat(top, "px");
     };
-    _this.createCropToolbar = function (stage, sureBtnEvent, cancelBtnEvent) {
+    _this.createCropToolbar = function (stage, sureBtnEvent, cancelBtnEvent, hintText) {
       if (document.getElementById(_this.toolbarId)) return;
       var fragment = new DocumentFragment();
       // 创建截图工具栏
@@ -48591,7 +48724,7 @@ var Crop = /*#__PURE__*/function (_Plugin) {
       $cropToolbar.setAttribute('style', cropToolbarStyle);
       fragment.appendChild($cropToolbar);
       // 创建文本
-      var $textNode = document.createTextNode('拖动边框调整图片显示范围');
+      var $textNode = document.createTextNode(hintText);
       $cropToolbar.appendChild($textNode);
       var btnStyle = 'display: inline-block; width: 32px; height: 24px; border: 1px solid #C9C9D0;' + 'border-radius: 2px; text-align: center; cursor: pointer; line-height: 24px;';
       // 创建取消按钮
@@ -48784,7 +48917,7 @@ var Crop = /*#__PURE__*/function (_Plugin) {
       }, function () {
         _this.reset(stage);
         stage.container().style.cursor = 'crosshair';
-      });
+      }, drawEventParams.t('cropHint'));
       _this.adjustToolbarPosition(stage);
     };
     _this.onLeave = function (drawEventParams) {
@@ -48835,12 +48968,16 @@ var Download = /*#__PURE__*/function (_Plugin) {
     _this.name = 'download';
     _this.iconfont = 'iconfont icon-download';
     _this.title = '下载图片';
+    _this.titleKey = 'download';
     _this.disappearImmediately = true;
     _this.onEnter = function (drawEventParams) {
       var stage = drawEventParams.stage,
         pixelRatio = drawEventParams.pixelRatio,
         imageElement = drawEventParams.imageElement;
-      // 延迟下载，等触发 plugin 的 onLeave 生命周期，清除未完成的现场
+      var config = _this.config || {};
+      var mimeType = config.mimeType || 'image/jpeg';
+      var quality = config.quality !== undefined ? config.quality : 0.92;
+      var fileName = config.fileName || '';
       setTimeout(function () {
         var canvas = stage.toCanvas({
           pixelRatio: pixelRatio,
@@ -48849,10 +48986,10 @@ var Download = /*#__PURE__*/function (_Plugin) {
         });
         canvas.toBlob(function (blob) {
           var link = document.createElement('a');
-          link.download = '';
+          link.download = fileName;
           link.href = URL.createObjectURL(blob);
           link.click();
-        }, 'image/jpeg');
+        }, mimeType, quality);
       }, 100);
     };
     return _this;
@@ -48902,6 +49039,7 @@ var Eraser = /*#__PURE__*/function (_Plugin) {
     _this.name = 'eraser';
     _this.iconfont = 'iconfont icon-eraser';
     _this.title = '擦除';
+    _this.titleKey = 'eraser';
     _this.params = ['strokeWidth'];
     _this.defaultParamValue = {
       strokeWidth: 2
@@ -48996,6 +49134,7 @@ var Mosaic = /*#__PURE__*/function (_Plugin) {
     _this.name = 'mosaic';
     _this.iconfont = 'iconfont icon-mosaic';
     _this.title = '马赛克';
+    _this.titleKey = 'mosaic';
     _this.params = ['strokeWidth'];
     _this.defaultParamValue = {
       strokeWidth: 2
@@ -49172,6 +49311,7 @@ var Pen = /*#__PURE__*/function (_Plugin) {
     _this.name = 'pen';
     _this.iconfont = 'iconfont icon-pen';
     _this.title = '画笔';
+    _this.titleKey = 'pen';
     _this.params = ['strokeWidth', 'lineType', 'color'];
     _this.defaultParamValue = {
       strokeWidth: 2,
@@ -49180,6 +49320,7 @@ var Pen = /*#__PURE__*/function (_Plugin) {
     };
     _this.lastLine = null;
     _this.isPaint = false;
+    _this.points = [];
     _this.onDrawStart = function (drawEventParams) {
       var stage = drawEventParams.stage,
         drawLayer = drawEventParams.drawLayer,
@@ -49187,6 +49328,7 @@ var Pen = /*#__PURE__*/function (_Plugin) {
       var pos = stage.getPointerPosition();
       if (!pos) return;
       _this.isPaint = true;
+      _this.points = [pos.x, pos.y];
       _this.lastLine = new konva__WEBPACK_IMPORTED_MODULE_0___default.a.Line({
         id: Object(_common_utils__WEBPACK_IMPORTED_MODULE_2__["uuid"])(),
         stroke: paramValue && paramValue.color ? paramValue.color : _this.defaultParamValue.color,
@@ -49194,8 +49336,8 @@ var Pen = /*#__PURE__*/function (_Plugin) {
         globalCompositeOperation: 'source-over',
         points: [pos.x, pos.y],
         dashEnabled: !!(paramValue && paramValue.lineType && paramValue.lineType === 'dash'),
-        dash: [8],
-        tension: 1,
+        dash: [8, 8],
+        tension: 0.3,
         lineCap: 'round',
         lineJoin: 'round'
       });
@@ -49206,17 +49348,19 @@ var Pen = /*#__PURE__*/function (_Plugin) {
         drawLayer = drawEventParams.drawLayer;
       var pos = stage.getPointerPosition();
       if (!_this.isPaint || !pos) return;
-      var newPoints = _this.lastLine.points().concat([pos.x, pos.y]);
-      _this.lastLine.points(newPoints);
+      _this.points.push(pos.x, pos.y);
+      _this.lastLine.points(_this.points);
       drawLayer.batchDraw();
     };
     _this.onDrawEnd = function (drawEventParams) {
       var pubSub = drawEventParams.pubSub;
       _this.isPaint = false;
+      _this.points = [];
       pubSub.pub('PUSH_HISTORY', _this.lastLine);
     };
     _this.onLeave = function () {
       _this.isPaint = false;
+      _this.points = [];
     };
     return _this;
   }
@@ -49236,14 +49380,27 @@ var Pen = /*#__PURE__*/function (_Plugin) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Plugin; });
+function _extends() { _extends = Object.assign ? Object.assign.bind() : function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, _toPropertyKey(descriptor.key), descriptor); } }
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
 function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return typeof key === "symbol" ? key : String(key); }
 function _toPrimitive(input, hint) { if (typeof input !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (typeof res !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-var Plugin = /*#__PURE__*/_createClass(function Plugin() {
-  _classCallCheck(this, Plugin);
-});
+var Plugin = /*#__PURE__*/function () {
+  function Plugin() {
+    _classCallCheck(this, Plugin);
+  }
+  _createClass(Plugin, [{
+    key: "applyConfig",
+    value: function applyConfig(config) {
+      this.config = config;
+      if (config.defaultParamValue && this.defaultParamValue) {
+        this.defaultParamValue = _extends(_extends({}, this.defaultParamValue), config.defaultParamValue);
+      }
+    }
+  }]);
+  return Plugin;
+}();
 
 
 /***/ }),
@@ -49287,9 +49444,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 
 
-var PluginFactory = /*#__PURE__*/_createClass(function PluginFactory() {
+var PluginFactory = /*#__PURE__*/_createClass(function PluginFactory(pluginConfig) {
   _classCallCheck(this, PluginFactory);
   this.plugins = [new _Arrow__WEBPACK_IMPORTED_MODULE_0__["default"](), new _Circle__WEBPACK_IMPORTED_MODULE_1__["default"](), new _Crop__WEBPACK_IMPORTED_MODULE_2__["default"](), new _Download__WEBPACK_IMPORTED_MODULE_3__["default"](), new _Eraser__WEBPACK_IMPORTED_MODULE_4__["default"](), new _Mosaic__WEBPACK_IMPORTED_MODULE_5__["default"](), new _Pen__WEBPACK_IMPORTED_MODULE_6__["default"](), new _Rect__WEBPACK_IMPORTED_MODULE_7__["default"](), new _Repeal__WEBPACK_IMPORTED_MODULE_8__["default"](), new _Text__WEBPACK_IMPORTED_MODULE_9__["default"](), new _ZoomIn__WEBPACK_IMPORTED_MODULE_10__["default"](), new _ZoomOut__WEBPACK_IMPORTED_MODULE_11__["default"]()];
+  if (pluginConfig) {
+    this.plugins.forEach(function (plugin) {
+      if (pluginConfig[plugin.name]) {
+        plugin.applyConfig(pluginConfig[plugin.name]);
+      }
+    });
+  }
 });
 
 
@@ -49337,6 +49501,7 @@ var Rect = /*#__PURE__*/function (_Plugin) {
     _this.name = 'rect';
     _this.iconfont = 'iconfont icon-square';
     _this.title = '插入矩形';
+    _this.titleKey = 'rect';
     _this.params = ['strokeWidth', 'lineType', 'color'];
     _this.defaultParamValue = {
       strokeWidth: 2,
@@ -49527,6 +49692,7 @@ var Repeal = /*#__PURE__*/function (_Plugin) {
     _this.name = 'repeal';
     _this.iconfont = 'iconfont icon-repeal';
     _this.title = '撤销';
+    _this.titleKey = 'repeal';
     _this.disappearImmediately = true;
     _this.onEnter = function (drawEventParams) {
       var drawLayer = drawEventParams.drawLayer,
@@ -49609,6 +49775,7 @@ var Text = /*#__PURE__*/function (_Plugin) {
     _this.name = 'text';
     _this.iconfont = 'iconfont icon-text';
     _this.title = '插入文字';
+    _this.titleKey = 'text';
     _this.params = ['fontSize', 'color'];
     _this.defaultParamValue = {
       fontSize: 12,
@@ -49858,6 +50025,7 @@ var ZoomIn = /*#__PURE__*/function (_Plugin) {
     _this.name = 'zoomIn';
     _this.iconfont = 'iconfont icon-zoomIn';
     _this.title = '放大';
+    _this.titleKey = 'zoomIn';
     _this.defaultParamValue = {
       zoomRatio: 0.2
     };
@@ -49925,6 +50093,7 @@ var ZoomOut = /*#__PURE__*/function (_Plugin) {
     _this.name = 'zoomOut';
     _this.iconfont = 'iconfont icon-zoomOut';
     _this.title = '缩小';
+    _this.titleKey = 'zoomOut';
     _this.defaultParamValue = {
       zoomRatio: 0.2
     };
@@ -49933,14 +50102,14 @@ var ZoomOut = /*#__PURE__*/function (_Plugin) {
         imageElement = drawEventParams.imageElement,
         paramValue = drawEventParams.paramValue;
       var zoomRatio = paramValue && paramValue.zoomRatio ? paramValue.zoomRatio : _this.defaultParamValue.zoomRatio || 0;
-      imageLayer.scale({
-        x: imageLayer.scaleX() * (1 - zoomRatio),
-        y: imageLayer.scaleY() * (1 - zoomRatio)
+      imageElement.scale({
+        x: imageElement.scaleX() * (1 - zoomRatio),
+        y: imageElement.scaleY() * (1 - zoomRatio)
       });
-      imageLayer.x(imageLayer.width() / 2);
-      imageLayer.y(imageLayer.height() / 2);
-      imageLayer.offsetX(imageLayer.width() / 2);
-      imageLayer.offsetY(imageLayer.height() / 2);
+      imageElement.x(imageElement.width() / 2);
+      imageElement.y(imageElement.height() / 2);
+      imageElement.offsetX(imageElement.width() / 2);
+      imageElement.offsetY(imageElement.height() / 2);
       imageElement.draggable(true);
       imageLayer.draw();
     };

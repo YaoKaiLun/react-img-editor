@@ -7,7 +7,7 @@
   <meta charset="utf-8"/>
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <link href="//cdnjs.cloudflare.com/ajax/libs/normalize/3.0.3/normalize.css" rel="stylesheet"/>
-  <title>react-img-editor@0.2.2 - 图片编辑器（微信截图编辑 PRO 版）</title>
+  <title>react-img-editor@0.2.3 - 图片编辑器（微信截图编辑 PRO 版）</title>
   <style>
     @font-face {
       font-family: octicons-anchor;
@@ -737,7 +737,7 @@
 
 <body>
 <div class="header">
-  <h1>react-img-editor@0.2.2</h1>
+  <h1>react-img-editor@0.2.3</h1>
 </div>
 <div class="examples">
   <h3>EXAMPLES</h3>
@@ -832,20 +832,35 @@
 <td>string?</td>
 <td>-</td>
 </tr>
+<tr>
+<td>pluginConfig</td>
+<td>插件配置项，可覆盖各插件的默认参数</td>
+<td>PluginConfig?</td>
+<td>{}</td>
+</tr>
+<tr>
+<td>locale</td>
+<td>国际化语言设置，支持 <code>&#39;zh-CN&#39;</code> 和 <code>&#39;en&#39;</code></td>
+<td>string?</td>
+<td>&#39;zh-CN&#39;</td>
+</tr>
 </tbody>
 </table>
 <h2>📝 TODO<a id="user-content-📝-todo" name="📝-todo" class="anchor" aria-hidden="true" href="#📝-todo"><span class="octicon octicon-link"></span></a></h2><ul>
-<li>[ ] 动态加载图片</li>
-<li>[ ] 下载图片类型配置</li>
-<li>[ ] 提供插件配置项配置</li>
-<li>[ ] 优化自由画笔书写体验</li>
-<li>[ ] 国际化支持</li>
+<li>[x] 动态加载图片</li>
+<li>[x] 下载图片类型配置</li>
+<li>[x] 提供插件配置项配置</li>
+<li>[x] 优化自由画笔书写体验</li>
+<li>[x] 国际化支持</li>
 </ul>
 <h2>🤝 贡献<a id="user-content-🤝-贡献" name="🤝-贡献" class="anchor" aria-hidden="true" href="#🤝-贡献"><span class="octicon octicon-link"></span></a></h2><p>开发</p>
 <div class="highlight"><pre><code language="undefined">npm run start</code></pre></div><p><a href="http://127.0.0.1:8012/examples/simple.html" title="null">http://127.0.0.1:8012/examples/simple.html</a></p>
 <p>发布</p>
-<div class="highlight"><pre><code language="undefined">npm run lint
-npm run pub</code></pre></div>
+<p><code>prepublishOnly</code> 钩子会自动执行 guard 检查（lint）和构建，只需一条命令即可发布：</p>
+<div class="highlight"><pre><code language="xml">npm publish --otp=<span class="hljs-tag">&lt;<span class="hljs-title">你的6位验证码</span>&gt;</span></code></pre></div><blockquote>
+<p>验证码来自你绑定的身份验证器应用（如 Google Authenticator、Authy 等）。</p>
+</blockquote>
+
   </div>
 </div>
 <a href="https://github.com/YaoKaiLun/react-img-editor#readme"><img style="position: absolute; top: 0; right: 0; border: 0;"
